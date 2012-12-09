@@ -1,3 +1,6 @@
+# ECLair Microcode
+
+# fields - names for bit positions
 field src_jmp   0     1
 field jmp       1     1
 field jmp_addr  2     8
@@ -17,6 +20,7 @@ field imm_val   29    2
 field load_x    31    1
 field load_y    32    1
 
+# enums - names for values that go into bit positions
 enum  src_jmp   mc    0
 enum  src_jmp   ir    1
 enum  src_mar   pc    0
@@ -37,9 +41,11 @@ enum  src_xy    d     4
 enum  src_xy    sp    5
 enum  src_xy    mar   6
 
+# locations - start addresses of instructions
 location    init  0
 location    fetch 1
 
+# instructions - each one is one word of microcode, glues everything above together
 instruction init    load_pc
 instruction fetch   src_mar(pc)   load_mar      mem_read
 instruction fetch   load_ir

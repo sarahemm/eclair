@@ -8,6 +8,7 @@ instructions = {}
 # read in the microcode text file and fill a bunch of arrays with the info we'll need
 File.open(ARGV[0], "r") do |infile|
   infile.each_line do |line|
+    line.gsub! /#.*/, ""
     values = line.split(/\s+/)
     next if values[0] == nil
     case values.shift
