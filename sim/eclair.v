@@ -32,8 +32,8 @@ module ECLair();
   wire          reg_d_load;
   wire          reg_ir_load;
   wire          reg_mar_load;
-  wire  [15:0]  alu_x;            // alu I/O registers
-  wire  [15:0]  alu_y;
+//  wire  [15:0]  alu_x;            // alu I/O registers
+//  wire  [15:0]  alu_y;
   wire  [15:0]  alu_z;
   wire          reg_x_load;
   wire          reg_y_load;
@@ -48,6 +48,7 @@ module ECLair();
   wire  [7:0]   reg_ir;
   wire  [15:0]  reg_mar;
   wire  [15:0]  lat_mar;
+  wire  [15:0]  lat_xy;
   
   initial begin
     // set everything up
@@ -72,12 +73,14 @@ module ECLair();
   latch           #(.WIDTH(16))                 lat_reg_b(reg_b_load, reg_z, reg_b);
   latch           #(.WIDTH(16))                 lat_reg_c(reg_c_load, reg_z, reg_c);
   latch           #(.WIDTH(16))                 lat_reg_d(reg_d_load, reg_z, reg_d);
-  latch           #(.WIDTH(16))                 lat_reg_x(reg_x_load, alu_z, reg_x);
-  latch           #(.WIDTH(16))                 lat_reg_y(reg_y_load, alu_y, reg_y);
-  latch           #(.WIDTH(16))                 lat_reg_z(reg_z_load, alu_x, reg_z);
+  latch           #(.WIDTH(16))                 lat_reg_x(reg_x_load, lat_xy, reg_x);
+  latch           #(.WIDTH(16))                 lat_reg_y(reg_y_load, lat_xy, reg_y);
+  latch           #(.WIDTH(16))                 lat_reg_z(reg_z_load, alu_z, reg_z);
   latch                                         lat_reg_ir(reg_ir_load, bus_data, reg_ir);
   latch           #(.WIDTH(16))                 lat_reg_mar(reg_mar_load, lat_mar, reg_mar);
   demux_38                                      dmx_reg_load(cs_data[19:17], reg_load);
+  mux_88                                        mux_xy_src_l(.sel(cs_data[28:26]), .a(8'b00000000), .y(lat_xy[7:0]));
+  mux_88                                        mux_xy_src_h(.sel(cs_data[28:26]), .a(8'b00000000), .y(lat_xy[15:8]));
   mux_28                                        mux_mar_l(cs_data[10], pc[7:0], reg_z[7:0], lat_mar[7:0]);
   mux_28                                        mux_mar_h(cs_data[10], pc[15:8], reg_z[15:8], lat_mar[15:8]);
   alu                                           alu(clk_main, alu_op, reg_x, reg_y, reg_z);
@@ -92,6 +95,9 @@ module ECLair();
   assign reg_d_load = reg_load[3];
   assign reg_mar_load = cs_data[13];
   assign reg_ir_load = cs_data[14];
+  assign reg_x_load = cs_data[31];
+  assign reg_y_load = cs_data[32];
+  assign reg_z_load = cs_data[33];
   assign addr_rom = ~(bus_addr[23:20] == 4'b0000);
   assign addr_device = ~(bus_addr[23:20] == 4'b0111);
   assign addr_ram = ~(addr_rom ~| addr_device);
@@ -104,11 +110,17 @@ module ECLair();
   always @ (clk_main) begin
     $display("resets: m:%0b e:%0b p:%0b c:%0b", _reset, _ext_reset, _por_reset, cs_ready);
     $display("cs_addr: %0h", cs_addr);
-    $display("cs_data: %0b", cs_data);
+    $display("cs_data: %08b_%08b_%08b_%08b", cs_data[31:24], cs_data[23:16], cs_data[15:8], cs_data[7:0]);
     $display("reg_ir: %0b", reg_ir);
-    $display("pc: %0b", pc);
+    $display("pc: 0x%06X", pc);
     $display("bus_addr: %0b", bus_addr);
     $display("bus_data: %0b (0x%0h)", bus_data, bus_data);
+    $display("reg_x: %0b (0x%0h)", reg_x, reg_x);
+    $display("reg_y: %0b (0x%0h)", reg_y, reg_y);
+    $display("reg_z: %0b (0x%0h)", reg_z, reg_z);
+    $display("lat_xy: %0b (0x%0h)", lat_xy, lat_xy);
+    $display("xy_src: %0b", cs_data[28:26]);
+    $display("reg_x_load: %0b", reg_x_load);
     $display("selected: rom: %0b dev: %0b ram: %0b\n", addr_rom, addr_device, addr_ram);
   end
   

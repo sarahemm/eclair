@@ -4,7 +4,10 @@ module latch(clk, in, out);
   input                   clk;
   input       [WIDTH-1:0] in;
 
-  always @ (posedge clk) begin
-    out <= in;
+  always @ (*) begin
+    if(clk == 1'b0) begin
+      // out tracks in while clk is low, latches to last state when high
+      out <= in;
+    end
   end
 endmodule

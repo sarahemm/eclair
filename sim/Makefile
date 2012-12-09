@@ -1,4 +1,4 @@
-OBJS=mc_eprom.v main_eprom.v mc_ram.v main_ram.v counter.v flipflop_jk.v mux_21.v mux_28.v demux_38.v latch.v alu.v eclair.v
+OBJS=mc_eprom.v main_eprom.v mc_ram.v main_ram.v counter.v flipflop_jk.v mux_21.v mux_28.v mux_88.v demux_38.v latch.v alu.v eclair.v
 
 all: eclair.vvp microcode.bin
 
