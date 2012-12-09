@@ -1,0 +1,46 @@
+field src_jmp   0     1
+field jmp       1     1
+field jmp_addr  2     8
+field src_mar   10    1
+field src_mdr   11    1
+field load_mdr  12    1
+field load_mar  13    1
+field load_ir   14    1
+field inc_pc    15    1
+field load_pc   16    1
+field load_reg  17    3
+field alu_op    20    4
+field mem_read  24    1
+field mem_write 25    1
+field src_xy    26    3
+field imm_val   29    2
+field load_x    31    1
+field load_y    32    1
+
+enum  src_jmp   mc    0
+enum  src_jmp   ir    1
+enum  src_mar   pc    0
+enum  src_mar   z     1
+enum  src_mdr   data  0
+enum  src_mdr   z     1
+enum  load_reg  a     1
+enum  load_reg  b     2
+enum  load_reg  c     3
+enum  load_reg  d     4
+enum  load_reg  sp    5
+enum  load_reg  mar   6
+enum  src_xy    imm   0
+enum  src_xy    a     1
+enum  src_xy    b     2
+enum  src_xy    c     3
+enum  src_xy    d     4
+enum  src_xy    sp    5
+enum  src_xy    mar   6
+
+location    init  0
+location    fetch 1
+
+instruction init    load_pc
+instruction fetch   src_mar(pc)   load_mar      mem_read
+instruction fetch   load_ir
+instruction fetch   inc_pc        src_jmp(ir)   jmp
