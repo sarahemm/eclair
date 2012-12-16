@@ -50,7 +50,7 @@ mc_bits = []
 (0..locations.length+4).each do |addr|
   instruction = locations[addr]
   next if !instruction
-  puts "@%03d" % addr
+  puts "@%03X" % addr
   last_mc_bits = 0
   instructions[instruction].each do |data|
     mc_bits[addr] = 0
