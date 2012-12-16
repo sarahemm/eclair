@@ -51,11 +51,20 @@ mc_bits = []
   instruction = locations[addr]
   next if !instruction
   puts "@%03d" % addr
+  last_mc_bits = 0
   instructions[instruction].each do |data|
-    mc_bits[addr] = 0;
+    mc_bits[addr] = 0
+    if(data[0] == "hold_last") then
+      # start off with what we used last time if the first field is "hold_last"
+      mc_bits[addr] = last_mc_bits
+    end
     description = "";
     data.each do |field|
       field_name, enum_name = field.match(/([^\(]+)\(?([^\)]*)\)?/).captures
+      if(field_name == "hold_last") then
+        description += "#{field_name}\t" if enum_name == ""
+        next
+      end
       raise "Invalid field '#{field_name}' in instruction '#{instruction}'" if !fields[field_name]
       # find out if there are enums for this field, and make sure they're valid and used if so
       raise "Enum expected for field '#{field_name}' in instruction #{instruction}" if enums[field_name] and enum_name == ""
@@ -71,6 +80,7 @@ mc_bits = []
     end
     bit_string = ("%064b" % mc_bits[addr]).gsub(/(\d)(?=(\d\d\d\d\d\d\d\d)+(?!\d))/, "\\1_")
     puts "#{bit_string} // #{description}" % addr
+    last_mc_bits = mc_bits[addr]
     addr += 1
   end
 end
