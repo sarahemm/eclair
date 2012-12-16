@@ -46,21 +46,22 @@ enum  src_xy    d     4
 enum  src_xy    sp    5
 enum  src_xy    mar   6
 enum  src_xy    mdr   7
-enum  jmp_addr  hlt   255
+enum  jmp_addr  fetch 2     # TODO: make this not require an enum for locations
+enum  jmp_addr  hlt   254
 
 # locations - start addresses of instructions
 location    init        0
 location    fetch       2
 location    ldi8.al     5   # load immediate 8 bits into low byte of a
-location    hlt         255
+location    hlt         254
 
 # instructions - each one is one word of microcode, glues everything above together
-instruction init        src_xy(zero)  alu_mode(arith) alu_op(x)
-instruction init        load_pc
+instruction init        src_xy(zero)  alu_mode(arith) alu_op(x)     load_x        load_y  load_z
+instruction init        hold_last     load_pc
 instruction fetch       src_mar(pc)   load_mar        mem_read
 instruction fetch       load_ir
 instruction fetch       inc_pc        src_jmp(ir)     jmp
-instruction ldi8.al     src_mdr(data) load_mdr_l
-instruction ldi8.al     src_xy(mdr)
-instruction ldi8.al     load_x        load_reg(a)     inc_pc
+instruction ldi8.al     src_mar(pc)   src_mdr(data)   src_xy(mdr)   mem_read
+instruction ldi8.al     hold_last     load_mar        load_mdr_l    load_x        load_z  load_reg(a)
+instruction ldi8.al     inc_pc        jmp_addr(fetch) src_jmp(mc)   jmp
 instruction hlt         src_jmp(mc)   jmp_addr(hlt)   jmp

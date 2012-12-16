@@ -14,6 +14,7 @@ module ECLair();
   wire          addr_device;
   wire          addr_ram;
   
+  wire          top_of_cs;        // currently addressing the very top of the control store
   wire          cs_ready;         // RAM control store is ready
   wire  [7:0]   cs_addr;          // output of control store sequencer counter
   wire  [63:0]  cs_rom_data;      // ROM control store, used to load into RAM at startup
@@ -61,11 +62,11 @@ module ECLair();
     _ext_reset = 1'b1;
     _por_reset = 1'b0;
     #10 _por_reset = 1'b1;
-    #4000 $finish;
+    #5300 $finish;
   end
   
-  flipflop_jk                                   flp_cs_ready(.clk(clk_cs), .j(cs_addr[7]), .k(1'b0), .q(cs_ready), ._q());
   flipflop_jk                                   flp_clk_halver(clk_main, 1'b1, 1'b1, clk_half_a, clk_half_b);
+  flipflop_jk                                   flp_cs_ready(.clk(top_of_cs), .j(1'b1), .k(1'b0), .q(cs_ready));
   mux_21                                        mux_cs_clk_selector(cs_ready, clk_half_a, clk_main, clk_cs);
   mux_28                                        mux_cs_jump_addr_src(.sel(cs_data[0]), .a(reg_ir), .b(cs_data[9:2]), .y(cs_jump_addr));
   counter         #(.WIDTH(8))                  ctr_cs_seq(.clk(clk_cs), .reset(~_por_reset), .out(cs_addr), .load(cs_jump), .preset(cs_jump_addr));
@@ -86,31 +87,32 @@ module ECLair();
   latch           #(.WIDTH(8))                  lat_reg_mdr_l(.clk(reg_mdr_l_load), .in(lat_mdr[7:0]),  .out(reg_mdr[7:0]));
   latch           #(.WIDTH(8))                  lat_reg_mdr_h(.clk(reg_mdr_h_load), .in(lat_mdr[15:8]), .out(reg_mdr[15:8]));
   demux_38                                      dmx_reg_load(cs_data[19:17], reg_load);
-  mux_88                                        mux_xy_src_l(.sel(cs_data[28:26]), .a(8'b00000000), .b(reg_a[7:0]), .c(reg_b[7:0]), .d(reg_c[7:0]), .e(reg_d[7:0]), .h(reg_mdr[7:0]),  .y(lat_xy[7:0]));
-  mux_88                                        mux_xy_src_h(.sel(cs_data[28:26]), .a(8'b00000000), .b(reg_a[15:8]), .c(reg_b[15:8]), .d(reg_c[15:8]), .e(reg_d[15:8]), .h(reg_mdr[15:8]), .y(lat_xy[15:8]));
+  mux_88                                        mux_xy_src_l(.sel(cs_data[28:26]), .a(16'b0000000000000000), .b(reg_a[7:0]), .c(reg_b[7:0]), .d(reg_c[7:0]), .e(reg_d[7:0]), .h(reg_mdr[7:0]),  .y(lat_xy[7:0]));
+  mux_88                                        mux_xy_src_h(.sel(cs_data[28:26]), .a(16'b0000000000000000), .b(reg_a[15:8]), .c(reg_b[15:8]), .d(reg_c[15:8]), .e(reg_d[15:8]), .h(reg_mdr[15:8]), .y(lat_xy[15:8]));
   mux_28                                        mux_mar_l(.sel(cs_data[10]), .a(reg_z[7:0]),  .b(pc[7:0]),  .y(lat_mar[7:0]));
   mux_28                                        mux_mar_h(.sel(cs_data[10]), .a(reg_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
   mux_28                                        mux_mdr_l(.sel(mux_mdr_src), .a(reg_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
   mux_28                                        mux_mdr_h(.sel(mux_mdr_src), .a(reg_z[15:8]), .b(bus_data[7:0]), .y(lat_mdr[15:8]));
   alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(1'b0), .x(reg_x), .y(reg_y), .z(alu_z));
   
+  assign top_of_cs = cs_addr == 8'b11111111;
   assign _reset = _ext_reset & _por_reset & cs_ready;
   assign cs_ram__w = cs_ready ~| clk_half_a;
   assign cs_jump = cs_data[1];
   assign alu_mode = cs_data[20];
   assign alu_op = cs_data[24:21];
-  assign reg_a_load = reg_load[0];
-  assign reg_b_load = reg_load[1];
-  assign reg_c_load = reg_load[2];
-  assign reg_d_load = reg_load[3];
+  assign reg_a_load = reg_load[1];
+  assign reg_b_load = reg_load[2];
+  assign reg_c_load = reg_load[3];
+  assign reg_d_load = reg_load[4];
   assign mux_mdr_src = cs_data[11];
   assign reg_mdr_l_load = ~cs_data[12];
   assign reg_mdr_h_load = ~cs_data[25];
-  assign reg_mar_load = cs_data[13];
-  assign reg_ir_load = cs_data[14];
-  assign reg_x_load = cs_data[31];
-  assign reg_y_load = cs_data[32];
-  assign reg_z_load = cs_data[33];
+  assign reg_mar_load = ~cs_data[13];
+  assign reg_ir_load = ~cs_data[14];
+  assign reg_x_load = ~cs_data[31];
+  assign reg_y_load = ~cs_data[32];
+  assign reg_z_load = ~cs_data[33];
   assign addr_rom = ~(bus_addr[23:20] == 4'b0000);
   assign addr_device = ~(bus_addr[23:20] == 4'b0111);
   assign addr_ram = ~(addr_rom ~| addr_device);
@@ -121,26 +123,28 @@ module ECLair();
   end
   
   always @ (clk_main) begin
-    $display("resets: m:%0b e:%0b p:%0b c:%0b", _reset, _ext_reset, _por_reset, cs_ready);
-    $display("cs_addr: %0h", cs_addr);
-    $display("cs_data: %08b_%08b_%08b_%08b", cs_data[31:24], cs_data[23:16], cs_data[15:8], cs_data[7:0]);
-    $display("reg_ir: %0b", reg_ir);
-    $display("pc: 0x%06X", pc);
-    $display("bus_addr: %0b", bus_addr);
-    $display("bus_data: %0b (0x%0h)", bus_data, bus_data);
-    $display("reg_mar: %0b (0x%0h)", reg_mar, reg_mar);
-    $display("reg_mdr: %0b (0x%0h)", reg_mdr, reg_mdr);
-    $display("reg_a: %0b (0x%0h)", reg_a, reg_a);
-    $display("reg_b: %0b (0x%0h)", reg_b, reg_b);
-    $display("reg_c: %0b (0x%0h)", reg_c, reg_c);
-    $display("reg_d: %0b (0x%0h)", reg_d, reg_d);
-    $display("reg_x: %0b (0x%0h)", reg_x, reg_x);
-    $display("reg_y: %0b (0x%0h)", reg_y, reg_y);
-    $display("reg_z: %0b (0x%0h)", reg_z, reg_z);
-    $display("lat_xy: %0b (0x%0h)", lat_xy, lat_xy);
-    $display("xy_src: %0b", cs_data[28:26]);
-    $display("reg_x_load: %0b", reg_x_load);
-    $display("selected: rom: %0b dev: %0b ram: %0b\n", addr_rom, addr_device, addr_ram);
+    if(cs_ready) begin
+      $display("resets: m:%0b e:%0b p:%0b c:%0b", _reset, _ext_reset, _por_reset, cs_ready);
+      $display("cs_addr: %0h", cs_addr);
+      $display("cs_data: %08b_%08b_%08b_%08b", cs_data[31:24], cs_data[23:16], cs_data[15:8], cs_data[7:0]);
+      $display("reg_ir: %0b", reg_ir);
+      $display("pc: 0x%06X", pc);
+      $display("bus_addr: %0b", bus_addr);
+      $display("bus_data: %0b (0x%0h)", bus_data, bus_data);
+      $display("reg_mar: %0b (0x%0h)", reg_mar, reg_mar);
+      $display("reg_mdr: %0b (0x%0h)", reg_mdr, reg_mdr);
+      $display("reg_a: %0b (0x%0h)", reg_a, reg_a);
+      $display("reg_b: %0b (0x%0h)", reg_b, reg_b);
+      $display("reg_c: %0b (0x%0h)", reg_c, reg_c);
+      $display("reg_d: %0b (0x%0h)", reg_d, reg_d);
+      $display("reg_x: %0b (0x%0h)", reg_x, reg_x);
+      $display("reg_y: %0b (0x%0h)", reg_y, reg_y);
+      $display("reg_z: %0b (0x%0h)", reg_z, reg_z);
+      $display("lat_xy: %0b (0x%0h)", lat_xy, lat_xy);
+      $display("xy_src: %0b", cs_data[28:26]);
+      $display("reg_x_load: %0b", reg_x_load);
+      $display("selected: rom: %0b dev: %0b ram: %0b\n", addr_rom, addr_device, addr_ram);
+    end
   end
   
   // control store copier
@@ -151,7 +155,7 @@ module ECLair();
     end
   end
   
-  always @ (negedge cs_addr[7]) begin
+  always @ (posedge cs_ready) begin
     if(cs_ready) begin
       $display("Microcode loaded from ROM to RAM.");
       $dumpfile("eclair.vcd");
