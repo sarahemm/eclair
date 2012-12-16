@@ -2,7 +2,7 @@ OBJS=mc_eprom.v main_eprom.v mc_ram.v main_ram.v counter.v flipflop_jk.v mux_21.
 
 all: eclair.vvp microcode.bin
 
-run: eclair.vvp
+run: eclair.vvp microcode.bin
 	./eclair.vvp
 
 eclair.vvp: $(OBJS)
