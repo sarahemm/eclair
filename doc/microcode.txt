@@ -1,40 +1,43 @@
 # ECLair Microcode
 
 # fields - names for bit positions
-field src_jmp   0     1
-field jmp       1     1
-field jmp_addr  2     8
-field src_mar   10    1
-field src_mdr   11    1
-field load_mdr  12    1
-field load_mar  13    1
-field load_ir   14    1
-field inc_pc    15    1
-field load_pc   16    1
-field load_reg  17    3
-field alu_op    20    4
-field mem_read  24    1
-field mem_write 25    1
-field src_xy    26    3
-# 29/30 free right now
-field load_x    31    1
-field load_y    32    1
-field load_z    33    1
+field src_jmp     0     1
+field jmp         1     1
+field jmp_addr    2     8
+field src_mar     10    1
+field src_mdr     11    1
+field load_mdr_l  12    1
+field load_mar    13    1
+field load_ir     14    1
+field inc_pc      15    1
+field load_pc     16    1
+field load_reg    17    3
+field alu_mode    20    1
+field alu_op      21    4
+field load_mdr_h  25    1
+field src_xy      26    3
+field mem_read    29    1
+field mem_write   30    1
+field load_x      31    1
+field load_y      32    1
+field load_z      33    1
 
 # enums - names for values that go into bit positions
-enum  src_jmp   mc    0
-enum  src_jmp   ir    1
-enum  src_mar   pc    0
-enum  src_mar   z     1
-enum  src_mdr   data  0
-enum  src_mdr   z     1
+enum  src_jmp   ir    0
+enum  src_jmp   mc    1
+enum  src_mar   z     0
+enum  src_mar   pc    1
+enum  src_mdr   z     0
+enum  src_mdr   data  1
 enum  load_reg  a     1
 enum  load_reg  b     2
 enum  load_reg  c     3
 enum  load_reg  d     4
 enum  load_reg  sp    5
 enum  load_reg  mar   6
-enum  alu_op    x     15
+enum  alu_mode  arith 0
+enum  alu_mode  logic 1
+enum  alu_op    x     0
 enum  src_xy    zero  0
 enum  src_xy    a     1
 enum  src_xy    b     2
@@ -42,14 +45,22 @@ enum  src_xy    c     3
 enum  src_xy    d     4
 enum  src_xy    sp    5
 enum  src_xy    mar   6
+enum  src_xy    mdr   7
+enum  jmp_addr  hlt   255
 
 # locations - start addresses of instructions
-location    init  0
-location    fetch 2
+location    init        0
+location    fetch       2
+location    ldi8.al     5   # load immediate 8 bits into low byte of a
+location    hlt         255
 
 # instructions - each one is one word of microcode, glues everything above together
-instruction init    src_xy(zero)  alu_op(x)
-instruction init    load_pc
-instruction fetch   src_mar(pc)   load_mar      mem_read
-instruction fetch   load_ir
-instruction fetch   inc_pc        src_jmp(ir)   jmp
+instruction init        src_xy(zero)  alu_mode(arith) alu_op(x)
+instruction init        load_pc
+instruction fetch       src_mar(pc)   load_mar        mem_read
+instruction fetch       load_ir
+instruction fetch       inc_pc        src_jmp(ir)     jmp
+instruction ldi8.al     src_mdr(data) load_mdr_l
+instruction ldi8.al     src_xy(mdr)
+instruction ldi8.al     load_x        load_reg(a)     inc_pc
+instruction hlt         src_jmp(mc)   jmp_addr(hlt)   jmp
