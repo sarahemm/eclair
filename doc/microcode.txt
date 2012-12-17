@@ -38,6 +38,7 @@ enum  load_reg  mar   6
 enum  alu_mode  arith 0
 enum  alu_mode  logic 1
 enum  alu_op    x     0
+enum  alu_op    add   6
 enum  src_xy    zero  0
 enum  src_xy    a     1
 enum  src_xy    b     2
@@ -53,15 +54,26 @@ enum  jmp_addr  hlt   254
 location    init        0
 location    fetch       2
 location    ldi8.al     5   # load immediate 8 bits into low byte of a
+location    ldi8.bl     8   # load immediate 8 bits into low byte of b
+location    add16.ab    11   # add a and b registers, result goes into a
 location    hlt         254
 
 # instructions - each one is one word of microcode, glues everything above together
-instruction init        src_xy(zero)  alu_mode(arith) alu_op(x)     load_x        load_y  load_z
+instruction init        src_xy(zero)  alu_mode(arith) alu_op(x)       load_x      load_y  load_z
 instruction init        hold_last     load_pc
 instruction fetch       src_mar(pc)   load_mar        mem_read
 instruction fetch       load_ir
 instruction fetch       inc_pc        src_jmp(ir)     jmp
-instruction ldi8.al     src_mar(pc)   src_mdr(data)   src_xy(mdr)   mem_read
-instruction ldi8.al     hold_last     load_mar        load_mdr_l    load_x        load_z  load_reg(a)
-instruction ldi8.al     inc_pc        jmp_addr(fetch) src_jmp(mc)   jmp
+instruction ldi8.al     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read
+instruction ldi8.al     hold_last     load_mar        load_mdr_l      load_x      load_z  load_reg(a)
+instruction ldi8.al     inc_pc        jmp_addr(fetch) src_jmp(mc)     jmp
+instruction ldi8.bl     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read
+instruction ldi8.bl     hold_last     load_mar        load_mdr_l      load_x      load_z  load_reg(b)
+instruction ldi8.bl     inc_pc        jmp_addr(fetch) src_jmp(mc)     jmp
+instruction add16.ab    src_xy(a)
+instruction add16.ab    hold_last     load_x
+instruction add16.ab    src_xy(b)
+instruction add16.ab    hold_last     load_y          alu_mode(arith) alu_op(add)
+instruction add16.ab    alu_op(add)   alu_mode(arith) load_z          load_reg(a)
+instruction add16.ab    jmp_addr(fetch)               src_jmp(mc)     jmp
 instruction hlt         src_jmp(mc)   jmp_addr(hlt)   jmp
