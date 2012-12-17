@@ -23,38 +23,42 @@ field load_y      32    1
 field load_z      33    1
 
 # enums - names for values that go into bit positions
-enum  src_jmp   ir    0
-enum  src_jmp   mc    1
-enum  src_mar   z     0
-enum  src_mar   pc    1
-enum  src_mdr   z     0
-enum  src_mdr   data  1
-enum  load_reg  a     1
-enum  load_reg  b     2
-enum  load_reg  c     3
-enum  load_reg  d     4
-enum  load_reg  sp    5
-enum  load_reg  mar   6
-enum  alu_mode  arith 0
-enum  alu_mode  logic 1
-enum  alu_op    x     0
-enum  alu_op    add   6
-enum  src_xy    zero  0
-enum  src_xy    a     1
-enum  src_xy    b     2
-enum  src_xy    c     3
-enum  src_xy    d     4
-enum  src_xy    sp    5
-enum  src_xy    mar   6
-enum  src_xy    mdr   7
-enum  jmp_addr  fetch 2     # TODO: make this not require an enum for locations
-enum  jmp_addr  hlt   254
+enum  src_jmp   ir      0
+enum  src_jmp   mc      1
+enum  src_mar   z       0
+enum  src_mar   pc      1
+enum  src_mdr   z       0
+enum  src_mdr   data    1
+enum  load_reg  a       1
+enum  load_reg  b       2
+enum  load_reg  c       3
+enum  load_reg  d       4
+enum  load_reg  sp      5
+enum  load_reg  via_ir  7
+enum  alu_mode  arith   0
+enum  alu_mode  logic   1
+enum  alu_op    x       0
+enum  alu_op    add     6
+enum  src_xy    zero    0
+enum  src_xy    a       1
+enum  src_xy    b       2
+enum  src_xy    c       3
+enum  src_xy    d       4
+enum  src_xy    sp      5
+enum  src_xy    mar     6
+enum  src_xy    mdr     7
+enum  jmp_addr  fetch   2     # TODO: make this not require an enum for locations
+enum  jmp_addr  ldi8.xl 200
+enum  jmp_addr  hlt     254
 
 # locations - start addresses of instructions
 location    init        0
 location    fetch       2
-location    ldi8.al     5   # load immediate 8 bits into low byte of a
-location    ldi8.bl     8   # load immediate 8 bits into low byte of b
+location    ldi8.al     5    # load immediate 8 bits into low byte of a
+location    ldi8.bl     69   # load immediate 8 bits into low byte of b
+location    ldi8.cl     133  # load immediate 8 bits into low byte of c
+location    ldi8.dl     197  # load immediate 8 bits into low byte of d
+location    ldi8.?l     200  # load immediate 8 bits into register from IR
 location    add16.ab    11   # add a and b registers, result goes into a
 location    hlt         254
 
@@ -64,12 +68,13 @@ instruction init        hold_last     load_pc
 instruction fetch       src_mar(pc)   load_mar        mem_read
 instruction fetch       load_ir
 instruction fetch       inc_pc        src_jmp(ir)     jmp
-instruction ldi8.al     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read
-instruction ldi8.al     hold_last     load_mar        load_mdr_l      load_x      load_z  load_reg(a)
-instruction ldi8.al     inc_pc        jmp_addr(fetch) src_jmp(mc)     jmp
-instruction ldi8.bl     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read
-instruction ldi8.bl     hold_last     load_mar        load_mdr_l      load_x      load_z  load_reg(b)
-instruction ldi8.bl     inc_pc        jmp_addr(fetch) src_jmp(mc)     jmp
+instruction ldi8.al     inc_pc        src_jmp(mc)     jmp_addr(ldi8.xl)           jmp
+instruction ldi8.bl     inc_pc        src_jmp(mc)     jmp_addr(ldi8.xl)           jmp
+instruction ldi8.cl     inc_pc        src_jmp(mc)     jmp_addr(ldi8.xl)           jmp
+instruction ldi8.dl     inc_pc        src_jmp(mc)     jmp_addr(ldi8.xl)           jmp
+instruction ldi8.?l     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read
+instruction ldi8.?l     hold_last     load_mar        load_mdr_l      load_x      load_z  load_reg(via_ir)
+instruction ldi8.?l     inc_pc        jmp_addr(fetch) src_jmp(mc)     jmp
 instruction add16.ab    src_xy(a)
 instruction add16.ab    hold_last     load_x
 instruction add16.ab    src_xy(b)

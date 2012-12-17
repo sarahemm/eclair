@@ -30,6 +30,9 @@ module ECLair();
   wire          ram__w;           // Main RAM write signal
   wire  [15:0]  pc;               // program counter
   wire  [7:0]   reg_load;         // load signals (latch clocks) for registers
+  wire  [7:0]   reg_load_via_ir;  // load signals (latch clocks) for registers (when loading via IR)
+  wire  [2:0]   reg_x_load_ir_src;  // bits from IR to determine which register to load
+  wire          reg_x_load_ir;    // load a register, getting the reg to load from IR[7..6]
   wire          reg_a_load;       
   wire          reg_b_load;
   wire          reg_c_load;
@@ -88,6 +91,7 @@ module ECLair();
   latch           #(.WIDTH(8))                  lat_reg_mdr_l(.clk(reg_mdr_l_load), .in(lat_mdr[7:0]),  .out(reg_mdr[7:0]));
   latch           #(.WIDTH(8))                  lat_reg_mdr_h(.clk(reg_mdr_h_load), .in(lat_mdr[15:8]), .out(reg_mdr[15:8]));
   demux_38                                      dmx_reg_load(cs_data[19:17], reg_load);
+  demux_38                                      dmx_reg_load_ir(reg_x_load_ir_src, reg_load_via_ir);
   mux_88                                        mux_xy_src_l(.sel(cs_data[28:26]), .a(16'b0000000000000000), .b(reg_a[7:0]), .c(reg_b[7:0]), .d(reg_c[7:0]), .e(reg_d[7:0]), .h(reg_mdr[7:0]),  .y(lat_xy[7:0]));
   mux_88                                        mux_xy_src_h(.sel(cs_data[28:26]), .a(16'b0000000000000000), .b(reg_a[15:8]), .c(reg_b[15:8]), .d(reg_c[15:8]), .e(reg_d[15:8]), .h(reg_mdr[15:8]), .y(lat_xy[15:8]));
   mux_28                                        mux_mar_l(.sel(cs_data[10]), .a(reg_z[7:0]),  .b(pc[7:0]),  .y(lat_mar[7:0]));
@@ -103,10 +107,11 @@ module ECLair();
   assign cs_jump = cs_data[1];
   assign alu_mode = cs_data[20];
   assign alu_op = cs_data[24:21];
-  assign reg_a_load = reg_load[1];
-  assign reg_b_load = reg_load[2];
-  assign reg_c_load = reg_load[3];
-  assign reg_d_load = reg_load[4];
+  assign reg_a_load = reg_load[1] | reg_load_via_ir[1];
+  assign reg_b_load = reg_load[2] | reg_load_via_ir[3];
+  assign reg_c_load = reg_load[3] | reg_load_via_ir[5];
+  assign reg_d_load = reg_load[4] | reg_load_via_ir[7];
+  assign reg_x_load_ir = reg_load[7];
   assign mux_mdr_src = cs_data[11];
   assign reg_mdr_l_load = ~cs_data[12];
   assign reg_mdr_h_load = ~cs_data[25];
@@ -119,6 +124,9 @@ module ECLair();
   assign addr_device = ~(bus_addr[23:20] == 4'b0111);
   assign addr_ram = ~(addr_rom ~| addr_device);
   assign bus_addr = reg_mar;
+  assign reg_x_load_ir_src[0] = 1'b0;
+  assign reg_x_load_ir_src[1] = reg_x_load_ir & reg_ir[6];
+  assign reg_x_load_ir_src[2] = reg_x_load_ir & reg_ir[7];
   
   always begin
     #5 clk_main = ~clk_main;
