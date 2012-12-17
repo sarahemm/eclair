@@ -14,6 +14,7 @@ module ECLair();
   wire          addr_device;
   wire          addr_ram;
   
+  wire          processor_halted; // 1 if the control store is accessing the HLT instruction
   wire          top_of_cs;        // currently addressing the very top of the control store
   wire          cs_ready;         // RAM control store is ready
   wire  [7:0]   cs_addr;          // output of control store sequencer counter
@@ -62,7 +63,7 @@ module ECLair();
     _ext_reset = 1'b1;
     _por_reset = 1'b0;
     #10 _por_reset = 1'b1;
-    #5300 $finish;
+    #10000 $finish;
   end
   
   flipflop_jk                                   flp_clk_halver(clk_main, 1'b1, 1'b1, clk_half_a, clk_half_b);
@@ -96,6 +97,7 @@ module ECLair();
   alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(1'b0), .x(reg_x), .y(reg_y), .z(alu_z));
   
   assign top_of_cs = cs_addr == 8'b11111111;
+  assign processor_halted = cs_ready & cs_addr == 8'hFE;
   assign _reset = _ext_reset & _por_reset & cs_ready;
   assign cs_ram__w = cs_ready ~| clk_half_a;
   assign cs_jump = cs_data[1];
@@ -161,5 +163,10 @@ module ECLair();
       $dumpfile("eclair.vcd");
       $dumpvars(0,ECLair);
     end
+  end
+  
+  always @ (posedge processor_halted) begin
+    $display("\nPROCESSOR HALTED");
+    $finish;
   end
 endmodule
