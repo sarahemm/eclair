@@ -146,6 +146,13 @@ module ECLair();
       $display("xy_src: %0b", cs_data[28:26]);
       $display("reg_x_load: %0b", reg_x_load);
       $display("selected: rom: %0b dev: %0b ram: %0b\n", addr_rom, addr_device, addr_ram);
+      if(^cs_data == 1'b1 || ^cs_data == 1'b0) begin
+      end else begin
+        if(cs_addr != 8'hFF) begin
+          $display("\nILLEGAL MICROINSTRUCTION EXECUTED (PC=0x%06X)", pc);
+          $finish;
+        end
+      end
     end
   end
   
