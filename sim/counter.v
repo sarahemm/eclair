@@ -14,10 +14,10 @@ module counter(clk, reset, out, load, preset);
   always @(posedge clk or posedge reset or posedge load) begin
     if (reset) begin
       out <= 0;
-      $display("counter: reset");
+      //$display("counter: reset");
     end else if(load) begin
       out <= preset;
-      $display("counter: load");
+      //$display("counter: load");
     end else begin
       out <= out + 1;
     end
