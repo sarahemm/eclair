@@ -52,7 +52,11 @@ mc_bits = []
   next if !instruction
   puts "@%03X" % addr
   last_mc_bits = 0
+  if(!instructions.include? instruction) then
+    raise "No definition found for instruction #{instruction} at address #{addr}"
+  end
   instructions[instruction].each do |data|
+    raise "#{instruction} overlaps with previous instruction at address 0x%03X" % addr if mc_bits[addr]
     mc_bits[addr] = 0
     if(data[0] == "hold_last") then
       # start off with what we used last time if the first field is "hold_last"
