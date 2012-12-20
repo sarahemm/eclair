@@ -26,6 +26,7 @@ module ECLair();
   wire  [7:0]   cs_jump_addr;     // control store jump destination
   wire          alu_mode;         // ALU mode (0=arithmetic, 1=logic)
   wire  [3:0]   alu_op;           // ALU operation
+  wire          op_16bit;         // Operation is 16-bits wide
   wire          mux_mdr_src;      // 0 = MDR sources from data, 1 = MDR sources from Z
   wire          ram__w;           // Main RAM write signal
   wire  [15:0]  pc;               // program counter
@@ -79,10 +80,14 @@ module ECLair();
   main_ram                                      ram_main(._cs(1'b0), ._oe(addr_ram), ._w(ram__w), .addr(bus_addr[19:0]), .data_in(bus_data), .data_out(bus_data));
   main_eprom      #(.ROM_FILE("bootrom.bin"))   rom_boot(1'b0, addr_rom, bus_addr[19:0], bus_data);
   counter         #(.WIDTH(16))                 ctr_pc(.clk(cs_data[15]), .reset(~_reset), .out(pc), .load(cs_data[16]), .preset(reg_z));
-  latch           #(.WIDTH(16))                 lat_reg_a(reg_a_load, reg_z, reg_a);
-  latch           #(.WIDTH(16))                 lat_reg_b(reg_b_load, reg_z, reg_b);
-  latch           #(.WIDTH(16))                 lat_reg_c(reg_c_load, reg_z, reg_c);
-  latch           #(.WIDTH(16))                 lat_reg_d(reg_d_load, reg_z, reg_d);
+  latch           #(.WIDTH(8))                  lat_reg_a_l(reg_a_load, reg_z[7:0], reg_a[7:0]);
+  latch           #(.WIDTH(8))                  lat_reg_a_h(reg_a_load | ~op_16bit, reg_z[15:8], reg_a[15:8]);
+  latch           #(.WIDTH(8))                  lat_reg_b_l(reg_b_load, reg_z[7:0], reg_b[7:0]);
+  latch           #(.WIDTH(8))                  lat_reg_b_h(reg_b_load | ~op_16bit, reg_z[15:8], reg_b[15:8]);
+  latch           #(.WIDTH(8))                  lat_reg_c_l(reg_c_load, reg_z[7:0], reg_c[7:0]);
+  latch           #(.WIDTH(8))                  lat_reg_c_h(reg_c_load | ~op_16bit, reg_z[15:8], reg_c[15:8]);
+  latch           #(.WIDTH(8))                  lat_reg_d_l(reg_d_load, reg_z[7:0], reg_d[7:0]);
+  latch           #(.WIDTH(8))                  lat_reg_d_h(reg_d_load | ~op_16bit, reg_z[15:8], reg_d[15:8]);
   latch           #(.WIDTH(16))                 lat_reg_x(reg_x_load, lat_xy, reg_x);
   latch           #(.WIDTH(16))                 lat_reg_y(reg_y_load, lat_xy, reg_y);
   latch           #(.WIDTH(16))                 lat_reg_z(reg_z_load, alu_z, reg_z);
@@ -107,11 +112,12 @@ module ECLair();
   assign cs_jump = cs_data[1];
   assign alu_mode = cs_data[20];
   assign alu_op = cs_data[24:21];
-  assign reg_a_load = reg_load[1] | reg_load_via_ir[1];
-  assign reg_b_load = reg_load[2] | reg_load_via_ir[3];
-  assign reg_c_load = reg_load[3] | reg_load_via_ir[5];
-  assign reg_d_load = reg_load[4] | reg_load_via_ir[7];
-  assign reg_x_load_ir = reg_load[7];
+  assign op_16bit = cs_data[34];
+  assign reg_a_load = reg_load[1] & reg_load_via_ir[1];
+  assign reg_b_load = reg_load[2] & reg_load_via_ir[3];
+  assign reg_c_load = reg_load[3] & reg_load_via_ir[5];
+  assign reg_d_load = reg_load[4] & reg_load_via_ir[7];
+  assign reg_x_load_ir = ~reg_load[7];
   assign mux_mdr_src = cs_data[11];
   assign reg_mdr_l_load = ~cs_data[12];
   assign reg_mdr_h_load = ~cs_data[25];
@@ -124,7 +130,7 @@ module ECLair();
   assign addr_device = ~(bus_addr[23:20] == 4'b0111);
   assign addr_ram = ~(addr_rom ~| addr_device);
   assign bus_addr = reg_mar;
-  assign reg_x_load_ir_src[0] = 1'b0;
+  assign reg_x_load_ir_src[0] = reg_x_load_ir;
   assign reg_x_load_ir_src[1] = reg_x_load_ir & reg_ir[6];
   assign reg_x_load_ir_src[2] = reg_x_load_ir & reg_ir[7];
   
@@ -136,28 +142,28 @@ module ECLair();
     if(cs_ready) begin
       $display("resets: m:%0b e:%0b p:%0b c:%0b", _reset, _ext_reset, _por_reset, cs_ready);
       $display("cs_addr: %0h", cs_addr);
-      $display("cs_data: %08b_%08b_%08b_%08b", cs_data[31:24], cs_data[23:16], cs_data[15:8], cs_data[7:0]);
-      $display("reg_ir: %0b", reg_ir);
+      $display("cs_data:  %08b_%08b_%08b_%08b", cs_data[31:24], cs_data[23:16], cs_data[15:8], cs_data[7:0]);
+      $display("reg_ir:   %0b", reg_ir);
       $display("pc: 0x%06X", pc);
-      $display("bus_addr: %0b", bus_addr);
+      $display("bus_addr: %08b_%08b_%08b", bus_addr[23:16], bus_addr[15:8], bus_addr[7:0]);
       $display("bus_data: %0b (0x%0h)", bus_data, bus_data);
-      $display("reg_mar: %0b (0x%0h)", reg_mar, reg_mar);
-      $display("reg_mdr: %0b (0x%0h)", reg_mdr, reg_mdr);
-      $display("reg_a: %0b (0x%0h)", reg_a, reg_a);
-      $display("reg_b: %0b (0x%0h)", reg_b, reg_b);
-      $display("reg_c: %0b (0x%0h)", reg_c, reg_c);
-      $display("reg_d: %0b (0x%0h)", reg_d, reg_d);
-      $display("reg_x: %0b (0x%0h)", reg_x, reg_x);
-      $display("reg_y: %0b (0x%0h)", reg_y, reg_y);
-      $display("reg_z: %0b (0x%0h)", reg_z, reg_z);
-      $display("lat_xy: %0b (0x%0h)", lat_xy, lat_xy);
-      $display("xy_src: %0b", cs_data[28:26]);
+      $display("reg_mar:  %08b_%08b (0x%0h)", reg_mar[15:8], reg_mar[7:0], reg_mar);
+      $display("reg_mdr:  %08b_%08b (0x%0h)", reg_mdr[15:8], reg_mdr[7:0], reg_mdr);
+      $display("reg_a:    %08b_%08b (0x%0h)", reg_a[15:8], reg_a[7:0], reg_a);
+      $display("reg_b:    %08b_%08b (0x%0h)", reg_b[15:8], reg_b[7:0], reg_b);
+      $display("reg_c:    %08b_%08b (0x%0h)", reg_c[15:8], reg_c[7:0], reg_c);
+      $display("reg_d:    %08b_%08b (0x%0h)", reg_d[15:8], reg_d[7:0], reg_d);
+      $display("reg_x:    %08b_%08b (0x%0h)", reg_x[15:8], reg_x[7:0], reg_x);
+      $display("reg_y:    %08b_%08b (0x%0h)", reg_y[15:8], reg_y[7:0], reg_y);
+      $display("reg_z:    %08b_%08b (0x%0h)", reg_z[15:8], reg_z[7:0], reg_z);
+      $display("lat_xy:   %0b (0x%0h)", lat_xy, lat_xy);
+      $display("xy_src:   %0b", cs_data[28:26]);
       $display("reg_x_load: %0b", reg_x_load);
       $display("selected: rom: %0b dev: %0b ram: %0b\n", addr_rom, addr_device, addr_ram);
       if(^cs_data == 1'b1 || ^cs_data == 1'b0) begin
       end else begin
         if(cs_addr != 8'hFF) begin
-          $display("\nILLEGAL MICROINSTRUCTION EXECUTED (PC=0x%06X)", pc);
+          $display("\nILLEGAL MICROINSTRUCTION EXECUTED (pc=0x%06X cs_addr=0x%06X)", pc, cs_addr);
           $finish;
         end
       end

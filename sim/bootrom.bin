@@ -1,9 +1,19 @@
 @000
+// test 8-bit immediate loads and adds
 00000101    // ldi8.al  
 00000111    // immediate for --^
 01000101    // ldi8.bl
 00001000    // immediate for --^
 00001011    // add16.ab
+// test 16-bit immediate loads and adds
+00000110    // ldi16.a
+00000111    // immediate low byte for --^
+00000110    // immediate high byte for --^
+01000110    // ldi16.b
+00001000    // immediate low byte for --^
+00001100    // immediate high byte for --^
+00001011    // add16.ab
+// done!
 11111110    // halt
 00000000
 00000000
