@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 // simple jk flip-flop
 module flipflop_jk(clk, j, k, q, _q);
   input       clk;

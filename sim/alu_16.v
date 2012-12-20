@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module alu_16(alu_op, mode, x, y, c_in, z, c_out);
   input   [3:0]     alu_op;
   input             mode;

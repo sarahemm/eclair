@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module main_eprom(_cs, _oe, addr, data);
   parameter ROM_FILE="eprom.bin";
   
@@ -14,5 +16,5 @@ module main_eprom(_cs, _oe, addr, data);
   initial begin
     $readmemb(ROM_FILE, rom);
     $display("Boot ROM loaded from disk to ROM.");
-  end  
+  end
 endmodule

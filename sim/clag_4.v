@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 // 4-bit carry lookahead generator
 module clag_4(g, p, cn, cn2, cn4, pg, gg);
   input [3:0]   g;

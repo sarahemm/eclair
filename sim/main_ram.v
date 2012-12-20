@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module main_ram(_cs, _oe, _w, addr, data_in, data_out);
   input           _cs;
   input           _oe;

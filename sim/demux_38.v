@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module demux_38(in, out);
   input   [2:0] in;
   output  [7:0] out;

@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module mux_88(sel, a, b, c, d, e, f, g, h, y);
   input       [2:0] sel;
   input       [7:0] a;

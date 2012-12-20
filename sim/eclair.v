@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module ECLair();
   reg   clk_main;     // main system clock
   wire  clk_half_a;   // halved system clock, phase A

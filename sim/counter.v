@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 // simple async-load async-reset up-counter
 module counter(clk, reset, out, load, preset);
   parameter WIDTH=8;

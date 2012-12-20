@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module mux_28(sel, a, b, y);
   input   sel;
   input   [7:0] a;

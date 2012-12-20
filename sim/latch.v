@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module latch(clk, in, out);
   parameter WIDTH=8;
   output  reg [WIDTH-1:0] out;

@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module microcode_eprom(_cs, _oe, addr, data);
   parameter ROM_FILE="eprom.bin";
   

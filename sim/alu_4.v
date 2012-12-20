@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module alu_4(s, a, b, cn, m, f, gg, pg, cn4);
   input   [3:0]   s;
   input   [3:0]   a;
