@@ -23,7 +23,8 @@ module ECLair();
   wire          cs_ready;         // RAM control store is ready
   wire  [7:0]   cs_addr;          // output of control store sequencer counter
   wire  [63:0]  cs_rom_data;      // ROM control store, used to load into RAM at startup
-  wire  [63:0]  cs_data;          // RAM control store, used to actually run the machine
+  wire  [63:0]  cs_data_prelatch; // RAM control store output
+  wire  [63:0]  cs_data;          // RAM control store latch output, used to actually run the machine
   reg   [63:0]  cs_data_in;
   wire          cs_ram__w;        // RAM control store write signal
   wire          cs_jump_src;      // control store jump source (0 = IR, 1 = MC bits)
@@ -80,7 +81,7 @@ module ECLair();
     _ext_reset = 1'b1;
     _por_reset = 1'b0;
     #10 _por_reset = 1'b1;
-    #167000 $finish;
+    #168000 $finish;
   end
   
   counter         #(.WIDTH(3))                  ctr_clk_divider(.clk(clk_main), .ce(1'b1), .reset(1'b0), .out(clk_divided), .load(1'b0), .preset(3'b000));
@@ -89,7 +90,8 @@ module ECLair();
   mux_28                                        mux_cs_jump_addr_src(.sel(cs_jump_src), .a(reg_ir), .b(cs_jump_addr_mc), .y(cs_jump_addr));
   counter         #(.WIDTH(8))                  ctr_cs_seq(.clk(clk_cs), .ce(1'b1), .reset(~_por_reset), .out(cs_addr), .load(cs_jump & cs_ready), .preset(cs_jump_addr));
   microcode_eprom #(.ROM_FILE("microcode-full.bin")) rom_cs(1'b0, 1'b0, cs_addr, cs_rom_data);
-  microcode_ram                                 ram_cs(1'b0, 1'b0, cs_ram__w, cs_addr, cs_data_in, cs_data);
+  microcode_ram                                 ram_cs(1'b0, 1'b0, cs_ram__w, cs_addr, cs_data_in, cs_data_prelatch);
+  flipflop_d      #(.WIDTH(64))                 flp_ram_cs(clk_cs_dly, cs_data_prelatch, cs_data);
   main_ram                                      ram_main(._cs(1'b0), ._oe(addr_ram), ._w(ram__w), .addr(bus_addr[19:0]), .data_in(bus_data), .data_out(bus_data));
   main_eprom      #(.ROM_FILE("bootrom.bin"))   rom_boot(1'b0, addr_rom, bus_addr[19:0], bus_data);
   counter         #(.WIDTH(16))                 ctr_pc(.clk(inc_pc), .ce(1'b1), .reset(~_reset), .out(pc), .load(load_pc), .preset(reg_z));
@@ -144,7 +146,7 @@ module ECLair();
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
-  assign #4 clk_cs_dly = clk_cs;
+  assign #8 clk_cs_dly = clk_cs;
   assign top_of_cs = cs_addr == 8'b11111111;
   assign processor_halted = cs_ready & cs_addr == 8'hFE;
   assign _reset = _ext_reset & _por_reset & cs_ready;
