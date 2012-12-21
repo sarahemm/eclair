@@ -6,27 +6,29 @@ file  microcode-edge.bin  0   24
 file  microcode-level.bin 24  40
 
 # fields - names for bit positions
-field src_jmp     0     1
-field jmp         1     1
-field jmp_addr    2     8
-field src_mar     10    1
-field src_mdr     11    1
-field load_mdr_l  12    1
-field load_mar    13    1
-field load_ir     14    1
-field inc_pc      15    1
-field load_pc     16    1
-field load_reg    17    3
-field alu_mode    20    1
-field alu_op      21    4
-field load_mdr_h  25    1
-field src_xy      26    3
-field mem_read    29    1
-field mem_write   30    1
-field load_x      31    1
-field load_y      32    1
-field load_z      33    1
-field op_16bit    34    1
+# edge-sensitive signals
+field jmp         0     1
+field load_mdr_l  1     1
+field load_mdr_h  2     1
+field load_mar    3     1
+field load_ir     4     1
+field inc_pc      5     1
+field load_pc     6     1
+field load_reg    7     3
+field load_x      10    1
+field load_y      11    1
+field load_z      12    1
+# level-sensitive signals
+field src_jmp     24    1
+field jmp_addr    25    8
+field src_mar     33    1
+field src_mdr     34    1
+field alu_mode    35    1
+field alu_op      36    4
+field src_xy      40    3
+field mem_read    43    1
+field mem_write   44    1
+field op_16bit    45    1
 
 # enums - names for values that go into bit positions
 enum  src_jmp   ir      0
