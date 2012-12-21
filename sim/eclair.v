@@ -6,6 +6,7 @@ module ECLair();
   wire          clk_quarter;  // quartered system clock
   wire  [2:0]   clk_divided;  // divided system clocks
   wire          clk_cs;       // control store clock (driven from clk_main or clk_half_a)
+  wire          clk_cs_dly;   // control store clock, delayed a slight amount (used for edge-sensitive signals)
   reg           _ext_reset;   // external reset, when this is high we're forced into reset
   reg           _por_reset;   // power-on reset, goes high briefly when powered on
   wire          _reset;       // master reset, when this is high we're good to run
@@ -112,6 +113,7 @@ module ECLair();
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
+  assign #4 clk_cs_dly = clk_cs;
   assign top_of_cs = cs_addr == 8'b11111111;
   assign processor_halted = cs_ready & cs_addr == 8'hFE;
   assign _reset = _ext_reset & _por_reset & cs_ready;
