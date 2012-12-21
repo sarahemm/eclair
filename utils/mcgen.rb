@@ -47,10 +47,10 @@ end
 # generate the actual array of bits for the output
 # FIXME: right now we assume the last start_addr + 4 is the end, shouldn't do this
 mc_bits = []
+mc_descs = []
 (0..locations.length+4).each do |addr|
   instruction = locations[addr]
   next if !instruction
-  puts "@%03X" % addr
   last_mc_bits = 0
   if(!instructions.include? instruction) then
     raise "No definition found for instruction #{instruction} at address #{addr}"
@@ -82,9 +82,20 @@ mc_bits = []
       description += "#{field_name}(#{enum_name})\t" if enum_name != ""
       description += "#{field_name}\t" if enum_name == ""
     end
-    bit_string = ("%064b" % mc_bits[addr]).gsub(/(\d)(?=(\d\d\d\d\d\d\d\d)+(?!\d))/, "\\1_")
-    puts "#{bit_string} // #{description}" % addr
+    #bit_string = ("%064b" % mc_bits[addr]).gsub(/(\d)(?=(\d\d\d\d\d\d\d\d)+(?!\d))/, "\\1_")
+    #puts "#{bit_string} // #{description}" % addr
+    mc_descs[addr] = description
     last_mc_bits = mc_bits[addr]
     addr += 1
   end
+end
+
+# write out the arrays of bits into one merged bin file for easier human-reading, plus
+# two separate bin files for the simulated ROMs (one for edge-sensitive signals, one
+# for level-sensitive signals)
+mc_bits.each_index do |addr|
+  next if !mc_bits[addr]
+  puts "@%03X // #{locations[addr]}" % addr if locations[addr]
+  bit_string = ("%064b" % mc_bits[addr]).gsub(/(\d)(?=(\d\d\d\d\d\d\d\d)+(?!\d))/, "\\1_")
+  puts "#{bit_string} // #{mc_descs[addr]}" % addr
 end
