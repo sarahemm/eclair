@@ -12,6 +12,7 @@ module clag_4(g, p, cn, cn2, cn4, pg, gg);
   wire          gate1_out, gate2_out, gate3_out, gate4_out, gate5_out;
   wire          gate6_out, gate7_out, gate8_out, gate9_out;
   
+  // TODO: realistic propagation delays
   assign gate1_out = ~g[3];
   assign gate2_out = ~(p[3] | g[2]);
   assign gate3_out = ~(p[3] | p[2] | g[1]);

@@ -10,6 +10,7 @@ module main_eprom(_cs, _oe, addr, data);
   reg     [7:0]  rom[0:1024];
   wire    [7:0]  data_val;
   
+  // TODO: make this have a realistic propagation delay
   assign data_val = (!_cs) ? rom[addr] : 8'b0;
   assign data = _oe ? 8'bZ : data_val;
   

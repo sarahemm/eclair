@@ -4,7 +4,7 @@ module demux_38(in, out);
   input   [2:0] in;
   output  [7:0] out;
   
-  assign out = (in == 3'b000) ? 8'b1111_1110:
+  assign #0.85 out = (in == 3'b000) ? 8'b1111_1110:
                (in == 3'b001) ? 8'b1111_1101:
                (in == 3'b010) ? 8'b1111_1011:
                (in == 3'b011) ? 8'b1111_0111:

@@ -9,7 +9,7 @@ module latch(clk, in, out);
   always @ (*) begin
     if(clk == 1'b0) begin
       // out tracks in while clk is low, latches to last state when high
-      out <= in;
+      #0.5 out <= in;
     end
   end
 endmodule

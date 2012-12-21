@@ -16,16 +16,16 @@ module flipflop_jk(clk, j, k, q, _q);
   always @(posedge clk) begin
     if(j && k) begin
       //$display("flipflop_jk: toggling");
-      q <= _q;
-      _q <= q;
+      q  <= #0.5 ~q;
+      _q <= #0.5 q;
     end else if(j && !k) begin
       //$display("flipflop_jk: flipping");
-      q <= 1'b1;
-      _q <= 1'b0;
+      #0.5 q  <= 1'b1;
+      #0.5 _q <= 1'b0;
     end else if(k && !j) begin
       //$display("flipflop_jk: flopping");
-      q <= 1'b0;
-      _q <= 1'b1;
+      #0.5 q  <= 1'b0;
+      #0.5 _q <= 1'b1;
     end
   end
 endmodule 

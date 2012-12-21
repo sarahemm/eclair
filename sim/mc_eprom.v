@@ -10,8 +10,8 @@ module microcode_eprom(_cs, _oe, addr, data);
   reg     [63:0]  rom[0:511];
   wire    [63:0]  data_val;
   
-  assign data_val = (!_cs) ? rom[addr] : 64'b0;
-  assign data = _oe ? 64'bZ : data_val;
+  assign #40 data_val = (!_cs) ? rom[addr] : 64'b0;
+  assign #40 data = _oe ? 64'bZ : data_val;
   
   initial begin
     $readmemb(ROM_FILE, rom);

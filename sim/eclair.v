@@ -1,13 +1,14 @@
 `timescale 1ns/1ps
 
 module ECLair();
-  reg   clk_main;     // main system clock
-  wire  clk_half_a;   // halved system clock, phase A
-  wire  clk_half_b;   // halved system clock, phase B
-  wire  clk_cs;       // control store clock (driven from clk_main or clk_half_a)
-  reg   _ext_reset;   // external reset, when this is high we're forced into reset
-  reg   _por_reset;   // power-on reset, goes high briefly when powered on
-  wire  _reset;       // master reset, when this is high we're good to run
+  reg           clk_main;     // main system clock
+  wire          clk_half;     // halved system clock
+  wire          clk_quarter;  // quartered system clock
+  wire  [2:0]   clk_divided;  // divided system clocks
+  wire          clk_cs;       // control store clock (driven from clk_main or clk_half_a)
+  reg           _ext_reset;   // external reset, when this is high we're forced into reset
+  reg           _por_reset;   // power-on reset, goes high briefly when powered on
+  wire          _reset;       // master reset, when this is high we're good to run
   
   wire  [7:0]   bus_data;
   wire  [24:0]  bus_addr;
@@ -65,23 +66,25 @@ module ECLair();
   wire  [15:0]  lat_xy;
   
   initial begin
+    //$dumpfile("eclair.vcd");
+    //$dumpvars(0,ECLair);
     clk_main = 1'b0;
     _ext_reset = 1'b1;
     _por_reset = 1'b0;
     #10 _por_reset = 1'b1;
-    #10000 $finish;
+    #167000 $finish;
   end
   
-  flipflop_jk                                   flp_clk_halver(clk_main, 1'b1, 1'b1, clk_half_a, clk_half_b);
+  counter         #(.WIDTH(3))                  ctr_clk_divider(.clk(clk_main), .ce(1'b1), .reset(1'b0), .out(clk_divided), .load(1'b0), .preset(3'b000));
   flipflop_jk                                   flp_cs_ready(.clk(top_of_cs), .j(1'b1), .k(1'b0), .q(cs_ready));
-  mux_21                                        mux_cs_clk_selector(cs_ready, clk_half_a, clk_main, clk_cs);
+  mux_21                                        mux_cs_clk_selector(cs_ready, clk_quarter, clk_main, clk_cs);
   mux_28                                        mux_cs_jump_addr_src(.sel(cs_data[0]), .a(reg_ir), .b(cs_data[9:2]), .y(cs_jump_addr));
-  counter         #(.WIDTH(8))                  ctr_cs_seq(.clk(clk_cs), .reset(~_por_reset), .out(cs_addr), .load(cs_jump), .preset(cs_jump_addr));
+  counter         #(.WIDTH(8))                  ctr_cs_seq(.clk(clk_cs), .ce(1'b1), .reset(~_por_reset), .out(cs_addr), .load(cs_jump & cs_ready), .preset(cs_jump_addr));
   microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(1'b0, 1'b0, cs_addr, cs_rom_data);
   microcode_ram                                 ram_cs(1'b0, 1'b0, cs_ram__w, cs_addr, cs_data_in, cs_data);
   main_ram                                      ram_main(._cs(1'b0), ._oe(addr_ram), ._w(ram__w), .addr(bus_addr[19:0]), .data_in(bus_data), .data_out(bus_data));
   main_eprom      #(.ROM_FILE("bootrom.bin"))   rom_boot(1'b0, addr_rom, bus_addr[19:0], bus_data);
-  counter         #(.WIDTH(16))                 ctr_pc(.clk(cs_data[15]), .reset(~_reset), .out(pc), .load(cs_data[16]), .preset(reg_z));
+  counter         #(.WIDTH(16))                 ctr_pc(.clk(cs_data[15]), .ce(1'b1), .reset(~_reset), .out(pc), .load(cs_data[16]), .preset(reg_z));
   latch           #(.WIDTH(8))                  lat_reg_a_l(reg_a_load, reg_z[7:0], reg_a[7:0]);
   latch           #(.WIDTH(8))                  lat_reg_a_h(reg_a_load | ~op_16bit, reg_z[15:8], reg_a[15:8]);
   latch           #(.WIDTH(8))                  lat_reg_b_l(reg_b_load, reg_z[7:0], reg_b[7:0]);
@@ -107,11 +110,13 @@ module ECLair();
   mux_28                                        mux_mdr_h(.sel(mux_mdr_src), .a(reg_z[15:8]), .b(bus_data[7:0]), .y(lat_mdr[15:8]));
   alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(1'b0), .x(reg_x), .y(reg_y), .z(alu_z));
   
+  assign clk_half = clk_divided[1];
+  assign clk_quarter = clk_divided[2];
   assign top_of_cs = cs_addr == 8'b11111111;
   assign processor_halted = cs_ready & cs_addr == 8'hFE;
   assign _reset = _ext_reset & _por_reset & cs_ready;
-  assign cs_ram__w = cs_ready ~| clk_half_a;
-  assign cs_jump = cs_data[1];
+  assign cs_ram__w = cs_ready ~| clk_cs;
+  assign #1 cs_jump = cs_data[1];
   assign alu_mode = cs_data[20];
   assign alu_op = cs_data[24:21];
   assign op_16bit = cs_data[34];
@@ -137,7 +142,7 @@ module ECLair();
   assign reg_x_load_ir_src[2] = reg_x_load_ir & reg_ir[7];
   
   always begin
-    #5 clk_main = ~clk_main;
+    #40 clk_main = ~clk_main;
   end
   
   always @ (clk_main) begin

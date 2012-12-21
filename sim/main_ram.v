@@ -10,7 +10,7 @@ module main_ram(_cs, _oe, _w, addr, data_in, data_out);
   reg     [7:0]  ram[0:1024];
   wire    [7:0]  data_val;
   
-  assign data_val = (!_cs) ? ram[addr] : 8'bZ;
+  assign #5 data_val = (!_cs) ? ram[addr] : 8'bZ;
   assign data_out = _oe ? 8'bZ : data_val;
   
   always @ (negedge _w) begin

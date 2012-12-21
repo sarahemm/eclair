@@ -6,5 +6,5 @@ module mux_21(sel, a, b, y);
   input   b;
   output  y;
 
-  assign y = (sel) ? b : a;
+  assign #0.85 y = (sel) ? b : a;
 endmodule
