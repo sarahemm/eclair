@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 # mcgen - generate microcode binary output based on a text input file
 
+files = []
 fields = {}
 enums = {}
 locations = []
@@ -12,6 +13,12 @@ File.open(ARGV[0], "r") do |infile|
     values = line.split(/\s+/)
     next if values[0] == nil
     case values.shift
+      when "file" then
+        # files specify an output file and which bits go into it
+        filename = values.shift
+        start_bit = values.shift.to_i
+        nbr_bits = values.shift.to_i
+        files.push :filename => filename, :start => start_bit, :length => nbr_bits
       when "field" then
         # fields specify a name for a bit or series of bits in the microcode
         field = values.shift
@@ -79,8 +86,8 @@ mc_descs = []
       bit_val = 1
       bit_val = enums[field_name][enum_name] if enums[field_name]
       mc_bits[addr] |= bit_val << fields[field_name].begin
-      description += "#{field_name}(#{enum_name})\t" if enum_name != ""
-      description += "#{field_name}\t" if enum_name == ""
+      description += "#{field_name}(#{enum_name}) " if enum_name != ""
+      description += "#{field_name} " if enum_name == ""
     end
     #bit_string = ("%064b" % mc_bits[addr]).gsub(/(\d)(?=(\d\d\d\d\d\d\d\d)+(?!\d))/, "\\1_")
     #puts "#{bit_string} // #{description}" % addr
@@ -90,12 +97,20 @@ mc_descs = []
   end
 end
 
-# write out the arrays of bits into one merged bin file for easier human-reading, plus
-# two separate bin files for the simulated ROMs (one for edge-sensitive signals, one
-# for level-sensitive signals)
-mc_bits.each_index do |addr|
-  next if !mc_bits[addr]
-  puts "@%03X // #{locations[addr]}" % addr if locations[addr]
-  bit_string = ("%064b" % mc_bits[addr]).gsub(/(\d)(?=(\d\d\d\d\d\d\d\d)+(?!\d))/, "\\1_")
-  puts "#{bit_string} // #{mc_descs[addr]}" % addr
+# assemble the arrsys of bits into whatever combination of files the input file requests
+files.each do |file_info|
+  filename = file_info[:filename]
+  start = file_info[:start]
+  length = file_info[:length]
+  mask = (2 ** length) - 1 << start
+  File.open(filename, 'w') do |file|
+    file.puts "// #{filename} - bits #{start}-#{start+length-1} of ECLair microcode"
+    mc_bits.each_index do |addr|
+      next if !mc_bits[addr]
+      my_bits = (mc_bits[addr] & mask) >> start
+      file.puts "@%03X // #{locations[addr]}" % addr if locations[addr]
+      bit_string = ("%0#{length}b" % my_bits).gsub(/(\d)(?=(\d\d\d\d\d\d\d\d)+(?!\d))/, "\\1_")
+      file.puts "#{bit_string} // #{mc_descs[addr]}" % addr
+    end
+  end
 end

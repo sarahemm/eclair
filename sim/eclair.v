@@ -81,7 +81,7 @@ module ECLair();
   mux_21                                        mux_cs_clk_selector(cs_ready, clk_quarter, clk_main, clk_cs);
   mux_28                                        mux_cs_jump_addr_src(.sel(cs_data[0]), .a(reg_ir), .b(cs_data[9:2]), .y(cs_jump_addr));
   counter         #(.WIDTH(8))                  ctr_cs_seq(.clk(clk_cs), .ce(1'b1), .reset(~_por_reset), .out(cs_addr), .load(cs_jump & cs_ready), .preset(cs_jump_addr));
-  microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(1'b0, 1'b0, cs_addr, cs_rom_data);
+  microcode_eprom #(.ROM_FILE("microcode-full.bin")) rom_cs(1'b0, 1'b0, cs_addr, cs_rom_data);
   microcode_ram                                 ram_cs(1'b0, 1'b0, cs_ram__w, cs_addr, cs_data_in, cs_data);
   main_ram                                      ram_main(._cs(1'b0), ._oe(addr_ram), ._w(ram__w), .addr(bus_addr[19:0]), .data_in(bus_data), .data_out(bus_data));
   main_eprom      #(.ROM_FILE("bootrom.bin"))   rom_boot(1'b0, addr_rom, bus_addr[19:0], bus_data);

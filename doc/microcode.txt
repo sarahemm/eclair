@@ -1,5 +1,10 @@
 # ECLair Microcode
 
+# files - output files with which bit positions go in each one
+file  microcode-full.bin  0   64
+file  microcode-edge.bin  0   24
+file  microcode-level.bin 24  40
+
 # fields - names for bit positions
 field src_jmp     0     1
 field jmp         1     1
