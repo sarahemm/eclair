@@ -97,7 +97,6 @@ instruction add16.ab    src_xy(a)
 instruction add16.ab    hold_last     load_x
 instruction add16.ab    src_xy(b)
 instruction add16.ab    hold_last     load_y          alu_mode(arith) alu_op(add) op_16bit
-instruction add16.ab    alu_op(add)   alu_mode(arith) load_z          load_reg(a) op_16bit
-instruction add16.ab    next_addr(fetch)
+instruction add16.ab    alu_op(add)   alu_mode(arith) load_z          load_reg(a) op_16bit        next_addr(fetch)
 
 instruction hlt         next_addr(hlt)
