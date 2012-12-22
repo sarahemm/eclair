@@ -8,9 +8,9 @@ run: eclair.vvp microcode
 eclair.vvp: $(OBJS)
 	iverilog -o eclair.vvp -Wall $(OBJS)
 
-microcode: microcode-full.bin microcode-edge.bin microcode-level.bin
+microcode: microcode.bin
 
-microcode-full.bin microcode-edge.bin microcode-level.bin: ../doc/microcode.txt ../utils/mcgen.rb
+microcode.bin: ../doc/microcode.txt ../utils/mcgen.rb
 	../utils/mcgen.rb ../doc/microcode.txt
 
 clean:
