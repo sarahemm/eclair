@@ -1,13 +1,10 @@
 # ECLair Microcode
 
 # files - output files with which bit positions go in each one
-file  microcode-full.bin  0   64
-file  microcode-edge.bin  0   24
-file  microcode-level.bin 24  40
+file  microcode.bin  0   64
 
 # fields - names for bit positions
 # edge-sensitive signals
-field jmp         0     1
 field load_mdr_l  1     1
 field load_mdr_h  2     1
 field load_mar    3     1
@@ -19,8 +16,7 @@ field load_x      10    1
 field load_y      11    1
 field load_z      12    1
 # level-sensitive signals
-field src_jmp     24    1
-field jmp_addr    25    8
+field next_addr   25    8
 field src_mar     33    1
 field src_mdr     34    1
 field alu_mode    35    1
@@ -31,8 +27,6 @@ field mem_write   44    1
 field op_16bit    45    1
 
 # enums - names for values that go into bit positions
-enum  src_jmp   ir      0
-enum  src_jmp   mc      1
 enum  src_mar   z       0
 enum  src_mar   pc      1
 enum  src_mdr   z       0
@@ -55,10 +49,6 @@ enum  src_xy    d       4
 enum  src_xy    sp      5
 enum  src_xy    mar     6
 enum  src_xy    mdr     7
-enum  jmp_addr  fetch   2     # TODO: make this not require an enum for locations
-enum  jmp_addr  ldi8.?l 200
-enum  jmp_addr  ldi16.? 203
-enum  jmp_addr  hlt     254
 
 # locations - start addresses of instructions
 location    init        0
@@ -81,33 +71,33 @@ instruction init        src_xy(zero)  alu_mode(arith) alu_op(x)       load_x    
 instruction init        hold_last     load_pc
 instruction fetch       src_mar(pc)   load_mar        mem_read
 instruction fetch       load_ir
-instruction fetch       inc_pc        src_jmp(ir)     jmp
+instruction fetch       inc_pc        next_addr(ir)
 
-instruction ldi8.al     src_jmp(mc)     jmp_addr(ldi8.?l)           jmp
-instruction ldi8.bl     src_jmp(mc)     jmp_addr(ldi8.?l)           jmp
-instruction ldi8.cl     src_jmp(mc)     jmp_addr(ldi8.?l)           jmp
-instruction ldi8.dl     src_jmp(mc)     jmp_addr(ldi8.?l)           jmp
+instruction ldi8.al     next_addr(ldi8.?l)
+instruction ldi8.bl     next_addr(ldi8.?l)
+instruction ldi8.cl     next_addr(ldi8.?l)
+instruction ldi8.dl     next_addr(ldi8.?l)
 
-instruction ldi16.a     src_jmp(mc)     jmp_addr(ldi16.?)           jmp
-instruction ldi16.b     src_jmp(mc)     jmp_addr(ldi16.?)           jmp
-instruction ldi16.c     src_jmp(mc)     jmp_addr(ldi16.?)           jmp
-instruction ldi16.d     src_jmp(mc)     jmp_addr(ldi16.?)           jmp
+instruction ldi16.a     next_addr(ldi16.?)
+instruction ldi16.b     next_addr(ldi16.?)
+instruction ldi16.c     next_addr(ldi16.?)
+instruction ldi16.d     next_addr(ldi16.?)
 
 instruction ldi8.?l     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read
 instruction ldi8.?l     hold_last     load_mar        load_mdr_l      load_x      load_z  load_reg(via_ir)
-instruction ldi8.?l     inc_pc        jmp_addr(fetch) src_jmp(mc)     jmp
+instruction ldi8.?l     inc_pc        next_addr(fetch)
 
 instruction ldi16.?     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read
 instruction ldi16.?     hold_last     load_mar        load_mdr_l
 instruction ldi16.?     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    inc_pc          op_16bit
 instruction ldi16.?     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        load_mdr_h      load_y    load_x      load_z  load_reg(via_ir)  op_16bit
-instruction ldi16.?     inc_pc        jmp_addr(fetch) src_jmp(mc)     jmp
+instruction ldi16.?     inc_pc        next_addr(fetch)
 
 instruction add16.ab    src_xy(a)
 instruction add16.ab    hold_last     load_x
 instruction add16.ab    src_xy(b)
 instruction add16.ab    hold_last     load_y          alu_mode(arith) alu_op(add) op_16bit
 instruction add16.ab    alu_op(add)   alu_mode(arith) load_z          load_reg(a) op_16bit
-instruction add16.ab    jmp_addr(fetch)               src_jmp(mc)     jmp
+instruction add16.ab    next_addr(fetch)
 
-instruction hlt         src_jmp(mc)   jmp_addr(hlt)   jmp
+instruction hlt         next_addr(hlt)

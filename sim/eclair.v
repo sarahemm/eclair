@@ -21,16 +21,16 @@ module ECLair();
   wire          processor_halted; // 1 if the control store is accessing the HLT instruction
   wire          top_of_cs;        // currently addressing the very top of the control store
   wire          cs_ready;         // RAM control store is ready
-  wire  [7:0]   cs_addr;          // output of control store sequencer counter
+  wire  [7:0]   cs_addr;          // output of control store sequencer
+  wire  [7:0]   cs_addr_init;     // output of control store counter, used during the initial copy
+  wire  [7:0]   cs_addr_run;      // output of control store sequencer latch, used during runtime
   wire  [63:0]  cs_rom_data;      // ROM control store, used to load into RAM at startup
   wire  [63:0]  cs_data_prelatch; // RAM control store output
   wire  [63:0]  cs_data;          // RAM control store latch output, used to actually run the machine
   reg   [63:0]  cs_data_in;
   wire          cs_ram__w;        // RAM control store write signal
-  wire          cs_jump_src;      // control store jump source (0 = IR, 1 = MC bits)
-  wire  [7:0]   cs_jump_addr_mc;  // microcode bits used if cs_jump_src = 1
-  wire          cs_jump;          // control store jump signal
-  wire  [7:0]   cs_jump_addr;     // control store jump destination
+  wire  [7:0]   cs_next_addr;     // control store next microcode address bits
+  wire  [7:0]   next_addr;        // next microcode address to visit, either the above bits or IR if above is 8'b0
   wire          inc_pc;           // increment PC
   wire          load_pc;          // load PC from Z
   wire          alu_mode;         // ALU mode (0=arithmetic, 1=logic)
@@ -87,11 +87,13 @@ module ECLair();
   counter         #(.WIDTH(3))                  ctr_clk_divider(.clk(clk_main), .ce(1'b1), .reset(1'b0), .out(clk_divided), .load(1'b0), .preset(3'b000));
   flipflop_jk                                   flp_cs_ready(.clk(top_of_cs), .j(1'b1), .k(1'b0), .q(cs_ready));
   mux_21                                        mux_cs_clk_selector(cs_ready, clk_quarter, clk_main, clk_cs);
-  mux_28                                        mux_cs_jump_addr_src(.sel(cs_jump_src), .a(reg_ir), .b(cs_jump_addr_mc), .y(cs_jump_addr));
-  counter         #(.WIDTH(8))                  ctr_cs_seq(.clk(clk_cs), .ce(1'b1), .reset(~_por_reset), .out(cs_addr), .load(cs_jump & cs_ready), .preset(cs_jump_addr));
-  microcode_eprom #(.ROM_FILE("microcode-full.bin")) rom_cs(1'b0, 1'b0, cs_addr, cs_rom_data);
+  mux_28                                        mux_cs_addr(.sel(cs_ready), .a(cs_addr_init), .b(cs_addr_run), .y(cs_addr));
+  mux_28                                        mux_cs_next_addr(.sel(cs_next_addr == 8'b00000000), .a(cs_next_addr), .b(reg_ir), .y(next_addr));
+  counter         #(.WIDTH(8))                  ctr_cs_seq(.clk(clk_cs), .ce(~cs_ready), .reset(~_por_reset), .out(cs_addr_init), .load(1'b0), .preset(8'b00000000));
+  flipflop_d      #(.WIDTH(8))                  flp_cs_addr(.clk(clk_cs), .reset(~cs_ready), .in(next_addr), .out(cs_addr_run));
+  microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(1'b0, 1'b0, cs_addr, cs_rom_data);
   microcode_ram                                 ram_cs(1'b0, 1'b0, cs_ram__w, cs_addr, cs_data_in, cs_data_prelatch);
-  flipflop_d      #(.WIDTH(64))                 flp_ram_cs(clk_cs_dly, cs_data_prelatch, cs_data);
+  flipflop_d      #(.WIDTH(64))                 flp_ram_cs(.clk(clk_cs_dly), .reset(1'b0), .in(cs_data_prelatch), .out(cs_data));
   main_ram                                      ram_main(._cs(1'b0), ._oe(addr_ram), ._w(ram__w), .addr(bus_addr[19:0]), .data_in(bus_data), .data_out(bus_data));
   main_eprom      #(.ROM_FILE("bootrom.bin"))   rom_boot(1'b0, addr_rom, bus_addr[19:0], bus_data);
   counter         #(.WIDTH(16))                 ctr_pc(.clk(inc_pc), .ce(1'b1), .reset(~_reset), .out(pc), .load(load_pc), .preset(reg_z));
@@ -121,7 +123,6 @@ module ECLair();
   alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(1'b0), .x(reg_x), .y(reg_y), .z(alu_z));
   
   // edge-sensitive microcode signals
-  assign #1 cs_jump = cs_data[0];
   assign reg_mdr_l_load = ~cs_data[1];
   assign reg_mdr_h_load = ~cs_data[2];
   assign reg_mar_load = ~cs_data[3];
@@ -133,8 +134,7 @@ module ECLair();
   assign reg_y_load = ~cs_data[11];
   assign reg_z_load = ~cs_data[12];
   // level-sensitive microcode signals
-  assign cs_jump_src = cs_data[24];
-  assign cs_jump_addr_mc = cs_data[32:25];
+  assign cs_next_addr = cs_data[32:25];
   assign mux_mar_src = cs_data[33];
   assign mux_mdr_src = cs_data[34];
   assign alu_mode = cs_data[35];

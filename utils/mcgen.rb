@@ -70,10 +70,22 @@ mc_descs = []
       mc_bits[addr] = last_mc_bits
     end
     description = "";
+    next_addr = nil;
     data.each do |field|
       field_name, enum_name = field.match(/([^\(]+)\(?([^\)]*)\)?/).captures
       if(field_name == "hold_last") then
-        description += "#{field_name}\t" if enum_name == ""
+        description += "#{field_name} "
+        next
+      end
+      if(field_name == "next_addr") then
+        if(enum_name == "ir") then
+          description = "next: ir #{description}"
+          next_addr = 0
+          next
+        end
+        loc_addr = locations.find_index(enum_name)
+        next_addr = loc_addr
+        description = "next: 0x#{loc_addr.to_s(16)} #{description}"
         next
       end
       raise "Invalid field '#{field_name}' in instruction '#{instruction}'" if !fields[field_name]
@@ -89,10 +101,10 @@ mc_descs = []
       description += "#{field_name}(#{enum_name}) " if enum_name != ""
       description += "#{field_name} " if enum_name == ""
     end
-    #bit_string = ("%064b" % mc_bits[addr]).gsub(/(\d)(?=(\d\d\d\d\d\d\d\d)+(?!\d))/, "\\1_")
-    #puts "#{bit_string} // #{description}" % addr
-    mc_descs[addr] = description
+    next_addr = addr + 1 if next_addr == nil
     last_mc_bits = mc_bits[addr]
+    mc_bits[addr] |= next_addr << fields["next_addr"].begin
+    mc_descs[addr] = description
     addr += 1
   end
 end
