@@ -85,6 +85,7 @@ module ECLair();
     #168000 $finish;
   end
   
+  test_validator                                test_validator(.clk(clk_cs), .cs_addr(cs_addr), .pc(pc), .reg_a(reg_a), .reg_b(reg_b), .reg_c(reg_c), .reg_d(reg_d));
   counter         #(.WIDTH(3))                  ctr_clk_divider(.clk(clk_main), .ce(1'b1), .reset(1'b0), .out(clk_divided), .load(1'b0), .preset(3'b000));
   flipflop_jk                                   flp_cs_ready(.clk(top_of_cs), .j(1'b1), .k(1'b0), .q(cs_ready));
   mux_21                                        mux_cs_clk_selector(cs_ready, clk_quarter, clk_main, clk_cs);
