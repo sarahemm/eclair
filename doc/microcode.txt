@@ -69,8 +69,7 @@ location    hlt         254
 # instructions - each one is one word of microcode, glues everything above together
 instruction init        src_xy(zero)  alu_mode(arith) alu_op(x)       load_x      load_y  load_z
 instruction init        hold_last     load_pc
-instruction fetch       src_mar(pc)   load_mar        mem_read
-instruction fetch       load_ir
+instruction fetch       src_mar(pc)   load_mar        mem_read load_ir
 instruction fetch       inc_pc        next_addr(ir)
 
 instruction ldi8.al     next_addr(ldi8.?l)
@@ -83,7 +82,7 @@ instruction ldi16.b     next_addr(ldi16.?)
 instruction ldi16.c     next_addr(ldi16.?)
 instruction ldi16.d     next_addr(ldi16.?)
 
-instruction ldi8.?l     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read
+instruction ldi8.?l     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar
 instruction ldi8.?l     hold_last     load_mar        load_mdr_l      load_x      load_z  load_reg(via_ir)
 instruction ldi8.?l     inc_pc        next_addr(fetch)
 
@@ -93,10 +92,8 @@ instruction ldi16.?     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read  
 instruction ldi16.?     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        load_mdr_h      load_y    load_x      load_z  load_reg(via_ir)  op_16bit
 instruction ldi16.?     inc_pc        next_addr(fetch)
 
-instruction add16.ab    src_xy(a)
-instruction add16.ab    hold_last     load_x
-instruction add16.ab    src_xy(b)
-instruction add16.ab    hold_last     load_y          alu_mode(arith) alu_op(add) op_16bit
-instruction add16.ab    alu_op(add)   alu_mode(arith) load_z          load_reg(a) op_16bit        next_addr(fetch)
+instruction add16.ab    src_xy(a)     load_x
+instruction add16.ab    src_xy(b)     load_y
+instruction add16.ab    alu_mode(arith) alu_op(add)   op_16bit        load_z      load_reg(a)     next_addr(fetch)
 
 instruction hlt         next_addr(hlt)

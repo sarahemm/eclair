@@ -6,7 +6,8 @@ module ECLair();
   wire          clk_quarter;  // quartered system clock
   wire  [2:0]   clk_divided;  // divided system clocks
   wire          clk_cs;       // control store clock (driven from clk_main or clk_half_a)
-  wire          clk_cs_dly;   // control store clock, delayed a slight amount (used for edge-sensitive signals)
+  wire          clk_cs_dly;   // control store clock, delayed a slight amount (used to latch microcode signals)
+  wire          clk_cs_dly2;  // control store clock, delayed more (used for edge-sensitive signals)
   reg           _ext_reset;   // external reset, when this is high we're forced into reset
   reg           _por_reset;   // power-on reset, goes high briefly when powered on
   wire          _reset;       // master reset, when this is high we're good to run
@@ -93,7 +94,8 @@ module ECLair();
   flipflop_d      #(.WIDTH(8))                  flp_cs_addr(.clk(clk_cs), .reset(~cs_ready), .in(next_addr), .out(cs_addr_run));
   microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(1'b0, 1'b0, cs_addr, cs_rom_data);
   microcode_ram                                 ram_cs(1'b0, 1'b0, cs_ram__w, cs_addr, cs_data_in, cs_data_prelatch);
-  flipflop_d      #(.WIDTH(64))                 flp_ram_cs(.clk(clk_cs_dly), .reset(1'b0), .in(cs_data_prelatch), .out(cs_data));
+  flipflop_d      #(.WIDTH(24))                 flp_ram_cs_e(.clk(clk_cs_dly2), .reset(~(clk_cs && clk_cs_dly2)), .in(cs_data_prelatch[23:0]),  .out(cs_data[23:0]));
+  flipflop_d      #(.WIDTH(40))                 flp_ram_cs_l(.clk(clk_cs_dly), .reset(1'b0), .in(cs_data_prelatch[63:24]), .out(cs_data[63:24]));
   main_ram                                      ram_main(._cs(1'b0), ._oe(addr_ram), ._w(ram__w), .addr(bus_addr[19:0]), .data_in(bus_data), .data_out(bus_data));
   main_eprom      #(.ROM_FILE("bootrom.bin"))   rom_boot(1'b0, addr_rom, bus_addr[19:0], bus_data);
   counter         #(.WIDTH(16))                 ctr_pc(.clk(inc_pc), .ce(1'b1), .reset(~_reset), .out(pc), .load(load_pc), .preset(reg_z));
@@ -147,6 +149,7 @@ module ECLair();
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
   assign #8 clk_cs_dly = clk_cs;
+  assign #8 clk_cs_dly2 = clk_cs_dly;
   assign top_of_cs = cs_addr == 8'b11111111;
   assign processor_halted = cs_ready & cs_addr == 8'hFE;
   assign _reset = _ext_reset & _por_reset & cs_ready;
