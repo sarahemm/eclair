@@ -1132,6 +1132,35 @@
 <wire x1="-2.54" y1="2.54" x2="2.54" y2="0" width="0.254" layer="94"/>
 <wire x1="2.54" y1="0" x2="-2.54" y2="-2.54" width="0.254" layer="94"/>
 </symbol>
+<symbol name="DELAY">
+<pin name="A" x="-15.24" y="0" visible="off" length="middle" direction="in"/>
+<pin name="Q" x="15.24" y="0" visible="off" length="middle" direction="out" rot="R180"/>
+<wire x1="-10.16" y1="2.54" x2="-10.16" y2="0" width="0.254" layer="94"/>
+<wire x1="-10.16" y1="0" x2="-10.16" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="-10.16" y1="-2.54" x2="10.16" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="10.16" y1="-2.54" x2="10.16" y2="0" width="0.254" layer="94"/>
+<wire x1="10.16" y1="0" x2="10.16" y2="2.54" width="0.254" layer="94"/>
+<wire x1="10.16" y1="2.54" x2="-10.16" y2="2.54" width="0.254" layer="94"/>
+<wire x1="-10.16" y1="0" x2="-7.62" y2="0" width="0.254" layer="94" curve="-180"/>
+<wire x1="-5.08" y1="0" x2="-7.62" y2="0" width="0.254" layer="94" curve="-180"/>
+<wire x1="-5.08" y1="0" x2="-2.54" y2="0" width="0.254" layer="94" curve="-180"/>
+<wire x1="0" y1="0" x2="-2.54" y2="0" width="0.254" layer="94" curve="-180"/>
+<wire x1="0" y1="0" x2="2.54" y2="0" width="0.254" layer="94" curve="-180"/>
+<wire x1="5.08" y1="0" x2="2.54" y2="0" width="0.254" layer="94" curve="-180"/>
+<wire x1="5.08" y1="0" x2="7.62" y2="0" width="0.254" layer="94" curve="-180"/>
+<wire x1="10.16" y1="0" x2="7.62" y2="0" width="0.254" layer="94" curve="-180"/>
+<text x="-9.906" y="3.048" size="1.778" layer="95">&gt;NAME</text>
+<text x="-9.906" y="-4.826" size="1.778" layer="96">&gt;VALUE</text>
+</symbol>
+<symbol name="NAND-2">
+<pin name="A" x="-10.16" y="2.54" visible="off" length="middle" direction="in"/>
+<pin name="B" x="-10.16" y="-2.54" visible="off" length="middle" direction="in"/>
+<pin name="Y" x="12.7" y="0" visible="off" length="middle" direction="out" function="dot" rot="R180"/>
+<wire x1="-5.08" y1="5.08" x2="-5.08" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="-5.08" y1="-5.08" x2="2.54" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="-5.08" y1="5.08" x2="2.54" y2="5.08" width="0.254" layer="94"/>
+<wire x1="2.54" y1="5.08" x2="2.54" y2="-5.08" width="0.254" layer="94" curve="-180"/>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="MUX-2X8" prefix="MUX" uservalue="yes">
@@ -1957,6 +1986,39 @@
 <connects>
 <connect gate="G$1" pin="Q" pad="P$1"/>
 <connect gate="G$1" pin="Y" pad="P$2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="DELAY" prefix="DLY" uservalue="yes">
+<gates>
+<gate name="G$1" symbol="DELAY" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="NULL">
+<connects>
+<connect gate="G$1" pin="A" pad="P$1"/>
+<connect gate="G$1" pin="Q" pad="P$2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="NAND-2" prefix="NAND" uservalue="yes">
+<gates>
+<gate name="G$1" symbol="NAND-2" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="NULL">
+<connects>
+<connect gate="G$1" pin="A" pad="P$1"/>
+<connect gate="G$1" pin="B" pad="P$2"/>
+<connect gate="G$1" pin="Y" pad="P$3"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -5737,6 +5799,9 @@ In this library the device names are the same as the pin names of the symbols, t
 <part name="FRAME8" library="logos-sen" deviceset="FRAME-LETTER-GRID-OSHW-SEN" device="">
 <attribute name="REV" value="001"/>
 </part>
+<part name="DLY1" library="logicalgates-sen" deviceset="DELAY" device="" value="8ns"/>
+<part name="DLY2" library="logicalgates-sen" deviceset="DELAY" device="" value="8ns"/>
+<part name="NAND1" library="logicalgates-sen" deviceset="NAND-2" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -8247,6 +8312,14 @@ In this library the device names are the same as the pin names of the symbols, t
 <instance part="FRAME1" gate="G$2" x="173.99" y="0">
 <attribute name="REV" x="173.99" y="0" size="1.27" layer="96" display="off"/>
 </instance>
+<instance part="DLY1" gate="G$1" x="111.76" y="175.26" smashed="yes">
+<attribute name="NAME" x="108.712" y="178.308" size="1.778" layer="95"/>
+<attribute name="VALUE" x="109.474" y="170.434" size="1.778" layer="96"/>
+</instance>
+<instance part="DLY2" gate="G$1" x="147.32" y="175.26" smashed="yes">
+<attribute name="NAME" x="144.272" y="178.308" size="1.778" layer="95"/>
+<attribute name="VALUE" x="145.034" y="170.434" size="1.778" layer="96"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -8268,6 +8341,11 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX3" gate="G$1" pin="Y0"/>
 <wire x1="142.24" y1="139.7" x2="144.78" y2="139.7" width="0.1524" layer="91"/>
 <label x="144.78" y="139.7" size="1.27" layer="95" xref="yes"/>
+</segment>
+<segment>
+<pinref part="DLY1" gate="G$1" pin="A"/>
+<wire x1="96.52" y1="175.26" x2="93.98" y2="175.26" width="0.1524" layer="91"/>
+<label x="93.98" y="175.26" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="CS_READY" class="0">
@@ -8305,6 +8383,24 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="139.7" y1="109.22" x2="127" y2="109.22" width="0.1524" layer="91"/>
 </segment>
 </net>
+<net name="CLK_CS_DLY" class="0">
+<segment>
+<pinref part="DLY1" gate="G$1" pin="Q"/>
+<pinref part="DLY2" gate="G$1" pin="A"/>
+<wire x1="127" y1="175.26" x2="129.54" y2="175.26" width="0.1524" layer="91"/>
+<wire x1="129.54" y1="175.26" x2="132.08" y2="175.26" width="0.1524" layer="91"/>
+<wire x1="129.54" y1="175.26" x2="129.54" y2="172.72" width="0.1524" layer="91"/>
+<junction x="129.54" y="175.26"/>
+<label x="129.54" y="172.72" size="1.27" layer="95" rot="R270" xref="yes"/>
+</segment>
+</net>
+<net name="CLK_CS_DLY2" class="0">
+<segment>
+<pinref part="DLY2" gate="G$1" pin="Q"/>
+<wire x1="162.56" y1="175.26" x2="165.1" y2="175.26" width="0.1524" layer="91"/>
+<label x="165.1" y="175.26" size="1.27" layer="95" xref="yes"/>
+</segment>
+</net>
 </nets>
 </sheet>
 <sheet>
@@ -8323,7 +8419,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <instances>
 <instance part="ROM1" gate="G$1" x="139.7" y="50.8" rot="R90"/>
 <instance part="RAM1" gate="G$1" x="139.7" y="101.6" rot="R90"/>
-<instance part="NOR1" gate="G$1" x="35.56" y="114.3"/>
+<instance part="NOR1" gate="G$1" x="40.64" y="99.06" rot="R90"/>
 <instance part="LINK1" gate="G$1" x="27.94" y="177.8" rot="R90"/>
 <instance part="LINK2" gate="G$1" x="60.96" y="177.8" rot="R90"/>
 <instance part="LINK3" gate="G$1" x="93.98" y="177.8" rot="R90"/>
@@ -8344,6 +8440,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <instance part="FRAME2" gate="G$2" x="173.99" y="0">
 <attribute name="REV" x="173.99" y="0" size="1.27" layer="96" display="off"/>
 </instance>
+<instance part="NAND1" gate="G$1" x="20.32" y="124.46" rot="R90"/>
 </instances>
 <busses>
 <bus name="CS_ADDR[0..7]">
@@ -8910,23 +9007,24 @@ In this library the device names are the same as the pin names of the symbols, t
 </net>
 <net name="CLK_HALF_A" class="0">
 <segment>
-<label x="22.86" y="111.76" size="1.27" layer="95" rot="R180" xref="yes"/>
-<wire x1="25.4" y1="111.76" x2="22.86" y2="111.76" width="0.1524" layer="91"/>
+<label x="43.18" y="86.36" size="1.27" layer="95" rot="R270" xref="yes"/>
+<wire x1="43.18" y1="88.9" x2="43.18" y2="86.36" width="0.1524" layer="91"/>
 <pinref part="NOR1" gate="G$1" pin="B"/>
 </segment>
 </net>
 <net name="CS_READY" class="0">
 <segment>
-<label x="22.86" y="116.84" size="1.27" layer="95" rot="R180" xref="yes"/>
-<wire x1="25.4" y1="116.84" x2="22.86" y2="116.84" width="0.1524" layer="91"/>
+<label x="38.1" y="86.36" size="1.27" layer="95" rot="R270" xref="yes"/>
+<wire x1="38.1" y1="88.9" x2="38.1" y2="86.36" width="0.1524" layer="91"/>
 <pinref part="NOR1" gate="G$1" pin="A"/>
 </segment>
 </net>
 <net name="N$94" class="0">
 <segment>
 <pinref part="RAM1" gate="G$1" pin="W"/>
-<wire x1="48.26" y1="114.3" x2="50.8" y2="114.3" width="0.1524" layer="91"/>
 <pinref part="NOR1" gate="G$1" pin="Y"/>
+<wire x1="50.8" y1="114.3" x2="40.64" y2="114.3" width="0.1524" layer="91"/>
+<wire x1="40.64" y1="114.3" x2="40.64" y2="111.76" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="CS_DATA11" class="0">
@@ -10036,6 +10134,79 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="RAM1" gate="G$1" pin="Y63"/>
 <pinref part="FLP9" gate="G$1" pin="A7"/>
 <wire x1="223.52" y1="124.46" x2="269.24" y2="144.78" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="CLK_CS_DLY" class="0">
+<segment>
+<pinref part="FLP1" gate="G$1" pin="CLK"/>
+<wire x1="10.16" y1="144.78" x2="10.16" y2="142.24" width="0.1524" layer="91"/>
+<pinref part="FLP3" gate="G$1" pin="CLK"/>
+<wire x1="10.16" y1="142.24" x2="43.18" y2="142.24" width="0.1524" layer="91"/>
+<wire x1="43.18" y1="142.24" x2="43.18" y2="144.78" width="0.1524" layer="91"/>
+<pinref part="FLP4" gate="G$1" pin="CLK"/>
+<wire x1="43.18" y1="142.24" x2="76.2" y2="142.24" width="0.1524" layer="91"/>
+<wire x1="76.2" y1="142.24" x2="76.2" y2="144.78" width="0.1524" layer="91"/>
+<junction x="43.18" y="142.24"/>
+<wire x1="10.16" y1="142.24" x2="10.16" y2="139.7" width="0.1524" layer="91"/>
+<junction x="10.16" y="142.24"/>
+<label x="10.16" y="139.7" size="1.27" layer="95" rot="R270" xref="yes"/>
+</segment>
+</net>
+<net name="N$11" class="0">
+<segment>
+<pinref part="FLP5" gate="G$1" pin="CLK"/>
+<wire x1="109.22" y1="144.78" x2="109.22" y2="142.24" width="0.1524" layer="91"/>
+<pinref part="FLP6" gate="G$1" pin="CLK"/>
+<wire x1="109.22" y1="142.24" x2="144.78" y2="142.24" width="0.1524" layer="91"/>
+<wire x1="144.78" y1="142.24" x2="144.78" y2="144.78" width="0.1524" layer="91"/>
+<pinref part="FLP7" gate="G$1" pin="CLK"/>
+<wire x1="144.78" y1="142.24" x2="177.8" y2="142.24" width="0.1524" layer="91"/>
+<wire x1="177.8" y1="142.24" x2="177.8" y2="144.78" width="0.1524" layer="91"/>
+<junction x="144.78" y="142.24"/>
+<pinref part="FLP8" gate="G$1" pin="CLK"/>
+<wire x1="177.8" y1="142.24" x2="210.82" y2="142.24" width="0.1524" layer="91"/>
+<wire x1="210.82" y1="142.24" x2="210.82" y2="144.78" width="0.1524" layer="91"/>
+<junction x="177.8" y="142.24"/>
+<pinref part="FLP9" gate="G$1" pin="CLK"/>
+<wire x1="210.82" y1="142.24" x2="243.84" y2="142.24" width="0.1524" layer="91"/>
+<wire x1="243.84" y1="142.24" x2="243.84" y2="144.78" width="0.1524" layer="91"/>
+<junction x="210.82" y="142.24"/>
+</segment>
+</net>
+<net name="CS_EDGE_SUPRESS" class="0">
+<segment>
+<pinref part="NAND1" gate="G$1" pin="Y"/>
+<wire x1="20.32" y1="137.16" x2="20.32" y2="139.7" width="0.1524" layer="91"/>
+<pinref part="FLP1" gate="G$1" pin="RESET"/>
+<wire x1="12.7" y1="144.78" x2="12.7" y2="139.7" width="0.1524" layer="91"/>
+<wire x1="12.7" y1="139.7" x2="20.32" y2="139.7" width="0.1524" layer="91"/>
+<pinref part="FLP3" gate="G$1" pin="RESET"/>
+<wire x1="20.32" y1="139.7" x2="45.72" y2="139.7" width="0.1524" layer="91"/>
+<wire x1="45.72" y1="139.7" x2="45.72" y2="144.78" width="0.1524" layer="91"/>
+<junction x="20.32" y="139.7"/>
+<pinref part="FLP5" gate="G$1" pin="RESET"/>
+<wire x1="111.76" y1="144.78" x2="111.76" y2="139.7" width="0.1524" layer="91"/>
+<pinref part="FLP4" gate="G$1" pin="RESET"/>
+<wire x1="78.74" y1="144.78" x2="78.74" y2="139.7" width="0.1524" layer="91"/>
+<wire x1="78.74" y1="139.7" x2="111.76" y2="139.7" width="0.1524" layer="91"/>
+<wire x1="45.72" y1="139.7" x2="78.74" y2="139.7" width="0.1524" layer="91"/>
+<junction x="45.72" y="139.7"/>
+<junction x="78.74" y="139.7"/>
+<label x="11.938" y="137.668" size="1.27" layer="95"/>
+</segment>
+</net>
+<net name="CLK_CS" class="0">
+<segment>
+<pinref part="NAND1" gate="G$1" pin="A"/>
+<wire x1="17.78" y1="114.3" x2="17.78" y2="111.76" width="0.1524" layer="91"/>
+<label x="17.78" y="111.76" size="1.27" layer="95" rot="R270" xref="yes"/>
+</segment>
+</net>
+<net name="CLK_CS_DLY2" class="0">
+<segment>
+<pinref part="NAND1" gate="G$1" pin="B"/>
+<wire x1="22.86" y1="111.76" x2="22.86" y2="114.3" width="0.1524" layer="91"/>
+<label x="22.86" y="111.76" size="1.27" layer="95" rot="R270" xref="yes"/>
 </segment>
 </net>
 </nets>
