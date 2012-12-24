@@ -53,17 +53,18 @@ enum  src_xy    mdr     7
 # locations - start addresses of instructions
 location    init        0
 location    fetch       2
-location    ldi8.al     5    # load immediate 8 bits into low byte of a
-location    ldi8.bl     69   # load immediate 8 bits into low byte of b
-location    ldi8.cl     133  # load immediate 8 bits into low byte of c
-location    ldi8.dl     197  # load immediate 8 bits into low byte of d
-location    ldi8.?l     200  # load immediate 8 bits into register from IR
-location    ldi16.a     6    # load immediate 16 bits into a
-location    ldi16.b     70   # load immediate 16 bits into b
-location    ldi16.c     134  # load immediate 16 bits into c
-location    ldi16.d     198  # load immediate 16 bits into d
-location    ldi16.?     203  # load immediate 16 bits into register from IR
-location    add16.ab    11   # add a and b registers, result goes into a
+location    ldi8.al     5     # load immediate 8 bits into low byte of a
+location    ldi8.bl     69    # load immediate 8 bits into low byte of b
+location    ldi8.cl     133   # load immediate 8 bits into low byte of c
+location    ldi8.dl     197   # load immediate 8 bits into low byte of d
+location    ldi8.?l     200   # load immediate 8 bits into register from IR
+location    ldi16.a     6     # load immediate 16 bits into a
+location    ldi16.b     70    # load immediate 16 bits into b
+location    ldi16.c     134   # load immediate 16 bits into c
+location    ldi16.d     198   # load immediate 16 bits into d
+location    ldi16.?     203   # load immediate 16 bits into register from IR
+location    add16.ab    11    # add a and b registers, result goes into a
+location    jmp         14    # unconditional immediate jump
 location    hlt         254
 
 # instructions - each one is one word of microcode, glues everything above together
@@ -95,5 +96,10 @@ instruction ldi16.?     inc_pc        next_addr(fetch)
 instruction add16.ab    src_xy(a)     load_x
 instruction add16.ab    src_xy(b)     load_y
 instruction add16.ab    alu_mode(arith) alu_op(add)   op_16bit        load_z      load_reg(a)     next_addr(fetch)
+
+instruction jmp                       src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)     load_mdr_l
+instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)     load_mdr_h
+instruction jmp         src_xy(mdr)   alu_op(x)       load_x          load_z
+instruction jmp         load_pc       next_addr(fetch)
 
 instruction hlt         next_addr(hlt)

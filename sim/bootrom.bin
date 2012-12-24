@@ -14,7 +14,15 @@
 00001000    // immediate low byte for --^
 00001100    // immediate high byte for --^
 00001011    // add16.ab
+// jump over the next instruction
+@00C
+00001110    // jmp
+00010000    // immediate low byte for --^
+00000000    // immediate high byte for --^
 // done!
+@00F
+11111110    // halt (jumped over)
+@010
 11111110    // halt
 00000000
 00000000
