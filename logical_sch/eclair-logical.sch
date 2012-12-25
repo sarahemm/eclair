@@ -12994,6 +12994,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX8" gate="G$1" pin="Y5"/>
 <wire x1="83.82" y1="58.42" x2="83.82" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="83.82" y1="53.34" x2="81.28" y2="50.8" width="0.1524" layer="91"/>
+<label x="85.09" y="55.88" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="ADDR22" class="0">
@@ -13001,6 +13002,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX8" gate="G$1" pin="Y4"/>
 <wire x1="86.36" y1="58.42" x2="86.36" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="86.36" y1="53.34" x2="83.82" y2="50.8" width="0.1524" layer="91"/>
+<label x="87.63" y="55.88" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="ADDR21" class="0">
@@ -13008,6 +13010,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX8" gate="G$1" pin="Y3"/>
 <wire x1="88.9" y1="58.42" x2="88.9" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="88.9" y1="53.34" x2="86.36" y2="50.8" width="0.1524" layer="91"/>
+<label x="90.17" y="55.88" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="ADDR20" class="0">
@@ -13015,6 +13018,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX8" gate="G$1" pin="Y2"/>
 <wire x1="91.44" y1="58.42" x2="91.44" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="91.44" y1="53.34" x2="88.9" y2="50.8" width="0.1524" layer="91"/>
+<label x="92.71" y="55.88" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="ADDR19" class="0">
@@ -13022,6 +13026,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX8" gate="G$1" pin="Y1"/>
 <wire x1="93.98" y1="58.42" x2="93.98" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="93.98" y1="53.34" x2="91.44" y2="50.8" width="0.1524" layer="91"/>
+<label x="95.25" y="55.88" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="ADDR18" class="0">
@@ -13029,6 +13034,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX8" gate="G$1" pin="Y0"/>
 <wire x1="96.52" y1="58.42" x2="96.52" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="96.52" y1="53.34" x2="93.98" y2="50.8" width="0.1524" layer="91"/>
+<label x="97.79" y="55.88" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="ADDR17" class="0">
@@ -13036,6 +13042,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX9" gate="G$1" pin="Y7"/>
 <wire x1="134.62" y1="58.42" x2="134.62" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="134.62" y1="53.34" x2="132.08" y2="50.8" width="0.1524" layer="91"/>
+<label x="135.89" y="55.88" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="ADDR16" class="0">
@@ -13043,6 +13050,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX9" gate="G$1" pin="Y6"/>
 <wire x1="137.16" y1="58.42" x2="137.16" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="137.16" y1="53.34" x2="134.62" y2="50.8" width="0.1524" layer="91"/>
+<label x="138.43" y="55.88" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="ADDR15" class="0">
@@ -13050,6 +13058,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX9" gate="G$1" pin="Y5"/>
 <wire x1="139.7" y1="58.42" x2="139.7" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="139.7" y1="53.34" x2="137.16" y2="50.8" width="0.1524" layer="91"/>
+<label x="140.97" y="55.88" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="ADDR14" class="0">
@@ -13057,6 +13066,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX9" gate="G$1" pin="Y4"/>
 <wire x1="142.24" y1="58.42" x2="142.24" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="142.24" y1="53.34" x2="139.7" y2="50.8" width="0.1524" layer="91"/>
+<label x="143.51" y="55.88" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="ADDR13" class="0">
@@ -13064,6 +13074,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX9" gate="G$1" pin="Y3"/>
 <wire x1="144.78" y1="58.42" x2="144.78" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="144.78" y1="53.34" x2="142.24" y2="50.8" width="0.1524" layer="91"/>
+<label x="146.05" y="55.88" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="ADDR12" class="0">
@@ -13071,6 +13082,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX9" gate="G$1" pin="Y2"/>
 <wire x1="147.32" y1="58.42" x2="147.32" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="147.32" y1="53.34" x2="144.78" y2="50.8" width="0.1524" layer="91"/>
+<label x="148.59" y="55.88" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="ADDR11" class="0">
@@ -13078,6 +13090,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX9" gate="G$1" pin="Y1"/>
 <wire x1="149.86" y1="58.42" x2="149.86" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="149.86" y1="53.34" x2="147.32" y2="50.8" width="0.1524" layer="91"/>
+<label x="151.13" y="55.88" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="ADDR10" class="0">
@@ -13085,6 +13098,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX9" gate="G$1" pin="Y0"/>
 <wire x1="152.4" y1="58.42" x2="152.4" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="152.4" y1="53.34" x2="149.86" y2="50.8" width="0.1524" layer="91"/>
+<label x="153.67" y="55.88" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
 <net name="PAGING_ENABLED" class="0">
