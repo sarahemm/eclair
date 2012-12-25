@@ -2,11 +2,12 @@
 
 module main_ram(_cs, _oe, _w, addr, data_in, data_out);
   parameter WIDTH=8;
+  parameter ADDR_WIDTH=20;
   
   input               _cs;
   input               _oe;
   input               _w;
-  input   [19:0]      addr;
+  input   [ADDR_WIDTH-1:0]      addr;
   input   [WIDTH-1:0] data_in;
   output  [WIDTH-1:0] data_out;
   reg     [WIDTH-1:0] ram[0:1024];
