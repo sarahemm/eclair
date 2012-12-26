@@ -16,7 +16,7 @@ field load_reg    7     3
 field load_x      10    1
 field load_y      11    1
 field load_z      12    1
-field load_pid    13    1
+field load_ptb    13    1
 # level-sensitive signals
 field next_addr   25    8
 field src_mar     33    1
@@ -65,7 +65,7 @@ location    ldi16.b     70    # load immediate 16 bits into b
 location    ldi16.c     134   # load immediate 16 bits into c
 location    ldi16.d     198   # load immediate 16 bits into d
 location    ldi16.?     203   # load immediate 16 bits into register from IR
-location    ldi8.pid    7     # load immediate 8 bits into PID register
+location    ldi8.ptb    7     # load immediate 8 bits into PTB register
 location    add16.ab    11    # add a and b registers, result goes into a
 location    jmp         14    # unconditional immediate jump
 location    wrpte       18    # write page table entry using data in a and address in d
@@ -87,9 +87,9 @@ instruction ldi16.b     next_addr(ldi16.?)
 instruction ldi16.c     next_addr(ldi16.?)
 instruction ldi16.d     next_addr(ldi16.?)
 
-instruction ldi8.pid    src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar
-instruction ldi8.pid    hold_last     load_mar        load_mdr_l      load_x      load_z  load_pid
-instruction ldi8.pid    inc_pc        next_addr(fetch)
+instruction ldi8.ptb    src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar
+instruction ldi8.ptb    hold_last     load_mar        load_mdr_l      load_x      load_z  load_ptb
+instruction ldi8.ptb    inc_pc        next_addr(fetch)
 
 instruction ldi8.?l     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar
 instruction ldi8.?l     hold_last     load_mar        load_mdr_l      load_x      load_z  load_reg(via_ir)

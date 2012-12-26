@@ -21,11 +21,11 @@
 00000000    // immediate high byte for --^
 @00F
 11111110    // halt (jumped over)
-// write the PID register to tell the machine we're executing PID 0
+// write the PTB register to tell the machine we're running a process in page table block 0executing PID 0
 @010
-00000111    // ldi8.pid
+00000111    // ldi8.ptb
 00000000    // immediate for --^
-// write a page table entry to map 0 to 0 (writable) for pid 0
+// write a page table entry to map 0 to 0 (writable) in PTB 0
 @012
 00000110    // ldi16.a
 00000000    // immediate low byte for --^

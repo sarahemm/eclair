@@ -76,9 +76,9 @@ module ECLair();
   wire  [15:0]  alu_z;
   wire  [11:0]  pagetable_addr; // currently selected address in the pagetable
   wire  [15:0]  pagetable_out;  // output from the page table
-  wire  [5:0]   reg_pid;        // currently running PID (used in the paging mechanism)
+  wire  [5:0]   reg_ptb;        // currently addressed page table block
   wire          write_pte;      // 1=write page table entry
-  wire          load_pid;       // load PID register from Z
+  wire          load_ptb;       // load PTB register from Z
   
   initial begin
     //$dumpfile("eclair.vcd");
@@ -117,7 +117,7 @@ module ECLair();
   latch           #(.WIDTH(16))                 lat_reg_y(reg_y_load, lat_xy, reg_y);
   latch           #(.WIDTH(16))                 lat_reg_z(reg_z_load, alu_z, reg_z);
   latch                                         lat_reg_ir(reg_ir_load, bus_data, reg_ir);
-  latch           #(.WIDTH(6))                  lat_reg_pid(load_pid, alu_z[5:0], reg_pid);
+  latch           #(.WIDTH(6))                  lat_reg_ptb(load_ptb, alu_z[5:0], reg_ptb);
   latch           #(.WIDTH(16))                 lat_reg_mar(reg_mar_load, lat_mar, reg_mar);
   latch           #(.WIDTH(8))                  lat_reg_mdr_l(.clk(reg_mdr_l_load), .in(lat_mdr[7:0]),  .out(reg_mdr[7:0]));
   latch           #(.WIDTH(8))                  lat_reg_mdr_h(.clk(reg_mdr_h_load), .in(lat_mdr[15:8]), .out(reg_mdr[15:8]));
@@ -146,7 +146,7 @@ module ECLair();
   assign reg_x_load = ~cs_data[10];
   assign reg_y_load = ~cs_data[11];
   assign reg_z_load = ~cs_data[12];
-  assign load_pid = ~cs_data[13];
+  assign load_ptb = ~cs_data[13];
   // level-sensitive microcode signals
   assign cs_next_addr = cs_data[32:25];
   assign mux_mar_src = cs_data[33];
@@ -179,7 +179,7 @@ module ECLair();
   assign reg_x_load_ir_src[1] = reg_x_load_ir & reg_ir[6];
   assign reg_x_load_ir_src[2] = reg_x_load_ir & reg_ir[7];
   assign pagetable_addr[5:0] = reg_mar[15:10];
-  assign pagetable_addr[11:6] = reg_pid[5:0];
+  assign pagetable_addr[11:6] = reg_ptb[5:0];
   
   always begin
     #40 clk_main = ~clk_main;
