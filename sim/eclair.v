@@ -13,7 +13,7 @@ module ECLair();
   wire          _reset;       // master reset, when this is high we're good to run
   
   wire  [7:0]   bus_data;
-  wire  [24:0]  bus_addr;
+  wire  [23:0]  bus_addr;
   
   wire          addr_rom;         // decoded address lines used as chip selects
   wire          addr_device;
@@ -63,7 +63,7 @@ module ECLair();
   wire  [15:0]  reg_x;
   wire  [15:0]  reg_y;
   wire  [15:0]  reg_z;
-  wire  [15:0]  reg_a;            // outputs from registers
+  wire  [15:0]  reg_a;          // outputs from registers
   wire  [15:0]  reg_b;
   wire  [15:0]  reg_c;
   wire  [15:0]  reg_d;
@@ -74,6 +74,10 @@ module ECLair();
   wire  [15:0]  lat_mdr;
   wire  [15:0]  lat_xy;
   wire  [15:0]  alu_z;
+  wire  [11:0]  pagetable_addr; // currently selected address in the pagetable
+  wire  [15:0]  pagetable_out;  // output from the page table
+  wire  [5:0]   reg_pid;        // currently running PID (used in the paging mechanism)
+  wire          write_pte;      // 1=write page table entry
   
   initial begin
     //$dumpfile("eclair.vcd");
@@ -124,8 +128,12 @@ module ECLair();
   mux_28                                        mux_mdr_l(.sel(mux_mdr_src), .a(reg_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
   mux_28                                        mux_mdr_h(.sel(mux_mdr_src), .a(reg_z[15:8]), .b(bus_data[7:0]), .y(lat_mdr[15:8]));
   alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(1'b0), .x(reg_x), .y(reg_y), .z(alu_z));
+  main_ram      #(.WIDTH(16), .ADDR_WIDTH(12))  ram_paging(._cs(1'b0), ._oe(1'b0), ._w(~write_pte), .addr(pagetable_addr), .data_in(), .data_out(pagetable_out));
+  mux_28                                        mux_paging_l(.sel(1'b0), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr[17:10]));
+  mux_28                                        mux_paging_h(.sel(1'b0), .a(8'b0),           .b(pagetable_out[13:8]), .y(bus_addr[23:18]));
   
   // edge-sensitive microcode signals
+  assign write_pte = cs_data[0];
   assign reg_mdr_l_load = ~cs_data[1];
   assign reg_mdr_h_load = ~cs_data[2];
   assign reg_mar_load = ~cs_data[3];
@@ -163,10 +171,12 @@ module ECLair();
   assign addr_rom = ~(bus_addr[23:20] == 4'b0000);
   assign addr_device = ~(bus_addr[23:20] == 4'b0111);
   assign addr_ram = ~(addr_rom ~| addr_device);
-  assign bus_addr = reg_mar;
+  assign bus_addr[9:0] = reg_mar[9:0];  // the rest of the bus goes through the paging mechanism
   assign reg_x_load_ir_src[0] = reg_x_load_ir;
   assign reg_x_load_ir_src[1] = reg_x_load_ir & reg_ir[6];
   assign reg_x_load_ir_src[2] = reg_x_load_ir & reg_ir[7];
+  assign pagetable_addr[5:0] = reg_mar[15:10];
+  assign pagetable_addr[11:6] = reg_pid[5:0];
   
   always begin
     #40 clk_main = ~clk_main;
