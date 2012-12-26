@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -5930,6 +5930,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <part name="SUPPLY9" library="supply2" deviceset="V-" device=""/>
 <part name="LAT18" library="logicalgates-sen" deviceset="LATCH-8" device="" value="PID Register"/>
 <part name="NOT1" library="logicalgates-sen" deviceset="NOT" device=""/>
+<part name="AND10" library="logicalgates-sen" deviceset="AND-2" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -10337,6 +10338,20 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="22.86" y="111.76" size="1.27" layer="95" rot="R270" xref="yes"/>
 </segment>
 </net>
+<net name="LOAD_PID" class="0">
+<segment>
+<pinref part="LINK2" gate="G$1" pin="B6"/>
+<wire x1="63.5" y1="185.42" x2="63.5" y2="187.96" width="0.1524" layer="91"/>
+<label x="63.5" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+</net>
+<net name="WRITE_PTE" class="0">
+<segment>
+<pinref part="LINK1" gate="G$1" pin="B1"/>
+<wire x1="17.78" y1="185.42" x2="17.78" y2="187.96" width="0.1524" layer="91"/>
+<label x="17.78" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+</net>
 </nets>
 </sheet>
 <sheet>
@@ -12542,6 +12557,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <attribute name="NAME" x="142.748" y="187.706" size="1.778" layer="95" rot="R270"/>
 </instance>
 <instance part="NOT1" gate="G$1" x="149.86" y="195.58" rot="R180"/>
+<instance part="AND10" gate="G$1" x="172.72" y="124.46" rot="R180"/>
 </instances>
 <busses>
 <bus name="MAR[0..15]">
@@ -13242,13 +13258,6 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="104.14" y1="160.02" x2="106.68" y2="162.56" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="WRITE_PTE" class="0">
-<segment>
-<pinref part="RAM3" gate="G$1" pin="W"/>
-<wire x1="157.48" y1="124.46" x2="160.02" y2="124.46" width="0.1524" layer="91"/>
-<label x="160.02" y="124.46" size="1.27" layer="95" xref="yes"/>
-</segment>
-</net>
 <net name="Z6" class="0">
 <segment>
 <pinref part="RAM3" gate="G$1" pin="Q6"/>
@@ -13307,6 +13316,27 @@ In this library the device names are the same as the pin names of the symbols, t
 <segment>
 <pinref part="RAM3" gate="G$1" pin="Q15"/>
 <wire x1="78.74" y1="160.02" x2="81.28" y2="162.56" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="WRITE_PTE_NOW" class="0">
+<segment>
+<pinref part="RAM3" gate="G$1" pin="W"/>
+<pinref part="AND10" gate="G$1" pin="Y"/>
+<wire x1="160.02" y1="124.46" x2="157.48" y2="124.46" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="WRITE_PTE" class="0">
+<segment>
+<pinref part="AND10" gate="G$1" pin="B"/>
+<wire x1="182.88" y1="127" x2="185.42" y2="127" width="0.1524" layer="91"/>
+<label x="185.42" y="127" size="1.27" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="CS_READY" class="0">
+<segment>
+<pinref part="AND10" gate="G$1" pin="A"/>
+<wire x1="182.88" y1="121.92" x2="185.42" y2="121.92" width="0.1524" layer="91"/>
+<label x="185.42" y="121.92" size="1.27" layer="95" xref="yes"/>
 </segment>
 </net>
 </nets>

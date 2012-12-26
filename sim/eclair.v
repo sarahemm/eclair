@@ -78,6 +78,7 @@ module ECLair();
   wire  [15:0]  pagetable_out;  // output from the page table
   wire  [5:0]   reg_pid;        // currently running PID (used in the paging mechanism)
   wire          write_pte;      // 1=write page table entry
+  wire          load_pid;       // load PID register from Z
   
   initial begin
     //$dumpfile("eclair.vcd");
@@ -86,7 +87,7 @@ module ECLair();
     _ext_reset = 1'b1;
     _por_reset = 1'b0;
     #10 _por_reset = 1'b1;
-    #168000 $finish;
+    #169000 $finish;
   end
   
   test_validator                                test_validator(.clk(clk_cs), .cs_addr(cs_addr), .pc(pc), .reg_a(reg_a), .reg_b(reg_b), .reg_c(reg_c), .reg_d(reg_d));
@@ -116,6 +117,7 @@ module ECLair();
   latch           #(.WIDTH(16))                 lat_reg_y(reg_y_load, lat_xy, reg_y);
   latch           #(.WIDTH(16))                 lat_reg_z(reg_z_load, alu_z, reg_z);
   latch                                         lat_reg_ir(reg_ir_load, bus_data, reg_ir);
+  latch           #(.WIDTH(6))                  lat_reg_pid(load_pid, alu_z[5:0], reg_pid);
   latch           #(.WIDTH(16))                 lat_reg_mar(reg_mar_load, lat_mar, reg_mar);
   latch           #(.WIDTH(8))                  lat_reg_mdr_l(.clk(reg_mdr_l_load), .in(lat_mdr[7:0]),  .out(reg_mdr[7:0]));
   latch           #(.WIDTH(8))                  lat_reg_mdr_h(.clk(reg_mdr_h_load), .in(lat_mdr[15:8]), .out(reg_mdr[15:8]));
@@ -128,12 +130,12 @@ module ECLair();
   mux_28                                        mux_mdr_l(.sel(mux_mdr_src), .a(reg_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
   mux_28                                        mux_mdr_h(.sel(mux_mdr_src), .a(reg_z[15:8]), .b(bus_data[7:0]), .y(lat_mdr[15:8]));
   alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(1'b0), .x(reg_x), .y(reg_y), .z(alu_z));
-  main_ram      #(.WIDTH(16), .ADDR_WIDTH(12))  ram_paging(._cs(1'b0), ._oe(1'b0), ._w(~write_pte), .addr(pagetable_addr), .data_in(), .data_out(pagetable_out));
+  main_ram      #(.WIDTH(16), .ADDR_WIDTH(12))  ram_paging(._cs(1'b0), ._oe(1'b0), ._w(~write_pte), .addr(pagetable_addr), .data_in(reg_z), .data_out(pagetable_out));
   mux_28                                        mux_paging_l(.sel(1'b0), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr[17:10]));
   mux_28                                        mux_paging_h(.sel(1'b0), .a(8'b0),           .b(pagetable_out[13:8]), .y(bus_addr[23:18]));
   
   // edge-sensitive microcode signals
-  assign write_pte = cs_data[0];
+  assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
   assign reg_mdr_l_load = ~cs_data[1];
   assign reg_mdr_h_load = ~cs_data[2];
   assign reg_mar_load = ~cs_data[3];
@@ -144,6 +146,7 @@ module ECLair();
   assign reg_x_load = ~cs_data[10];
   assign reg_y_load = ~cs_data[11];
   assign reg_z_load = ~cs_data[12];
+  assign load_pid = ~cs_data[13];
   // level-sensitive microcode signals
   assign cs_next_addr = cs_data[32:25];
   assign mux_mar_src = cs_data[33];

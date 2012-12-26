@@ -19,10 +19,23 @@
 00001110    // jmp
 00010000    // immediate low byte for --^
 00000000    // immediate high byte for --^
-// done!
 @00F
 11111110    // halt (jumped over)
+// write the PID register to tell the machine we're executing PID 0
 @010
+00000111    // ldi8.pid
+00000000    // immediate for --^
+// write a page table entry to map 0 to 0 (writable) for pid 0
+@012
+00000110    // ldi16.a
+00000000    // immediate low byte for --^
+11000000    // immediate high byte for --^
+11000110    // ldi16.d
+00000000    // immediate low byte for --^
+00000000    // immediate high byte for --^
+00010010    // write page table entry (addr from d, data from a)
+// done!
+@019
 11111110    // halt
 00000000
 00000000

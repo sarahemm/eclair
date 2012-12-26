@@ -5,6 +5,7 @@ file  microcode.bin  0   64
 
 # fields - names for bit positions
 # edge-sensitive signals
+field write_pte   0     1
 field load_mdr_l  1     1
 field load_mdr_h  2     1
 field load_mar    3     1
@@ -15,6 +16,7 @@ field load_reg    7     3
 field load_x      10    1
 field load_y      11    1
 field load_z      12    1
+field load_pid    13    1
 # level-sensitive signals
 field next_addr   25    8
 field src_mar     33    1
@@ -63,8 +65,10 @@ location    ldi16.b     70    # load immediate 16 bits into b
 location    ldi16.c     134   # load immediate 16 bits into c
 location    ldi16.d     198   # load immediate 16 bits into d
 location    ldi16.?     203   # load immediate 16 bits into register from IR
+location    ldi8.pid    7     # load immediate 8 bits into PID register
 location    add16.ab    11    # add a and b registers, result goes into a
 location    jmp         14    # unconditional immediate jump
+location    wrpte       18    # write page table entry using data in a and address in d
 location    hlt         254
 
 # instructions - each one is one word of microcode, glues everything above together
@@ -83,6 +87,10 @@ instruction ldi16.b     next_addr(ldi16.?)
 instruction ldi16.c     next_addr(ldi16.?)
 instruction ldi16.d     next_addr(ldi16.?)
 
+instruction ldi8.pid    src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar
+instruction ldi8.pid    hold_last     load_mar        load_mdr_l      load_x      load_z  load_pid
+instruction ldi8.pid    inc_pc        next_addr(fetch)
+
 instruction ldi8.?l     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar
 instruction ldi8.?l     hold_last     load_mar        load_mdr_l      load_x      load_z  load_reg(via_ir)
 instruction ldi8.?l     inc_pc        next_addr(fetch)
@@ -95,11 +103,14 @@ instruction ldi16.?     inc_pc        next_addr(fetch)
 
 instruction add16.ab    src_xy(a)     load_x
 instruction add16.ab    src_xy(b)     load_y
-instruction add16.ab    alu_mode(arith) alu_op(add)   op_16bit        load_z      load_reg(a)     next_addr(fetch)
+instruction add16.ab    alu_mode(arith) alu_op(add)   op_16bit        load_z        load_reg(a)     next_addr(fetch)
 
 instruction jmp                       src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)     load_mdr_l
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)     load_mdr_h
 instruction jmp         src_xy(mdr)   alu_op(x)       load_x          load_z
 instruction jmp         load_pc       next_addr(fetch)
+
+instruction wrpte       alu_op(x)     src_xy(d)       load_x          load_z        src_mar(z)      load_mar
+instruction wrpte       alu_op(x)     src_xy(a)       load_x          load_z        write_pte       next_addr(fetch)
 
 instruction hlt         next_addr(hlt)
