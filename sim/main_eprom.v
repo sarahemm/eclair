@@ -7,7 +7,7 @@ module main_eprom(_cs, _oe, addr, data);
   input           _oe;
   input   [19:0]  addr;
   output  [7:0]  data; 
-  reg     [7:0]  rom[0:1024];
+  reg     [7:0]  rom[0:2048];
   wire    [7:0]  data_val;
   
   // TODO: make this have a realistic propagation delay

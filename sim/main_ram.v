@@ -10,7 +10,7 @@ module main_ram(_cs, _oe, _w, addr, data_in, data_out);
   input   [ADDR_WIDTH-1:0]      addr;
   input   [WIDTH-1:0] data_in;
   output  [WIDTH-1:0] data_out;
-  reg     [WIDTH-1:0] ram[0:1024];
+  reg     [WIDTH-1:0] ram[0:2048];
   wire    [WIDTH-1:0] data_val;
   
   assign #5 data_val = (!_cs) ? ram[addr] : 16'bZ;
