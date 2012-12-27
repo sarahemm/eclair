@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -1216,6 +1216,33 @@
 <pin name="Y15" x="22.86" y="-38.1" visible="pin" length="middle" direction="out" rot="R180"/>
 <text x="-2.54" y="14.224" size="6.35" layer="94">RAM</text>
 </symbol>
+<symbol name="FLIPFLOP-D-8">
+<pin name="CLK" x="-12.7" y="12.7" visible="pin" length="middle" direction="in" function="clk"/>
+<pin name="A0" x="-12.7" y="5.08" visible="pin" length="middle" direction="in"/>
+<pin name="A1" x="-12.7" y="2.54" visible="pin" length="middle" direction="in"/>
+<pin name="A2" x="-12.7" y="0" visible="pin" length="middle" direction="in"/>
+<pin name="A3" x="-12.7" y="-2.54" visible="pin" length="middle" direction="in"/>
+<pin name="A4" x="-12.7" y="-5.08" visible="pin" length="middle" direction="in"/>
+<pin name="A5" x="-12.7" y="-7.62" visible="pin" length="middle" direction="in"/>
+<pin name="A6" x="-12.7" y="-10.16" visible="pin" length="middle" direction="in"/>
+<pin name="A7" x="-12.7" y="-12.7" visible="pin" length="middle" direction="in"/>
+<pin name="Y0" x="12.7" y="5.08" visible="pin" length="middle" direction="out" rot="R180"/>
+<pin name="Y1" x="12.7" y="2.54" visible="pin" length="middle" direction="out" rot="R180"/>
+<pin name="Y2" x="12.7" y="0" visible="pin" length="middle" direction="out" rot="R180"/>
+<pin name="Y3" x="12.7" y="-2.54" visible="pin" length="middle" direction="out" rot="R180"/>
+<pin name="Y4" x="12.7" y="-5.08" visible="pin" length="middle" direction="out" rot="R180"/>
+<pin name="Y5" x="12.7" y="-7.62" visible="pin" length="middle" direction="out" rot="R180"/>
+<pin name="Y6" x="12.7" y="-10.16" visible="pin" length="middle" direction="out" rot="R180"/>
+<pin name="Y7" x="12.7" y="-12.7" visible="pin" length="middle" direction="out" rot="R180"/>
+<wire x1="-7.62" y1="15.24" x2="-7.62" y2="-15.24" width="0.254" layer="94"/>
+<wire x1="-7.62" y1="-15.24" x2="7.62" y2="-15.24" width="0.254" layer="94"/>
+<wire x1="7.62" y1="-15.24" x2="7.62" y2="15.24" width="0.254" layer="94"/>
+<wire x1="7.62" y1="15.24" x2="-7.62" y2="15.24" width="0.254" layer="94"/>
+<text x="-7.366" y="-17.526" size="1.778" layer="96">&gt;VALUE</text>
+<text x="-7.366" y="15.748" size="1.778" layer="95">&gt;NAME</text>
+<text x="3.048" y="9.652" size="3.81" layer="94">D</text>
+<pin name="RESET" x="-12.7" y="10.16" visible="pin" length="middle" direction="in"/>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="MUX-2X8" prefix="MUX" uservalue="yes">
@@ -2135,6 +2162,38 @@
 <connect gate="G$1" pin="Y7" pad="P$38"/>
 <connect gate="G$1" pin="Y8" pad="P$39"/>
 <connect gate="G$1" pin="Y9" pad="P$40"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="FLIPFLOP-D-8" prefix="FLP" uservalue="yes">
+<gates>
+<gate name="G$1" symbol="FLIPFLOP-D-8" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="NULL">
+<connects>
+<connect gate="G$1" pin="A0" pad="P$1"/>
+<connect gate="G$1" pin="A1" pad="P$2"/>
+<connect gate="G$1" pin="A2" pad="P$3"/>
+<connect gate="G$1" pin="A3" pad="P$4"/>
+<connect gate="G$1" pin="A4" pad="P$5"/>
+<connect gate="G$1" pin="A5" pad="P$6"/>
+<connect gate="G$1" pin="A6" pad="P$7"/>
+<connect gate="G$1" pin="A7" pad="P$8"/>
+<connect gate="G$1" pin="CLK" pad="P$9"/>
+<connect gate="G$1" pin="RESET" pad="P$10"/>
+<connect gate="G$1" pin="Y0" pad="P$11"/>
+<connect gate="G$1" pin="Y1" pad="P$12"/>
+<connect gate="G$1" pin="Y2" pad="P$13"/>
+<connect gate="G$1" pin="Y3" pad="P$14"/>
+<connect gate="G$1" pin="Y4" pad="P$15"/>
+<connect gate="G$1" pin="Y5" pad="P$16"/>
+<connect gate="G$1" pin="Y6" pad="P$17"/>
+<connect gate="G$1" pin="Y7" pad="P$18"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -5928,9 +5987,11 @@ In this library the device names are the same as the pin names of the symbols, t
 <part name="LINK9" library="logicalgates-sen" deviceset="LINKS-8" device=""/>
 <part name="LINK10" library="logicalgates-sen" deviceset="LINKS-8" device=""/>
 <part name="SUPPLY9" library="supply2" deviceset="V-" device=""/>
-<part name="LAT18" library="logicalgates-sen" deviceset="LATCH-8" device="" value="PID Register"/>
+<part name="LAT18" library="logicalgates-sen" deviceset="LATCH-8" device="" value="PTB Register"/>
 <part name="NOT1" library="logicalgates-sen" deviceset="NOT" device=""/>
 <part name="AND10" library="logicalgates-sen" deviceset="AND-2" device=""/>
+<part name="FLP11" library="logicalgates-sen" deviceset="FLIPFLOP-D-8" device="" value="System Flags"/>
+<part name="FLP12" library="logicalgates-sen" deviceset="FLIPFLOP-D-8" device="" value="ALU Status"/>
 </parts>
 <sheets>
 <sheet>
@@ -8449,8 +8510,20 @@ In this library the device names are the same as the pin names of the symbols, t
 <attribute name="NAME" x="78.232" y="183.388" size="1.778" layer="95"/>
 <attribute name="VALUE" x="78.994" y="175.514" size="1.778" layer="96"/>
 </instance>
+<instance part="FLP11" gate="G$1" x="86.36" y="93.98" smashed="yes" rot="R270">
+<attribute name="VALUE" x="68.58" y="103.378" size="1.778" layer="96" rot="R270"/>
+<attribute name="NAME" x="102.108" y="101.346" size="1.778" layer="95" rot="R270"/>
+</instance>
+<instance part="FLP12" gate="G$1" x="121.92" y="93.98" rot="R270"/>
 </instances>
 <busses>
+<bus name="Z[0..15]">
+<segment>
+<wire x1="66.04" y1="111.76" x2="68.58" y2="109.22" width="0.762" layer="92"/>
+<wire x1="68.58" y1="109.22" x2="88.9" y2="109.22" width="0.762" layer="92"/>
+<label x="65.786" y="114.3" size="1.778" layer="95" rot="R180"/>
+</segment>
+</bus>
 </busses>
 <nets>
 <net name="CLK_MAIN" class="0">
@@ -8528,6 +8601,46 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="DLY2" gate="G$1" pin="Q"/>
 <wire x1="96.52" y1="180.34" x2="99.06" y2="180.34" width="0.1524" layer="91"/>
 <label x="99.06" y="180.34" size="1.27" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="Z0" class="0">
+<segment>
+<pinref part="FLP11" gate="G$1" pin="A0"/>
+<wire x1="88.9" y1="109.22" x2="91.44" y2="106.68" width="0.1524" layer="91"/>
+<label x="92.71" y="104.902" size="1.016" layer="95" rot="R90"/>
+</segment>
+</net>
+<net name="PAGING_ENABLED" class="0">
+<segment>
+<pinref part="FLP11" gate="G$1" pin="Y0"/>
+<wire x1="91.44" y1="81.28" x2="91.44" y2="78.74" width="0.1524" layer="91"/>
+<label x="91.44" y="78.74" size="1.27" layer="95" rot="R270" xref="yes"/>
+</segment>
+</net>
+<net name="RESET_MAIN" class="0">
+<segment>
+<pinref part="FLP11" gate="G$1" pin="RESET"/>
+<wire x1="96.52" y1="106.68" x2="96.52" y2="109.22" width="0.1524" layer="91"/>
+<label x="96.52" y="109.22" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+<segment>
+<pinref part="FLP12" gate="G$1" pin="RESET"/>
+<wire x1="132.08" y1="106.68" x2="132.08" y2="109.22" width="0.1524" layer="91"/>
+<label x="132.08" y="109.22" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+</net>
+<net name="LOAD_STATUS" class="0">
+<segment>
+<pinref part="FLP12" gate="G$1" pin="CLK"/>
+<wire x1="134.62" y1="106.68" x2="134.62" y2="109.22" width="0.1524" layer="91"/>
+<label x="134.62" y="109.22" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+</net>
+<net name="LOAD_FLAGS" class="0">
+<segment>
+<pinref part="FLP11" gate="G$1" pin="CLK"/>
+<wire x1="99.06" y1="106.68" x2="99.06" y2="109.22" width="0.1524" layer="91"/>
+<label x="99.06" y="109.22" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 </nets>
@@ -10338,7 +10451,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="22.86" y="111.76" size="1.27" layer="95" rot="R270" xref="yes"/>
 </segment>
 </net>
-<net name="LOAD_PID" class="0">
+<net name="LOAD_PTB" class="0">
 <segment>
 <pinref part="LINK2" gate="G$1" pin="B6"/>
 <wire x1="63.5" y1="185.42" x2="63.5" y2="187.96" width="0.1524" layer="91"/>
@@ -13129,7 +13242,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <junction x="167.64" y="88.9"/>
 </segment>
 </net>
-<net name="REG_PID5" class="0">
+<net name="REG_PTB5" class="0">
 <segment>
 <pinref part="RAM3" gate="G$1" pin="A11"/>
 <pinref part="LAT18" gate="G$1" pin="Y5"/>
@@ -13137,7 +13250,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="123.19" y="160.274" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
-<net name="REG_PID4" class="0">
+<net name="REG_PTB4" class="0">
 <segment>
 <pinref part="LAT18" gate="G$1" pin="Y4"/>
 <pinref part="RAM3" gate="G$1" pin="A10"/>
@@ -13145,7 +13258,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="125.73" y="160.274" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
-<net name="REG_PID3" class="0">
+<net name="REG_PTB3" class="0">
 <segment>
 <pinref part="RAM3" gate="G$1" pin="A9"/>
 <pinref part="LAT18" gate="G$1" pin="Y3"/>
@@ -13153,7 +13266,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="128.27" y="160.274" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
-<net name="REG_PID2" class="0">
+<net name="REG_PTB2" class="0">
 <segment>
 <pinref part="LAT18" gate="G$1" pin="Y2"/>
 <pinref part="RAM3" gate="G$1" pin="A8"/>
@@ -13161,7 +13274,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="130.81" y="160.274" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
-<net name="REG_PID1" class="0">
+<net name="REG_PTB1" class="0">
 <segment>
 <pinref part="RAM3" gate="G$1" pin="A7"/>
 <pinref part="LAT18" gate="G$1" pin="Y1"/>
@@ -13169,7 +13282,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="133.35" y="160.274" size="1.016" layer="95" rot="R90"/>
 </segment>
 </net>
-<net name="REG_PID0" class="0">
+<net name="REG_PTB0" class="0">
 <segment>
 <pinref part="LAT18" gate="G$1" pin="Y0"/>
 <pinref part="RAM3" gate="G$1" pin="A6"/>
@@ -13185,7 +13298,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="NOT1" gate="G$1" pin="Y"/>
 </segment>
 </net>
-<net name="LOAD_PID" class="0">
+<net name="LOAD_PTB" class="0">
 <segment>
 <pinref part="NOT1" gate="G$1" pin="Q"/>
 <wire x1="157.48" y1="195.58" x2="160.02" y2="195.58" width="0.1524" layer="91"/>
