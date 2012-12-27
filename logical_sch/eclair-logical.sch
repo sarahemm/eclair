@@ -8488,6 +8488,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <description>Clocks/Flags/Status</description>
 <plain>
 <text x="271.78" y="208.28" size="7.62" layer="94" ratio="10" rot="R180">Clocks/Flags/Status</text>
+<text x="107.95" y="108.204" size="7.62" layer="96">TBD</text>
 </plain>
 <instances>
 <instance part="MUX3" gate="G$1" x="104.14" y="167.64" smashed="yes">
@@ -10463,6 +10464,20 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="LINK1" gate="G$1" pin="B1"/>
 <wire x1="17.78" y1="185.42" x2="17.78" y2="187.96" width="0.1524" layer="91"/>
 <label x="17.78" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+</net>
+<net name="LOAD_FLAGS" class="0">
+<segment>
+<pinref part="LINK2" gate="G$1" pin="B7"/>
+<wire x1="66.04" y1="185.42" x2="66.04" y2="187.96" width="0.1524" layer="91"/>
+<label x="66.04" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+</net>
+<net name="LOAD_STATUS" class="0">
+<segment>
+<pinref part="LINK2" gate="G$1" pin="B8"/>
+<wire x1="68.58" y1="187.96" x2="68.58" y2="185.42" width="0.1524" layer="91"/>
+<label x="68.58" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 </nets>
