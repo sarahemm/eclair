@@ -17,6 +17,7 @@ field load_x      10    1
 field load_y      11    1
 field load_z      12    1
 field load_ptb    13    1
+field load_flags  14    1
 # level-sensitive signals
 field next_addr   25    8
 field src_mar     33    1
@@ -69,6 +70,7 @@ location    ldi8.ptb    7     # load immediate 8 bits into PTB register
 location    add16.ab    11    # add a and b registers, result goes into a
 location    jmp         14    # unconditional immediate jump
 location    wrpte       18    # write page table entry using data in a and address in d
+location    ldi8.flags  21    # load immediate 8 bits into system flags
 location    hlt         254
 
 # instructions - each one is one word of microcode, glues everything above together
@@ -111,6 +113,11 @@ instruction jmp         src_xy(mdr)   alu_op(x)       load_x          load_z
 instruction jmp         load_pc       next_addr(fetch)
 
 instruction wrpte       alu_op(x)     src_xy(d)       load_x          load_z        src_mar(z)      load_mar
-instruction wrpte       alu_op(x)     src_xy(a)       load_x          load_z        write_pte       next_addr(fetch)
+instruction wrpte       alu_op(x)     src_xy(a)       load_x          load_z        
+instruction wrpte       write_pte     next_addr(fetch)
+
+instruction ldi8.flags  src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar
+instruction ldi8.flags  hold_last     load_mar        load_mdr_l      load_x      load_z
+instruction ldi8.flags  load_flags    inc_pc          next_addr(fetch)
 
 instruction hlt         next_addr(hlt)

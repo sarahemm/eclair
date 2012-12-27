@@ -79,6 +79,9 @@ module ECLair();
   wire  [5:0]   reg_ptb;        // currently addressed page table block
   wire          write_pte;      // 1=write page table entry
   wire          load_ptb;       // load PTB register from Z
+  wire          load_flags;     // load system flags from Z
+  wire  [7:0]   flags;          // system flags (paging enabled, etc.)
+  wire          paging_enabled; // paging is enabled, all addresses run through the page table
   
   initial begin
     //$dumpfile("eclair.vcd");
@@ -87,7 +90,7 @@ module ECLair();
     _ext_reset = 1'b1;
     _por_reset = 1'b0;
     #10 _por_reset = 1'b1;
-    #169000 $finish;
+    #170000 $finish;
   end
   
   test_validator                                test_validator(.clk(clk_cs), .cs_addr(cs_addr), .pc(pc), .reg_a(reg_a), .reg_b(reg_b), .reg_c(reg_c), .reg_d(reg_d));
@@ -105,22 +108,22 @@ module ECLair();
   main_ram                                      ram_main(._cs(1'b0), ._oe(addr_ram), ._w(ram__w), .addr(bus_addr[19:0]), .data_in(bus_data), .data_out(bus_data));
   main_eprom      #(.ROM_FILE("bootrom.bin"))   rom_boot(1'b0, addr_rom, bus_addr[19:0], bus_data);
   counter         #(.WIDTH(16))                 ctr_pc(.clk(inc_pc), .ce(1'b1), .reset(~_reset), .out(pc), .load(load_pc), .preset(reg_z));
-  latch           #(.WIDTH(8))                  lat_reg_a_l(reg_a_load, reg_z[7:0], reg_a[7:0]);
-  latch           #(.WIDTH(8))                  lat_reg_a_h(reg_a_load | ~op_16bit, reg_z[15:8], reg_a[15:8]);
-  latch           #(.WIDTH(8))                  lat_reg_b_l(reg_b_load, reg_z[7:0], reg_b[7:0]);
-  latch           #(.WIDTH(8))                  lat_reg_b_h(reg_b_load | ~op_16bit, reg_z[15:8], reg_b[15:8]);
-  latch           #(.WIDTH(8))                  lat_reg_c_l(reg_c_load, reg_z[7:0], reg_c[7:0]);
-  latch           #(.WIDTH(8))                  lat_reg_c_h(reg_c_load | ~op_16bit, reg_z[15:8], reg_c[15:8]);
-  latch           #(.WIDTH(8))                  lat_reg_d_l(reg_d_load, reg_z[7:0], reg_d[7:0]);
-  latch           #(.WIDTH(8))                  lat_reg_d_h(reg_d_load | ~op_16bit, reg_z[15:8], reg_d[15:8]);
-  latch           #(.WIDTH(16))                 lat_reg_x(reg_x_load, lat_xy, reg_x);
-  latch           #(.WIDTH(16))                 lat_reg_y(reg_y_load, lat_xy, reg_y);
-  latch           #(.WIDTH(16))                 lat_reg_z(reg_z_load, alu_z, reg_z);
-  latch                                         lat_reg_ir(reg_ir_load, bus_data, reg_ir);
-  latch           #(.WIDTH(6))                  lat_reg_ptb(load_ptb, alu_z[5:0], reg_ptb);
-  latch           #(.WIDTH(16))                 lat_reg_mar(reg_mar_load, lat_mar, reg_mar);
-  latch           #(.WIDTH(8))                  lat_reg_mdr_l(.clk(reg_mdr_l_load), .in(lat_mdr[7:0]),  .out(reg_mdr[7:0]));
-  latch           #(.WIDTH(8))                  lat_reg_mdr_h(.clk(reg_mdr_h_load), .in(lat_mdr[15:8]), .out(reg_mdr[15:8]));
+  latch           #(.WIDTH(8))                  lat_reg_a_h(.clk(reg_a_load | ~op_16bit), .reset(1'b0), .in(reg_z[15:8]), .out(reg_a[15:8]));
+  latch           #(.WIDTH(8))                  lat_reg_b_h(.clk(reg_b_load | ~op_16bit), .reset(1'b0), .in(reg_z[15:8]), .out(reg_b[15:8]));
+  latch           #(.WIDTH(8))                  lat_reg_c_h(.clk(reg_c_load | ~op_16bit), .reset(1'b0), .in(reg_z[15:8]), .out(reg_c[15:8]));
+  latch           #(.WIDTH(8))                  lat_reg_d_h(.clk(reg_d_load | ~op_16bit), .reset(1'b0), .in(reg_z[15:8]), .out(reg_d[15:8]));
+  latch           #(.WIDTH(8))                  lat_reg_a_l(.clk(reg_a_load), .reset(1'b0), .in(reg_z[7:0]), .out(reg_a[7:0]));
+  latch           #(.WIDTH(8))                  lat_reg_b_l(.clk(reg_b_load), .reset(1'b0), .in(reg_z[7:0]), .out(reg_b[7:0]));
+  latch           #(.WIDTH(8))                  lat_reg_c_l(.clk(reg_c_load), .reset(1'b0), .in(reg_z[7:0]), .out(reg_c[7:0]));
+  latch           #(.WIDTH(8))                  lat_reg_d_l(.clk(reg_d_load), .reset(1'b0), .in(reg_z[7:0]), .out(reg_d[7:0]));
+  latch           #(.WIDTH(16))                 lat_reg_x(.clk(reg_x_load), .reset(1'b0), .in(lat_xy), .out(reg_x));
+  latch           #(.WIDTH(16))                 lat_reg_y(.clk(reg_y_load), .reset(1'b0), .in(lat_xy), .out(reg_y));
+  latch           #(.WIDTH(16))                 lat_reg_z(.clk(reg_z_load), .reset(1'b0), .in(alu_z),  .out(reg_z));
+  latch                                         lat_reg_ir(.clk(reg_ir_load), .reset(1'b0), .in(bus_data), .out(reg_ir));
+  latch           #(.WIDTH(6))                  lat_reg_ptb(.clk(load_ptb), .reset(1'b0), .in(alu_z[5:0]), .out(reg_ptb));
+  latch           #(.WIDTH(16))                 lat_reg_mar(.clk(reg_mar_load), .reset(1'b0), .in(lat_mar), .out(reg_mar));
+  latch           #(.WIDTH(8))                  lat_reg_mdr_l(.clk(reg_mdr_l_load), .reset(1'b0), .in(lat_mdr[7:0]),  .out(reg_mdr[7:0]));
+  latch           #(.WIDTH(8))                  lat_reg_mdr_h(.clk(reg_mdr_h_load), .reset(1'b0), .in(lat_mdr[15:8]), .out(reg_mdr[15:8]));
   demux_38                                      dmx_reg_load(load_reg, reg_load);
   demux_38                                      dmx_reg_load_ir(reg_x_load_ir_src, reg_load_via_ir);
   mux_88                                        mux_xy_src_l(.sel(reg_xy_src), .a(16'b0000000000000000), .b(reg_a[7:0]), .c(reg_b[7:0]), .d(reg_c[7:0]), .e(reg_d[7:0]), .h(reg_mdr[7:0]),  .y(lat_xy[7:0]));
@@ -131,8 +134,9 @@ module ECLair();
   mux_28                                        mux_mdr_h(.sel(mux_mdr_src), .a(reg_z[15:8]), .b(bus_data[7:0]), .y(lat_mdr[15:8]));
   alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(1'b0), .x(reg_x), .y(reg_y), .z(alu_z));
   main_ram      #(.WIDTH(16), .ADDR_WIDTH(12))  ram_paging(._cs(1'b0), ._oe(1'b0), ._w(~write_pte), .addr(pagetable_addr), .data_in(reg_z), .data_out(pagetable_out));
-  mux_28                                        mux_paging_l(.sel(1'b0), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr[17:10]));
-  mux_28                                        mux_paging_h(.sel(1'b0), .a(8'b0),           .b(pagetable_out[13:8]), .y(bus_addr[23:18]));
+  mux_28                                        mux_paging_l(.sel(paging_enabled), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr[17:10]));
+  mux_28                                        mux_paging_h(.sel(paging_enabled), .a(8'b0),           .b(pagetable_out[13:8]), .y(bus_addr[23:18]));
+  flipflop_d    #(.WIDTH(8))                    flp_reg_flags(.clk(load_flags), .reset(~_reset), .in(reg_z[7:0]), .out(flags));
   
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
@@ -147,6 +151,8 @@ module ECLair();
   assign reg_y_load = ~cs_data[11];
   assign reg_z_load = ~cs_data[12];
   assign load_ptb = ~cs_data[13];
+  assign load_flags = cs_data[14];
+  
   // level-sensitive microcode signals
   assign cs_next_addr = cs_data[32:25];
   assign mux_mar_src = cs_data[33];
@@ -180,6 +186,7 @@ module ECLair();
   assign reg_x_load_ir_src[2] = reg_x_load_ir & reg_ir[7];
   assign pagetable_addr[5:0] = reg_mar[15:10];
   assign pagetable_addr[11:6] = reg_ptb[5:0];
+  assign paging_enabled = flags[0];
   
   always begin
     #40 clk_main = ~clk_main;
@@ -187,11 +194,12 @@ module ECLair();
   
   always @ (clk_main) begin
     if(cs_ready) begin
-      $display("resets: m:%0b e:%0b p:%0b c:%0b", _reset, _ext_reset, _por_reset, cs_ready);
-      $display("cs_addr: %0h", cs_addr);
+      $display("resets:   m:%0b e:%0b p:%0b c:%0b", _reset, _ext_reset, _por_reset, cs_ready);
+      $display("flags:    %08b", flags);
+      $display("cs_addr:  %0h", cs_addr);
       $display("cs_data:  %08b_%08b_%08b_%08b", cs_data[31:24], cs_data[23:16], cs_data[15:8], cs_data[7:0]);
       $display("reg_ir:   %0b", reg_ir);
-      $display("pc: 0x%06X", pc);
+      $display("pc:       0x%06X", pc);
       $display("bus_addr: %08b_%08b_%08b", bus_addr[23:16], bus_addr[15:8], bus_addr[7:0]);
       $display("bus_data: %0b (0x%0h)", bus_data, bus_data);
       $display("reg_mar:  %08b_%08b (0x%0h)", reg_mar[15:8], reg_mar[7:0], reg_mar);

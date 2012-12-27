@@ -28,17 +28,24 @@
 // write a page table entry to map 0 to 0 (writable) in PTB 0
 @012
 00000110    // ldi16.a
-00000000    // immediate low byte for --^
+00000001    // immediate low byte for --^
 11000000    // immediate high byte for --^
 11000110    // ldi16.d
 00000000    // immediate low byte for --^
 00000000    // immediate high byte for --^
 00010010    // write page table entry (addr from d, data from a)
-// done!
 @019
+00010101    // write system flags
+00000001    // immediate for --^ (enables paging, which means the next code runs from 0x419)
+// done!
+@01B
 11111110    // halt
-00000000
-00000000
+11111110    // halt
+11111110    // halt
+@419
+11111110    // halt
+11111110    // halt
+11111110    // halt
 00000000
 00000000
 00000000
