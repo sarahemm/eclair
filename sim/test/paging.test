@@ -1,0 +1,18 @@
+@000
+00000111    // ldi8.ptb
+00000000    // immediate for --^
+00000110    // ldi16.a
+00000001    // immediate low byte for --^
+00000000    // immediate high byte for --^
+11000110    // ldi16.d
+00000000    // immediate low byte for --^
+00000000    // immediate high byte for --^
+00010010    // write page table entry (data from a, addr from d)
+00010101    // write system flags
+00000001    // immediate for --^ (enables paging, which means the next code runs from 0x40B)
+11111110    // halt
+@40B
+11111110    // halt
+
+// expect: pc=0x00000c
+// expect: bus_addr=00000000_00000100_00001011

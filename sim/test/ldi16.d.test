@@ -1,0 +1,11 @@
+@000
+11000110    // ldi16.d
+11010101    // immediate for --^
+11110100    // immediate for --^
+11111110    // halt
+
+// expect: reg_a=xxxxxxxx_xxxxxxxx
+// expect: reg_b=xxxxxxxx_xxxxxxxx
+// expect: reg_c=xxxxxxxx_xxxxxxxx
+// expect: reg_d=11110100_11010101
+// expect: pc=0x000004

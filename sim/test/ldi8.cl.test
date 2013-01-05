@@ -1,0 +1,10 @@
+@000
+10000101    // ldi8.cl
+11000111    // immediate for --^
+11111110    // halt
+
+// expect: reg_a=xxxxxxxx_xxxxxxxx
+// expect: reg_b=xxxxxxxx_xxxxxxxx
+// expect: reg_c=xxxxxxxx_11000111
+// expect: reg_d=xxxxxxxx_xxxxxxxx
+// expect: pc=0x000003
