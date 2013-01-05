@@ -1,0 +1,11 @@
+@000
+00010101    // write system flags
+00000001    // immediate for --^ (enables paging, which means the next code runs from 0x419)
+11111110    // halt
+
+// expect: reg_a=xxxxxxxx_xxxxxxxx
+// expect: reg_b=xxxxxxxx_xxxxxxxx
+// expect: reg_c=xxxxxxxx_xxxxxxxx
+// expect: reg_d=xxxxxxxx_xxxxxxxx
+// expect: flags=00000001
+// expect: pc=0x000003
