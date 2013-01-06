@@ -11,7 +11,7 @@
 00010101    // write system flags
 00000001    // immediate for --^ (enables paging, which means the next code runs from 0x40B)
 11111110    // halt
-@40B
+@40B        // pc: 00B
 11111110    // halt
 
 // expect: pc=0x00000c

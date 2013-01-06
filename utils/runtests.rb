@@ -4,13 +4,29 @@
 require 'colorize'
 
 def run_test(filename)
-  puts "TEST:    #{File.basename(filename).gsub(".test", "")}".light_white
-  # find all the expects and put them into an array
+  puts "\nTEST:    #{File.basename(filename).gsub(".test", "")}".light_white
+  # find all the expects and put them into an array of arrays
+  # expects[pc after which tests are run][register]
   expects = Array.new
   File.open(filename, "r") do |infile|
+    addr = nil
     infile.each_line do |line|
-      next if !expect = line.match(/expect:\s*([^=]+)=(.*)/)
-      expects << {:register => expect[1], :value => expect[2]}
+      if(matches = line.match(/expect:\s*([^=]+)=(.*)/)) then
+        # expect line, record it in the array
+        expects[addr][matches[1]] = matches[2]
+      elsif(matches = line.match(/^@([0-9A-Fa-f]+)$/)) then
+        # new address where ppc=pc
+        addr = matches[1].to_i(16)
+        expects[addr] = Hash.new
+      elsif(matches = line.match(/^@([0-9A-Fa-f]+)\s*\/\/\s*pc:\s*([0-9A-Fa-f]+)$/)) then
+        # new address where ppc and pc are specified separately
+        addr = matches[2].to_i(16)
+        expects[addr] = Hash.new
+      elsif(line.match(/^[01]{8}/)) then
+        # instruction, increment address by 1
+        addr += 1
+        expects[addr] = Hash.new
+      end
     end
   end
   
@@ -25,25 +41,45 @@ def run_test(filename)
   end
   File.unlink "../sim/sysrom.bin"
   
+  # read the log and store all the register values
+  # results are stored only for the last cycle at each pc
+  results = Hash.new
+  last_pc = 0
+  stdout.each_line do |out_line|
+    #if(out_line =~ /^\s*$/) then
+    #  puts "Cycle at PC #{last_pc} is complete."
+    #end
+    next if !reg_val = out_line.match(/(\S+):\s*(\S+)/)
+    if(reg_val[1] == "pc") then
+      last_pc = reg_val[2].to_i(16)
+    end
+    results[last_pc] = Hash.new if !results[last_pc]
+    results[last_pc][reg_val[1]] = reg_val[2]
+  end
+  
   # check each register to make sure it matches what we think it should
-  fails = problems = pass = 0
-  expects.each do |expect|
-    last_val = nil
-    stdout.each_line do |out_line|
-      next if !reg_val = out_line.match(/(\S+):\s*(\S+)/)
-      last_val = reg_val[2] if reg_val[1] == expect[:register]
-    end
-    if(last_val == nil) then
-      problems += 1
-      puts "PROBLEM: Simulator did not report value of register '#{expect[:register]}'.".light_yellow
-      next
-    end
-    if(last_val == expect[:value]) then
-      pass += 1
-      puts "PASS:    #{expect[:register]} is #{expect[:value]}".light_green
-    else
-      fails += 1
-      puts "FAIL:    #{expect[:register]} should be #{expect[:value]} but was #{last_val}".light_red
+  fails = problems = pass = last_pc = 0
+  expects.each_index do |addr|
+    next if !expects[addr] or expects[addr].length == 0
+    puts "ADDR:    Running tests for PC 0x#{addr.to_s(16).upcase}"
+    expects[addr].each do |reg, val|
+      if(results[addr] == nil) then
+        problems += 1
+        puts "PROBLEM: Simulator did not report any values at PC 0x#{addr.to_s(16).upcase}".light_yellow
+        next
+      end
+      if(results[addr][reg] == nil) then
+        problems += 1
+        puts "PROBLEM: Simulator did not report value of register '#{expect[:register]}'".light_yellow
+        next
+      end
+      if(results[addr][reg] == val)
+        pass += 1
+        puts "PASS:    #{reg} is #{val}".light_green
+      else
+        fails += 1
+        puts "FAIL:    #{reg} should be #{val} but was #{results[addr][reg]}".light_red
+      end
     end
   end
   
