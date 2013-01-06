@@ -18,6 +18,7 @@ field load_y      11    1
 field load_z      12    1
 field load_ptb    13    1
 field load_flags  14    1
+field load_status 15    1
 # level-sensitive signals
 field next_addr   25    8
 field src_mar     33    1
@@ -94,7 +95,7 @@ instruction ldi8.ptb    hold_last     load_mar        load_mdr_l      load_x    
 instruction ldi8.ptb    inc_pc        next_addr(fetch)
 
 instruction ldi8.?l     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar
-instruction ldi8.?l     hold_last     load_mar        load_mdr_l      load_x      load_z  load_reg(via_ir)
+instruction ldi8.?l     hold_last     load_mar        load_mdr_l      load_x      load_z  load_reg(via_ir)  load_status
 instruction ldi8.?l     inc_pc        next_addr(fetch)
 
 instruction ldi16.?     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read
