@@ -74,6 +74,8 @@ module ECLair();
   wire  [15:0]  lat_mdr;
   wire  [15:0]  lat_xy;
   wire  [15:0]  alu_z;
+  wire          alu_cout8;
+  wire          alu_cout16;
   wire  [11:0]  pagetable_addr; // currently selected address in the pagetable
   wire  [15:0]  pagetable_out;  // output from the page table
   wire  [5:0]   reg_ptb;        // currently addressed page table block
@@ -138,7 +140,7 @@ module ECLair();
   mux_28                                        mux_mar_h(.sel(mux_mar_src), .a(reg_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
   mux_28                                        mux_mdr_l(.sel(mux_mdr_src), .a(reg_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
   mux_28                                        mux_mdr_h(.sel(mux_mdr_src), .a(reg_z[15:8]), .b(bus_data[7:0]), .y(lat_mdr[15:8]));
-  alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(1'b0), .x(reg_x), .y(reg_y), .z(alu_z));
+  alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(1'b0), .x(reg_x), .y(reg_y), .z(alu_z), .c_out8(alu_cout8), .c_out16(alu_cout16));
   main_ram      #(.WIDTH(16), .ADDR_WIDTH(12))  ram_paging(._cs(1'b0), ._oe(1'b0), ._w(~write_pte), .addr(pagetable_addr), .data_in(reg_z), .data_out(pagetable_out));
   mux_28                                        mux_paging_l(.sel(paging_enabled), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr[17:10]));
   mux_28                                        mux_paging_h(.sel(paging_enabled), .a(8'b0),           .b(pagetable_out[13:8]), .y(bus_addr[23:18]));
@@ -160,7 +162,7 @@ module ECLair();
   assign reg_z_load = ~cs_data[12];
   assign load_ptb = ~cs_data[13];
   assign load_flags = cs_data[14];
-  assign load_status = cs_data[15];
+  assign load_status = ~cs_data[15];
   
   // level-sensitive microcode signals
   assign cs_next_addr = cs_data[32:25];
@@ -200,6 +202,8 @@ module ECLair();
   assign status_z_16 = (reg_z == 16'd0);
   assign status_8[0]  = status_z_8;
   assign status_16[0] = status_z_16;
+  assign status_8[1]  = alu_cout8;
+  assign status_16[1] = alu_cout16;
   
   always begin
     #40 clk_main = ~clk_main;

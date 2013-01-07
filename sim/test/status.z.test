@@ -3,20 +3,20 @@
 00000110    // ldi16.a
 10101010    // immediate for --^
 01010101    // immediate for --^
-// expect: status=zzzzzzz0
+// expect: status=zzzzzz00
 01000110    // ldi16.b
 00000000    // immediate for --^
 00000000    // immediate for --^
-// expect: status=zzzzzzz1
+// expect: status=zzzzzz01
 // add the two 16s and make sure Z is unset
 00001011    // add16.ab
-// expect: status=zzzzzzz0
+// expect: status=zzzzzz00
 // change register A so that the value will be zero
 00000110    // ldi16.a
 00000000    // immediate for --^
 00000000    // immediate for --^
-// expect: status=zzzzzzz1
+// expect: status=zzzzzz01
 // add the two zeroes together, make sure at Z is set
 00001011    // add16.ab
-// expect: status=zzzzzzz1
+// expect: status=zzzzzz01
 11111110    // halt

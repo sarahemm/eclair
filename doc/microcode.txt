@@ -101,24 +101,24 @@ instruction ldi8.?l     inc_pc        next_addr(fetch)
 instruction ldi16.?     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read
 instruction ldi16.?     hold_last     load_mar        load_mdr_l
 instruction ldi16.?     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    inc_pc          op_16bit
-instruction ldi16.?     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        load_mdr_h      load_y    load_x      load_z  load_reg(via_ir)  op_16bit
+instruction ldi16.?     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        load_mdr_h      load_y    load_x      load_z  load_reg(via_ir)  op_16bit  load_status
 instruction ldi16.?     inc_pc        next_addr(fetch)
 
 instruction add16.ab    src_xy(a)     load_x
 instruction add16.ab    src_xy(b)     load_y
-instruction add16.ab    alu_mode(arith) alu_op(add)   op_16bit        load_z        load_reg(a)     next_addr(fetch)
+instruction add16.ab    alu_mode(arith) alu_op(add)   op_16bit        load_z        load_reg(a)     next_addr(fetch)  load_status
 
-instruction jmp                       src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)     load_mdr_l
-instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)     load_mdr_h
+instruction jmp                       src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       load_mdr_l
+instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       load_mdr_h
 instruction jmp         src_xy(mdr)   alu_op(x)       load_x          load_z
 instruction jmp         load_pc       next_addr(fetch)
 
 instruction wrpte       alu_op(x)     src_xy(d)       load_x          load_z        src_mar(z)      load_mar
-instruction wrpte       alu_op(x)     src_xy(a)       load_x          load_z        
+instruction wrpte       alu_op(x)     src_xy(a)       load_x          load_z        load_status
 instruction wrpte       write_pte     next_addr(fetch)
 
 instruction ldi8.flags  src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar
-instruction ldi8.flags  hold_last     load_mar        load_mdr_l      load_x      load_z
+instruction ldi8.flags  hold_last     load_mar        load_mdr_l      load_x      load_z    load_status
 instruction ldi8.flags  load_flags    inc_pc          next_addr(fetch)
 
 instruction hlt         next_addr(hlt)
