@@ -1,0 +1,12 @@
+@000
+00000101    // ldi8.al
+11111110    // immediate for --^
+01000101    // ldi8.b
+00000001    // immediate for --^
+00011000    // add8.ab
+// expect: status=zzzzzz00
+00000101    // ldi8.al
+11111111    // immediate for --^
+00011000    // add8.ab
+// expect: status=zzzzzz11
+11111110    // halt
