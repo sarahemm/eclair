@@ -29,30 +29,34 @@ field src_xy      40    3
 field mem_read    43    1
 field mem_write   44    1
 field op_16bit    45    1
+field branch_cond 46    3
 
 # enums - names for values that go into bit positions
-enum  src_mar   z       0
-enum  src_mar   pc      1
-enum  src_mdr   z       0
-enum  src_mdr   data    1
-enum  load_reg  a       1
-enum  load_reg  b       2
-enum  load_reg  c       3
-enum  load_reg  d       4
-enum  load_reg  sp      5
-enum  load_reg  via_ir  7
-enum  alu_mode  arith   0
-enum  alu_mode  logic   1
-enum  alu_op    x       0
-enum  alu_op    add     6
-enum  src_xy    zero    0
-enum  src_xy    a       1
-enum  src_xy    b       2
-enum  src_xy    c       3
-enum  src_xy    d       4
-enum  src_xy    sp      5
-enum  src_xy    mar     6
-enum  src_xy    mdr     7
+enum  src_mar     z       0
+enum  src_mar     pc      1
+enum  src_mdr     z       0
+enum  src_mdr     data    1
+enum  load_reg    a       1
+enum  load_reg    b       2
+enum  load_reg    c       3
+enum  load_reg    d       4
+enum  load_reg    sp      5
+enum  load_reg    via_ir  7
+enum  alu_mode    arith   0
+enum  alu_mode    logic   1
+enum  alu_op      x       0
+enum  alu_op      add     6
+enum  src_xy      zero    0
+enum  src_xy      a       1
+enum  src_xy      b       2
+enum  src_xy      c       3
+enum  src_xy      d       4
+enum  src_xy      sp      5
+enum  src_xy      mar     6
+enum  src_xy      mdr     7
+enum  branch_cond always  0
+enum  branch_cond z       1
+enum  branch_cond co      2
 
 # locations - start addresses of instructions
 location    init        0
@@ -73,6 +77,7 @@ location    jmp         14    # unconditional immediate jump
 location    wrpte       18    # write page table entry using data in a and address in d
 location    ldi8.flags  21    # load immediate 8 bits into system flags
 location    add8.ab     24    # add lower 8 bits of a and b registers, result goes into a
+location    jmpz        27    # jump if Z
 location    hlt         254
 
 # instructions - each one is one word of microcode, glues everything above together
@@ -116,7 +121,12 @@ instruction add8.ab     alu_mode(arith) alu_op(add)                   load_z    
 instruction jmp                       src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       load_mdr_l
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       load_mdr_h
 instruction jmp         src_xy(mdr)   alu_op(x)       load_x          load_z
-instruction jmp         load_pc       next_addr(fetch)
+instruction jmp         branch_cond(always)           load_pc         next_addr(fetch)
+
+instruction jmpz                      src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       load_mdr_l
+instruction jmpz        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       load_mdr_h
+instruction jmpz        src_xy(mdr)   alu_op(x)       load_x          load_z
+instruction jmpz        branch_cond(z)                inc_pc          load_pc       next_addr(fetch)
 
 instruction wrpte       alu_op(x)     src_xy(d)       load_x          load_z        src_mar(z)      load_mar
 instruction wrpte       alu_op(x)     src_xy(a)       load_x          load_z        load_status

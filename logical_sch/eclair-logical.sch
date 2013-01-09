@@ -1258,6 +1258,26 @@
 <pin name="A" x="-10.16" y="5.08" visible="off" length="middle" direction="in"/>
 <pin name="D" x="-10.16" y="-5.08" visible="off" length="middle" direction="in"/>
 </symbol>
+<symbol name="MUX-8X1">
+<pin name="SEL0" x="-12.7" y="12.7" visible="pin" length="middle" direction="in"/>
+<pin name="A0" x="-12.7" y="2.54" visible="pin" length="middle" direction="in"/>
+<pin name="Y0" x="12.7" y="2.54" visible="pin" length="middle" direction="out" rot="R180"/>
+<wire x1="-7.62" y1="15.24" x2="-7.62" y2="-17.78" width="0.254" layer="94"/>
+<wire x1="-7.62" y1="-17.78" x2="7.62" y2="-17.78" width="0.254" layer="94"/>
+<wire x1="7.62" y1="-17.78" x2="7.62" y2="15.24" width="0.254" layer="94"/>
+<wire x1="7.62" y1="15.24" x2="-7.62" y2="15.24" width="0.254" layer="94"/>
+<pin name="B0" x="-12.7" y="0" visible="pin" length="middle" direction="in"/>
+<text x="-7.366" y="15.748" size="1.778" layer="95">&gt;NAME</text>
+<text x="-7.366" y="-20.066" size="1.778" layer="96">&gt;VALUE</text>
+<pin name="C0" x="-12.7" y="-2.54" visible="pin" length="middle" direction="in"/>
+<pin name="D0" x="-12.7" y="-5.08" visible="pin" length="middle" direction="in"/>
+<pin name="E0" x="-12.7" y="-7.62" visible="pin" length="middle" direction="in"/>
+<pin name="F0" x="-12.7" y="-10.16" visible="pin" length="middle" direction="in"/>
+<pin name="G0" x="-12.7" y="-12.7" visible="pin" length="middle" direction="in"/>
+<pin name="H0" x="-12.7" y="-15.24" visible="pin" length="middle" direction="in"/>
+<pin name="SEL1" x="-12.7" y="10.16" visible="pin" length="middle" direction="in"/>
+<pin name="SEL2" x="-12.7" y="7.62" visible="pin" length="middle" direction="in"/>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="MUX-2X8" prefix="MUX" uservalue="yes">
@@ -2228,6 +2248,32 @@
 <connect gate="G$1" pin="C" pad="P$3"/>
 <connect gate="G$1" pin="D" pad="P$4"/>
 <connect gate="G$1" pin="Y" pad="P$5"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="MUX-8X1" prefix="MUX" uservalue="yes">
+<gates>
+<gate name="G$1" symbol="MUX-8X1" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="NULL">
+<connects>
+<connect gate="G$1" pin="A0" pad="P$1"/>
+<connect gate="G$1" pin="B0" pad="P$2"/>
+<connect gate="G$1" pin="C0" pad="P$3"/>
+<connect gate="G$1" pin="D0" pad="P$4"/>
+<connect gate="G$1" pin="E0" pad="P$5"/>
+<connect gate="G$1" pin="F0" pad="P$6"/>
+<connect gate="G$1" pin="G0" pad="P$7"/>
+<connect gate="G$1" pin="H0" pad="P$8"/>
+<connect gate="G$1" pin="SEL0" pad="P$9"/>
+<connect gate="G$1" pin="SEL1" pad="P$10"/>
+<connect gate="G$1" pin="SEL2" pad="P$11"/>
+<connect gate="G$1" pin="Y0" pad="P$12"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -6033,6 +6079,9 @@ In this library the device names are the same as the pin names of the symbols, t
 <part name="NOR7" library="logicalgates-sen" deviceset="NOR-2" device=""/>
 <part name="MUX10" library="logicalgates-sen" deviceset="MUX-2X8" device=""/>
 <part name="LAT19" library="logicalgates-sen" deviceset="LATCH-8" device="" value="ALU Status"/>
+<part name="MUX11" library="logicalgates-sen" deviceset="MUX-8X1" device="" value="Branch Condition"/>
+<part name="SUPPLY10" library="supply2" deviceset="V+" device=""/>
+<part name="AND11" library="logicalgates-sen" deviceset="AND-2" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -6049,8 +6098,8 @@ In this library the device names are the same as the pin names of the symbols, t
 <instance part="CTR3" gate="G$1" x="132.08" y="106.68" rot="R90"/>
 <instance part="MUX4" gate="G$1" x="58.42" y="152.4" rot="R90"/>
 <instance part="MUX5" gate="G$1" x="116.84" y="152.4" rot="R90"/>
-<instance part="SUPPLY3" gate="1" x="55.88" y="121.92" smashed="yes" rot="R90">
-<attribute name="VALUE" x="55.118" y="120.904" size="1.778" layer="96" rot="R90"/>
+<instance part="SUPPLY3" gate="1" x="60.96" y="124.46" smashed="yes">
+<attribute name="VALUE" x="59.944" y="125.222" size="1.778" layer="96"/>
 </instance>
 <instance part="MUX6" gate="G$1" x="109.22" y="30.48" rot="R90"/>
 <instance part="LAT1" gate="G$1" x="114.3" y="58.42" rot="R90"/>
@@ -6058,6 +6107,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <instance part="FRAME8" gate="G$2" x="173.99" y="0">
 <attribute name="REV" x="173.99" y="0" size="1.778" layer="96" display="off"/>
 </instance>
+<instance part="AND11" gate="G$1" x="30.48" y="86.36"/>
 </instances>
 <busses>
 <bus name="DATA[0..7]">
@@ -6461,7 +6511,6 @@ In this library the device names are the same as the pin names of the symbols, t
 <segment>
 <pinref part="CTR2" gate="G$1" pin="CE"/>
 <wire x1="60.96" y1="119.38" x2="60.96" y2="121.92" width="0.1524" layer="91"/>
-<wire x1="58.42" y1="121.92" x2="60.96" y2="121.92" width="0.1524" layer="91"/>
 <pinref part="SUPPLY3" gate="1" pin="V+"/>
 </segment>
 </net>
@@ -7002,18 +7051,6 @@ In this library the device names are the same as the pin names of the symbols, t
 <junction x="60.96" y="88.9"/>
 </segment>
 </net>
-<net name="LOAD_PC" class="0">
-<segment>
-<pinref part="CTR2" gate="G$1" pin="LOAD"/>
-<wire x1="63.5" y1="93.98" x2="63.5" y2="86.36" width="0.1524" layer="91"/>
-<label x="58.42" y="86.36" size="1.27" layer="95" rot="R180" xref="yes"/>
-<pinref part="CTR3" gate="G$1" pin="LOAD"/>
-<wire x1="63.5" y1="86.36" x2="58.42" y2="86.36" width="0.1524" layer="91"/>
-<wire x1="121.92" y1="93.98" x2="121.92" y2="86.36" width="0.1524" layer="91"/>
-<wire x1="121.92" y1="86.36" x2="63.5" y2="86.36" width="0.1524" layer="91"/>
-<junction x="63.5" y="86.36"/>
-</segment>
-</net>
 <net name="MDR_SRC" class="0">
 <segment>
 <pinref part="MUX2" gate="G$1" pin="SEL"/>
@@ -7032,6 +7069,33 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="43.18" y1="134.62" x2="43.18" y2="132.08" width="0.1524" layer="91"/>
 <junction x="43.18" y="134.62"/>
 <label x="43.18" y="132.08" size="1.27" layer="95" rot="R270" xref="yes"/>
+</segment>
+</net>
+<net name="REALLY_LOAD_PC" class="0">
+<segment>
+<pinref part="CTR2" gate="G$1" pin="LOAD"/>
+<wire x1="63.5" y1="93.98" x2="63.5" y2="86.36" width="0.1524" layer="91"/>
+<pinref part="CTR3" gate="G$1" pin="LOAD"/>
+<wire x1="121.92" y1="93.98" x2="121.92" y2="86.36" width="0.1524" layer="91"/>
+<wire x1="121.92" y1="86.36" x2="63.5" y2="86.36" width="0.1524" layer="91"/>
+<pinref part="AND11" gate="G$1" pin="Y"/>
+<wire x1="63.5" y1="86.36" x2="43.18" y2="86.36" width="0.1524" layer="91"/>
+<junction x="63.5" y="86.36"/>
+<label x="74.422" y="86.868" size="1.016" layer="95"/>
+</segment>
+</net>
+<net name="LOAD_PC" class="0">
+<segment>
+<pinref part="AND11" gate="G$1" pin="A"/>
+<wire x1="20.32" y1="88.9" x2="17.78" y2="88.9" width="0.1524" layer="91"/>
+<label x="17.78" y="88.9" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+</net>
+<net name="BRANCH_COND_MET" class="0">
+<segment>
+<pinref part="AND11" gate="G$1" pin="B"/>
+<wire x1="17.78" y1="83.82" x2="20.32" y2="83.82" width="0.1524" layer="91"/>
+<label x="17.78" y="83.82" size="1.27" layer="95" rot="R270" xref="yes"/>
 </segment>
 </net>
 </nets>
@@ -9010,6 +9074,12 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="166.878" y="188.722" size="1.27" layer="95" rot="R90"/>
 </segment>
 </bus>
+<bus name="BRANCH_COND[0..2]">
+<segment>
+<wire x1="200.66" y1="187.96" x2="218.44" y2="187.96" width="0.762" layer="92"/>
+<label x="200.914" y="188.722" size="1.27" layer="95"/>
+</segment>
+</bus>
 </busses>
 <nets>
 <net name="CS_ADDR0" class="0">
@@ -10772,12 +10842,31 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="68.58" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
+<net name="BRANCH_COND0" class="0">
+<segment>
+<pinref part="LINK6" gate="G$1" pin="B7"/>
+<wire x1="200.66" y1="187.96" x2="200.66" y2="185.42" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="BRANCH_COND1" class="0">
+<segment>
+<pinref part="LINK6" gate="G$1" pin="B8"/>
+<wire x1="203.2" y1="185.42" x2="203.2" y2="187.96" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="BRANCH_COND2" class="0">
+<segment>
+<pinref part="LINK7" gate="G$1" pin="B1"/>
+<wire x1="218.44" y1="185.42" x2="218.44" y2="187.96" width="0.1524" layer="91"/>
+</segment>
+</net>
 </nets>
 </sheet>
 <sheet>
 <description>Sequencing</description>
 <plain>
 <text x="271.78" y="208.28" size="7.62" layer="94" ratio="10" rot="R180">Sequencing</text>
+<text x="134.62" y="139.7" size="5.08" layer="97" rot="R90">TBD</text>
 </plain>
 <instances>
 <instance part="MUX1" gate="G$1" x="124.46" y="116.84" smashed="yes">
@@ -12205,6 +12294,10 @@ In this library the device names are the same as the pin names of the symbols, t
 <instance part="NOR4" gate="G$1" x="58.42" y="50.8"/>
 <instance part="NOR5" gate="G$1" x="58.42" y="35.56"/>
 <instance part="AND9" gate="G$1" x="86.36" y="43.18"/>
+<instance part="MUX11" gate="G$1" x="66.04" y="162.56"/>
+<instance part="SUPPLY10" gate="1" x="48.26" y="165.1" smashed="yes" rot="R90">
+<attribute name="VALUE" x="47.498" y="164.338" size="1.778" layer="96" rot="R90"/>
+</instance>
 </instances>
 <busses>
 <bus name="LOAD_REG[0..2]">
@@ -12219,6 +12312,13 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="43.18" y1="22.86" x2="45.72" y2="25.4" width="0.762" layer="92"/>
 <wire x1="45.72" y1="25.4" x2="45.72" y2="53.34" width="0.762" layer="92"/>
 <label x="42.672" y="22.098" size="1.27" layer="95" rot="R180"/>
+</segment>
+</bus>
+<bus name="BRANCH_COND[0..2]">
+<segment>
+<wire x1="48.26" y1="182.88" x2="50.8" y2="180.34" width="0.762" layer="92"/>
+<wire x1="50.8" y1="180.34" x2="50.8" y2="172.72" width="0.762" layer="92"/>
+<label x="48.26" y="185.166" size="1.778" layer="95" rot="R180"/>
 </segment>
 </bus>
 </busses>
@@ -12470,6 +12570,52 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="73.66" y1="35.56" x2="73.66" y2="40.64" width="0.1524" layer="91"/>
 <pinref part="AND9" gate="G$1" pin="B"/>
 <wire x1="73.66" y1="40.64" x2="76.2" y2="40.64" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="V+" class="0">
+<segment>
+<pinref part="SUPPLY10" gate="1" pin="V+"/>
+<pinref part="MUX11" gate="G$1" pin="A0"/>
+<wire x1="50.8" y1="165.1" x2="53.34" y2="165.1" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$173" class="0">
+<segment>
+<pinref part="MUX11" gate="G$1" pin="SEL0"/>
+<wire x1="53.34" y1="175.26" x2="50.8" y2="177.8" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$174" class="0">
+<segment>
+<pinref part="MUX11" gate="G$1" pin="SEL1"/>
+<wire x1="50.8" y1="175.26" x2="53.34" y2="172.72" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="BUX" class="0">
+<segment>
+<pinref part="MUX11" gate="G$1" pin="SEL2"/>
+<wire x1="53.34" y1="170.18" x2="50.8" y2="172.72" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="STATUS_Z" class="0">
+<segment>
+<pinref part="MUX11" gate="G$1" pin="B0"/>
+<wire x1="53.34" y1="162.56" x2="50.8" y2="162.56" width="0.1524" layer="91"/>
+<label x="50.8" y="162.56" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+</net>
+<net name="STATUS_CO" class="0">
+<segment>
+<pinref part="MUX11" gate="G$1" pin="C0"/>
+<wire x1="53.34" y1="160.02" x2="50.8" y2="160.02" width="0.1524" layer="91"/>
+<label x="50.8" y="160.02" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+</net>
+<net name="BRANCH_COND_MET" class="0">
+<segment>
+<pinref part="MUX11" gate="G$1" pin="Y0"/>
+<wire x1="78.74" y1="165.1" x2="81.28" y2="165.1" width="0.1524" layer="91"/>
+<label x="81.28" y="165.1" size="1.27" layer="95" xref="yes"/>
 </segment>
 </net>
 </nets>

@@ -91,6 +91,9 @@ module ECLair();
   wire          status_z_16;    // last operation result was zero (16-bit)
   wire  [7:0]   status_8;       // status byte full of 8-bit-operation status information
   wire  [7:0]   status_16;      // status byte full of 16-bit-operation status information
+  wire          branch_cond_met;  // branch condition is met
+  wire          really_load_pc;   // request to load pc and branch condition is met
+  wire  [2:0]   branch_cond;    // which branch condition to use
   
   initial begin
     //$dumpfile("eclair.vcd");
@@ -115,7 +118,7 @@ module ECLair();
   flipflop_d      #(.WIDTH(40))                 flp_ram_cs_l(.clk(clk_cs_dly), .reset(1'b0), .in(cs_data_prelatch[63:24]), .out(cs_data[63:24]));
   main_ram                                      ram_main(._cs(1'b0), ._oe(addr_ram), ._w(ram__w), .addr(bus_addr[19:0]), .data_in(bus_data), .data_out(bus_data));
   main_eprom      #(.ROM_FILE("sysrom.bin"))    rom_boot(1'b0, addr_rom, bus_addr[19:0], bus_data);
-  counter         #(.WIDTH(16))                 ctr_pc(.clk(inc_pc), .ce(1'b1), .reset(~_reset), .out(pc), .load(load_pc), .preset(reg_z));
+  counter         #(.WIDTH(16))                 ctr_pc(.clk(inc_pc), .ce(1'b1), .reset(~_reset), .out(pc), .load(really_load_pc), .preset(reg_z));
   latch           #(.WIDTH(8))                  lat_reg_a_h(.clk(reg_a_load | ~op_16bit), .reset(1'b0), .in(reg_z[15:8]), .out(reg_a[15:8]));
   latch           #(.WIDTH(8))                  lat_reg_b_h(.clk(reg_b_load | ~op_16bit), .reset(1'b0), .in(reg_z[15:8]), .out(reg_b[15:8]));
   latch           #(.WIDTH(8))                  lat_reg_c_h(.clk(reg_c_load | ~op_16bit), .reset(1'b0), .in(reg_z[15:8]), .out(reg_c[15:8]));
@@ -147,7 +150,7 @@ module ECLair();
   flipflop_d    #(.WIDTH(8))                    flp_reg_flags(.clk(load_flags), .reset(~_reset), .in(reg_z[7:0]), .out(flags));
   latch         #(.WIDTH(8))                    lat_reg_status(.clk(load_status), .reset(~_reset), .in(status_in), .out(status));
   mux_28                                        mux_status(.sel(op_16bit), .a(status_8), .b(status_16), .y(status_in));
-  
+  mux_18                                        mux_branch_cond(.sel(branch_cond), .a(1'b1), .b(status[0]), .c(status[1]), .y(branch_cond_met));
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
   assign reg_mdr_l_load = ~cs_data[1];
@@ -174,6 +177,7 @@ module ECLair();
   assign ram_read = cs_data[43];
   assign ram_write = cs_data[44];
   assign op_16bit = cs_data[45];
+  assign branch_cond = cs_data[48:46];
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
@@ -204,6 +208,7 @@ module ECLair();
   assign status_16[0] = status_z_16;
   assign status_8[1]  = alu_cout8;
   assign status_16[1] = alu_cout16;
+  assign really_load_pc = load_pc & branch_cond_met;
   
   always begin
     #40 clk_main = ~clk_main;
