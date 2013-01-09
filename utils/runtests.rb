@@ -99,8 +99,15 @@ def run_test(filename)
   return fails, problems, pass
 end
 
+filespec = nil
+if(ARGV[0]) then
+  filespec = ARGV[0]
+else
+  filespec = "../sim/test/*.test"
+end
+
 total_fails = total_problems = total_pass = 0
-Dir.glob("../sim/test/*.test") do |test_file|
+Dir.glob(filespec) do |test_file|
   test_fails, test_problems, test_pass = run_test(test_file)
   total_fails += test_fails
   total_problems += test_problems
