@@ -6082,7 +6082,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <part name="MUX11" library="logicalgates-sen" deviceset="MUX-8X1" device="" value="Branch Condition"/>
 <part name="SUPPLY10" library="supply2" deviceset="V+" device=""/>
 <part name="AND11" library="logicalgates-sen" deviceset="AND-2" device=""/>
-<part name="MUX12" library="logicalgates-sen" deviceset="MUX-2X8" device=""/>
+<part name="MUX12" library="logicalgates-sen" deviceset="MUX-2X8" device="" value="PTB Mux"/>
 <part name="SUPPLY11" library="supply2" deviceset="V-" device=""/>
 </parts>
 <sheets>
