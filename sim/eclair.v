@@ -78,7 +78,8 @@ module ECLair();
   wire          alu_cout16;
   wire  [11:0]  pagetable_addr; // currently selected address in the pagetable
   wire  [15:0]  pagetable_out;  // output from the page table
-  wire  [5:0]   reg_ptb;        // currently addressed page table block
+  wire  [5:0]   reg_ptb;        // currently addressed page table block register output
+  wire  [5:0]   ptb;            // currently addressed page table block (taking into account supervisor mode PTB=0)
   wire          write_pte;      // 1=write page table entry
   wire          load_ptb;       // load PTB register from Z
   wire          load_flags;     // load system flags from Z
@@ -86,6 +87,7 @@ module ECLair();
   wire  [7:0]   flags;          // system flags (paging enabled, etc.)
   wire  [7:0]   status;         // system status (ALU zero, carry/overflow, etc.)
   wire          paging_enabled; // paging is enabled, all addresses run through the page table
+  wire          mode;           // supervisor (0) or user (1) mode
   wire  [7:0]   status_in;      // input to status latch (output from 8/16 status selector mux)
   wire          status_z_8;     // last operation result was zero (8-bit)
   wire          status_z_16;    // last operation result was zero (16-bit)
@@ -108,8 +110,8 @@ module ECLair();
   counter         #(.WIDTH(3))                  ctr_clk_divider(.clk(clk_main), .ce(1'b1), .reset(1'b0), .out(clk_divided), .load(1'b0), .preset(3'b000));
   flipflop_jk                                   flp_cs_ready(.clk(top_of_cs), .j(1'b1), .k(1'b0), .q(cs_ready));
   mux_21                                        mux_cs_clk_selector(cs_ready, clk_quarter, clk_main, clk_cs);
-  mux_28                                        mux_cs_addr(.sel(cs_ready), .a(cs_addr_init), .b(cs_addr_run), .y(cs_addr));
-  mux_28                                        mux_cs_next_addr(.sel(cs_next_addr == 8'b00000000), .a(cs_next_addr), .b(reg_ir), .y(next_addr));
+  mux_2x                                        mux_cs_addr(.sel(cs_ready), .a(cs_addr_init), .b(cs_addr_run), .y(cs_addr));
+  mux_2x                                        mux_cs_next_addr(.sel(cs_next_addr == 8'b00000000), .a(cs_next_addr), .b(reg_ir), .y(next_addr));
   counter         #(.WIDTH(8))                  ctr_cs_seq(.clk(clk_cs), .ce(~cs_ready), .reset(~_por_reset), .out(cs_addr_init), .load(1'b0), .preset(8'b00000000));
   flipflop_d      #(.WIDTH(8))                  flp_cs_addr(.clk(clk_cs), .reset(~cs_ready), .in(next_addr), .out(cs_addr_run));
   microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(1'b0, 1'b0, cs_addr, cs_rom_data);
@@ -139,18 +141,20 @@ module ECLair();
   demux_38                                      dmx_reg_load_ir(reg_x_load_ir_src, reg_load_via_ir);
   mux_88                                        mux_xy_src_l(.sel(reg_xy_src), .a(8'b00000000), .b(reg_a[7:0]), .c(reg_b[7:0]), .d(reg_c[7:0]), .e(reg_d[7:0]), .h(reg_mdr[7:0]),  .y(lat_xy[7:0]));
   mux_88                                        mux_xy_src_h(.sel(reg_xy_src), .a(8'b00000000), .b(reg_a[15:8]), .c(reg_b[15:8]), .d(reg_c[15:8]), .e(reg_d[15:8]), .h(reg_mdr[15:8]), .y(lat_xy[15:8]));
-  mux_28                                        mux_mar_l(.sel(mux_mar_src), .a(reg_z[7:0]),  .b(pc[7:0]),  .y(lat_mar[7:0]));
-  mux_28                                        mux_mar_h(.sel(mux_mar_src), .a(reg_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
-  mux_28                                        mux_mdr_l(.sel(mux_mdr_src), .a(reg_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
-  mux_28                                        mux_mdr_h(.sel(mux_mdr_src), .a(reg_z[15:8]), .b(bus_data[7:0]), .y(lat_mdr[15:8]));
+  mux_2x                                        mux_mar_l(.sel(mux_mar_src), .a(reg_z[7:0]),  .b(pc[7:0]),  .y(lat_mar[7:0]));
+  mux_2x                                        mux_mar_h(.sel(mux_mar_src), .a(reg_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
+  mux_2x                                        mux_mdr_l(.sel(mux_mdr_src), .a(reg_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
+  mux_2x                                        mux_mdr_h(.sel(mux_mdr_src), .a(reg_z[15:8]), .b(bus_data[7:0]), .y(lat_mdr[15:8]));
+  mux_2x          #(.WIDTH(6))                  mux_ptb(.sel(mode), .a(6'b000000), .b(reg_ptb), .y(ptb));
   alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(1'b0), .x(reg_x), .y(reg_y), .z(alu_z), .c_out8(alu_cout8), .c_out16(alu_cout16));
   main_ram      #(.WIDTH(16), .ADDR_WIDTH(12))  ram_paging(._cs(1'b0), ._oe(1'b0), ._w(~write_pte), .addr(pagetable_addr), .data_in(reg_z), .data_out(pagetable_out));
-  mux_28                                        mux_paging_l(.sel(paging_enabled), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr[17:10]));
-  mux_28                                        mux_paging_h(.sel(paging_enabled), .a(8'b0),           .b(pagetable_out[13:8]), .y(bus_addr[23:18]));
+  mux_2x                                        mux_paging_l(.sel(paging_enabled), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr[17:10]));
+  mux_2x        #(.WIDTH(6))                    mux_paging_h(.sel(paging_enabled), .a(6'b0),           .b(pagetable_out[13:8]), .y(bus_addr[23:18]));
   flipflop_d    #(.WIDTH(8))                    flp_reg_flags(.clk(load_flags), .reset(~_reset), .in(reg_z[7:0]), .out(flags));
   latch         #(.WIDTH(8))                    lat_reg_status(.clk(load_status), .reset(~_reset), .in(status_in), .out(status));
-  mux_28                                        mux_status(.sel(op_16bit), .a(status_8), .b(status_16), .y(status_in));
+  mux_2x                                        mux_status(.sel(op_16bit), .a(status_8), .b(status_16), .y(status_in));
   mux_18                                        mux_branch_cond(.sel(branch_cond), .a(1'b1), .b(status[0]), .c(status[1]), .y(branch_cond_met));
+  
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
   assign reg_mdr_l_load = ~cs_data[1];
@@ -200,8 +204,9 @@ module ECLair();
   assign reg_x_load_ir_src[1] = reg_x_load_ir & reg_ir[6];
   assign reg_x_load_ir_src[2] = reg_x_load_ir & reg_ir[7];
   assign pagetable_addr[5:0] = reg_mar[15:10];
-  assign pagetable_addr[11:6] = reg_ptb[5:0];
+  assign pagetable_addr[11:6] = ptb[5:0];
   assign paging_enabled = flags[0];
+  assign mode = flags[1];
   assign status_z_8  = (reg_z[7:0] == 8'd0);
   assign status_z_16 = (reg_z == 16'd0);
   assign status_8[0]  = status_z_8;
@@ -222,6 +227,7 @@ module ECLair();
       $display("pc:       0x%06X", pc);
       $display("flags:    %08b", flags);
       $display("status:   %08b", status);
+      $display("ptb:      %06b", ptb);
       $display("bus_addr: %08b_%08b_%08b", bus_addr[23:16], bus_addr[15:8], bus_addr[7:0]);
       $display("bus_data: %0b (0x%0h)", bus_data, bus_data);
       $display("reg_ir:   %0b", reg_ir);
