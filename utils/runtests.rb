@@ -70,7 +70,7 @@ def run_test(filename)
       end
       if(results[addr][reg] == nil) then
         problems += 1
-        puts "PROBLEM: Simulator did not report value of register '#{expect[:register]}'".light_yellow
+        puts "PROBLEM: Simulator did not report value of register '#{reg}'".light_yellow
         next
       end
       if(results[addr][reg] == val)
