@@ -1,6 +1,9 @@
 @000
+00010101    // write system flags
+00000010    // immediate for --^ (switches to user mode but leaves paging off)
+// set up page table block 1 (actually used to page)
 00000111    // ldi8.ptb
-00000000    // immediate for --^
+00000001    // immediate for --^
 00000110    // ldi16.a
 00000001    // immediate low byte for --^
 00000000    // immediate high byte for --^
@@ -8,11 +11,27 @@
 00000000    // immediate low byte for --^
 00000000    // immediate high byte for --^
 00010010    // write page table entry (data from a, addr from d)
+// second page table block, (used to make sure we can have two blocks
+// that don't interfere with each other)
+@00B
+00000111    // ldi8.ptb
+00000010    // immediate for --^
+00000110    // ldi16.a
+00000010    // immediate low byte for --^
+00000000    // immediate high byte for --^
+11000110    // ldi16.d
+00000000    // immediate low byte for --^
+00000000    // immediate high byte for --^
+00010010    // write page table entry (data from a, addr from d)
+// switch back to PTB 1, enable paging, and make sure the address jumps
+@014
+00000111    // ldi8.ptb
+00000001    // immediate for --^
 00010101    // write system flags
-00000001    // immediate for --^ (enables paging, which means the next code runs from 0x40B)
+00000011    // immediate for --^ (enables paging, which means the next code runs from 0x417)
 11111110    // halt
-@40B        // pc: 00B
+@417        // pc: 017
 11111110    // halt
 
-// expect: pc=0x00000c
-// expect: bus_addr=00000000_00000100_00001011
+// expect: pc=0x000018
+// expect: bus_addr=00000000_00000100_00011000
