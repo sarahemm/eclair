@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -8199,14 +8199,10 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="116.84" y1="104.14" x2="119.38" y2="104.14" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="DEMUX2" gate="G$1" pin="A0"/>
-<wire x1="27.94" y1="147.32" x2="25.4" y2="144.78" width="0.1524" layer="91"/>
 <pinref part="SUPPLY4" gate="1" pin="V-"/>
-<wire x1="22.86" y1="144.78" x2="25.4" y2="144.78" width="0.1524" layer="91"/>
 <pinref part="DEMUX2" gate="G$1" pin="A1"/>
 <wire x1="30.48" y1="147.32" x2="27.94" y2="144.78" width="0.1524" layer="91"/>
-<wire x1="25.4" y1="144.78" x2="27.94" y2="144.78" width="0.1524" layer="91"/>
-<junction x="25.4" y="144.78"/>
+<wire x1="22.86" y1="144.78" x2="27.94" y2="144.78" width="0.1524" layer="91"/>
 <pinref part="DEMUX2" gate="G$1" pin="A2"/>
 <wire x1="33.02" y1="147.32" x2="30.48" y2="144.78" width="0.1524" layer="91"/>
 <wire x1="27.94" y1="144.78" x2="30.48" y2="144.78" width="0.1524" layer="91"/>
@@ -8783,6 +8779,14 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="ALU4" gate="G$1" pin="CN+4"/>
 <wire x1="231.14" y1="86.36" x2="233.68" y2="86.36" width="0.1524" layer="91"/>
 <label x="233.68" y="86.36" size="1.27" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="XY_IMM_LSB" class="0">
+<segment>
+<pinref part="DEMUX2" gate="G$1" pin="A0"/>
+<wire x1="27.94" y1="147.32" x2="22.86" y2="142.24" width="0.1524" layer="91"/>
+<wire x1="22.86" y1="142.24" x2="22.86" y2="139.7" width="0.1524" layer="91"/>
+<label x="22.86" y="139.7" size="1.27" layer="95" rot="R270" xref="yes"/>
 </segment>
 </net>
 </nets>
@@ -11044,6 +11048,13 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="LINK3" gate="G$1" pin="B1"/>
 <wire x1="83.82" y1="185.42" x2="83.82" y2="187.96" width="0.1524" layer="91"/>
 <label x="83.82" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+</net>
+<net name="XY_IMM_LSB" class="0">
+<segment>
+<pinref part="LINK4" gate="G$1" pin="B1"/>
+<wire x1="116.84" y1="185.42" x2="116.84" y2="187.96" width="0.1524" layer="91"/>
+<label x="116.84" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 </nets>

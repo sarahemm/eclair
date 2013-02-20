@@ -20,6 +20,7 @@ field load_ptb    13    1
 field load_flags  14    1
 field load_status 15    1
 # level-sensitive signals
+field xy_imm_lsb  24    1
 field next_addr   25    8
 field src_mar     33    1
 field src_mdr     34    1
@@ -46,7 +47,7 @@ enum  alu_mode    arith   0
 enum  alu_mode    logic   1
 enum  alu_op      x       0
 enum  alu_op      add     6
-enum  src_xy      zero    0
+enum  src_xy      imm     0
 enum  src_xy      a       1
 enum  src_xy      b       2
 enum  src_xy      c       3
@@ -81,7 +82,7 @@ location    jmpz        27    # jump if Z
 location    hlt         254
 
 # instructions - each one is one word of microcode, glues everything above together
-instruction init        src_xy(zero)  alu_mode(arith) alu_op(x)       load_x      load_y  load_z
+instruction init        src_xy(imm)   alu_mode(arith) alu_op(x)       load_x      load_y  load_z
 instruction init        hold_last     load_pc
 instruction fetch       src_mar(pc)   load_mar        mem_read load_ir
 instruction fetch       inc_pc        next_addr(ir)
@@ -132,8 +133,8 @@ instruction wrpte       alu_op(x)     src_xy(d)       load_x          load_z    
 instruction wrpte       alu_op(x)     src_xy(a)       load_x          load_z        load_status
 instruction wrpte       write_pte     next_addr(fetch)
 
-instruction ldi8.flags  src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar
-instruction ldi8.flags  hold_last     load_mar        load_mdr_l      load_x      load_z    load_status
+instruction ldi8.flags  src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read      load_mar
+instruction ldi8.flags  hold_last     load_mar        load_mdr_l      load_x        load_z      load_status
 instruction ldi8.flags  load_flags    inc_pc          next_addr(fetch)
 
 instruction hlt         next_addr(hlt)

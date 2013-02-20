@@ -46,6 +46,8 @@ module ECLair();
   wire  [2:0]   load_reg;         // load general register
   wire  [7:0]   reg_load;         // load signals (latch clocks) for registers
   wire  [7:0]   reg_load_via_ir;  // load signals (latch clocks) for registers (when loading via IR)
+  wire          xy_imm_lsb;       // least significant immediate bit (used when reg_xy_src = 3'b000)
+  wire  [15:0]  xy_imm_val;       // xy immediate value (used when reg_xy_src = 3'b000)
   wire  [2:0]   reg_xy_src;       // load source for X and Y registers
   wire  [2:0]   reg_x_load_ir_src;  // bits from IR to determine which register to load
   wire          reg_x_load_ir;    // load a register, getting the reg to load from IR[7..6]
@@ -139,8 +141,8 @@ module ECLair();
   latch           #(.WIDTH(8))                  lat_reg_mdr_h(.clk(reg_mdr_h_load), .reset(1'b0), .in(lat_mdr[15:8]), .out(reg_mdr[15:8]));
   demux_38                                      dmx_reg_load(load_reg, reg_load);
   demux_38                                      dmx_reg_load_ir(reg_x_load_ir_src, reg_load_via_ir);
-  mux_88                                        mux_xy_src_l(.sel(reg_xy_src), .a(8'b00000000), .b(reg_a[7:0]), .c(reg_b[7:0]), .d(reg_c[7:0]), .e(reg_d[7:0]), .h(reg_mdr[7:0]),  .y(lat_xy[7:0]));
-  mux_88                                        mux_xy_src_h(.sel(reg_xy_src), .a(8'b00000000), .b(reg_a[15:8]), .c(reg_b[15:8]), .d(reg_c[15:8]), .e(reg_d[15:8]), .h(reg_mdr[15:8]), .y(lat_xy[15:8]));
+  mux_88                                        mux_xy_src_l(.sel(reg_xy_src), .a(xy_imm_val[7:0]), .b(reg_a[7:0]), .c(reg_b[7:0]), .d(reg_c[7:0]), .e(reg_d[7:0]), .h(reg_mdr[7:0]),  .y(lat_xy[7:0]));
+  mux_88                                        mux_xy_src_h(.sel(reg_xy_src), .a(xy_imm_val[15:8]), .b(reg_a[15:8]), .c(reg_b[15:8]), .d(reg_c[15:8]), .e(reg_d[15:8]), .h(reg_mdr[15:8]), .y(lat_xy[15:8]));
   mux_2x                                        mux_mar_l(.sel(mux_mar_src), .a(reg_z[7:0]),  .b(pc[7:0]),  .y(lat_mar[7:0]));
   mux_2x                                        mux_mar_h(.sel(mux_mar_src), .a(reg_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
   mux_2x                                        mux_mdr_l(.sel(mux_mdr_src), .a(reg_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
@@ -172,6 +174,7 @@ module ECLair();
   assign load_status = ~cs_data[15];
   
   // level-sensitive microcode signals
+  assign xy_imm_lsb = cs_data[24];
   assign cs_next_addr = cs_data[32:25];
   assign mux_mar_src = cs_data[33];
   assign mux_mdr_src = cs_data[34];
@@ -214,6 +217,8 @@ module ECLair();
   assign status_8[1]  = alu_cout8;
   assign status_16[1] = alu_cout16;
   assign really_load_pc = load_pc & branch_cond_met;
+  assign xy_imm_val[0] = xy_imm_lsb;
+  assign xy_imm_val[15:1] = 15'b000000000000000;
   
   always begin
     #40 clk_main = ~clk_main;
