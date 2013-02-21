@@ -18,6 +18,6 @@ module main_ram(_cs, _oe, _w, addr, data_in, data_out);
   
   always @ (negedge _w) begin
     ram[addr] <= data_in;
-    $display("Main RAM wrote word %d to %b", addr, data_in);
+    $display("Main RAM wrote word %d to %b (0x%0h)", addr, data_in, data_in);
   end
 endmodule
