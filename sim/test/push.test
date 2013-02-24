@@ -30,7 +30,10 @@
 @015
 00011111    // push immediate
 01010101    // immediate for --^
+00011111    // push immediate
+10101010    // immediate for --^
 11111110    // halt
 
-// expect: pc=0x000018
-// expect: ram[0x10000]=0xAA
+// expect: pc=0x00001a
+// expect: ram[0x100000]=0x55
+// expect: ram[0x100001]=0xaa
