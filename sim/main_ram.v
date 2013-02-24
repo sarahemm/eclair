@@ -3,6 +3,7 @@
 module main_ram(_cs, _oe, _w, addr, data_in, data_out);
   parameter WIDTH=8;
   parameter ADDR_WIDTH=20;
+  parameter TYPE="Unknown";
   
   input               _cs;
   input               _oe;
@@ -18,6 +19,6 @@ module main_ram(_cs, _oe, _w, addr, data_in, data_out);
   
   always @ (negedge _w) begin
     ram[addr] <= data_in;
-    $display("Main RAM wrote word %d to %b (0x%0h)", addr, data_in, data_in);
+    $display("%s RAM wrote data %b (0x%0h) to address %b (0x%0h)", TYPE, data_in, data_in, addr, addr);
   end
 endmodule

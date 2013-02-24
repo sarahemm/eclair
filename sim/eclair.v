@@ -41,7 +41,7 @@ module ECLair();
   wire          op_16bit;         // Operation is 16-bits wide
   wire          mux_mar_src;      // 0 = MAR sources from Z, 1 = MAR sources from PC
   wire          mux_mdr_src;      // 0 = MDR sources from Z, 1 = MDR sources from data bus
-  wire          ram__w;           // Main RAM write signal
+  wire          mdr_byte;         // which byte of MDR to use for 8-bit ops (0=low byte, 1=high byte)
   wire  [15:0]  pc;               // program counter
   wire  [2:0]   load_reg;         // load general register
   wire  [7:0]   reg_load;         // load signals (latch clocks) for registers
@@ -58,8 +58,7 @@ module ECLair();
   wire          reg_sp_load;
   wire          reg_ir_load;
   wire          reg_mar_load;
-  wire          reg_mdr_l_load;
-  wire          reg_mdr_h_load;
+  wire          reg_mdr_load;
   wire          reg_x_load;
   wire          reg_y_load;
   wire          reg_z_load;
@@ -75,6 +74,7 @@ module ECLair();
   wire  [15:0]  reg_mar;
   wire  [15:0]  lat_mar;
   wire  [15:0]  reg_mdr;
+  wire  [7:0]   reg_mdr_8bit;
   wire  [15:0]  lat_mdr;
   wire  [15:0]  lat_xy;
   wire  [15:0]  alu_z;
@@ -122,7 +122,7 @@ module ECLair();
   microcode_ram                                 ram_cs(1'b0, 1'b0, cs_ram__w, cs_addr, cs_data_in, cs_data_prelatch);
   flipflop_d      #(.WIDTH(24))                 flp_ram_cs_e(.clk(clk_cs_dly2), .reset(~(clk_cs && clk_cs_dly2)), .in(cs_data_prelatch[23:0]),  .out(cs_data[23:0]));
   flipflop_d      #(.WIDTH(40))                 flp_ram_cs_l(.clk(clk_cs_dly), .reset(1'b0), .in(cs_data_prelatch[63:24]), .out(cs_data[63:24]));
-  main_ram                                      ram_main(._cs(1'b0), ._oe(addr_ram), ._w(ram__w), .addr(bus_addr[19:0]), .data_in(bus_data), .data_out(bus_data));
+  main_ram        #(.TYPE("Main"))              ram_main(._cs(1'b0), ._oe(~(~ram_write & ~addr_ram)), ._w(~(ram_write & ~addr_ram)), .addr(bus_addr[19:0]), .data_in(reg_mdr_8bit), .data_out(bus_data));
   main_eprom      #(.ROM_FILE("sysrom.bin"))    rom_boot(1'b0, addr_rom, bus_addr[19:0], bus_data);
   counter         #(.WIDTH(16))                 ctr_pc(.clk(inc_pc), .ce(1'b1), .reset(~_reset), .out(pc), .load(really_load_pc), .preset(reg_z));
   latch           #(.WIDTH(8))                  lat_reg_a_h(.clk(reg_a_load | ~op_16bit), .reset(1'b0), .in(reg_z[15:8]), .out(reg_a[15:8]));
@@ -140,8 +140,8 @@ module ECLair();
   latch                                         lat_reg_ir(.clk(reg_ir_load), .reset(1'b0), .in(bus_data), .out(reg_ir));
   latch           #(.WIDTH(6))                  lat_reg_ptb(.clk(load_ptb), .reset(1'b0), .in(alu_z[5:0]), .out(reg_ptb));
   latch           #(.WIDTH(16))                 lat_reg_mar(.clk(reg_mar_load), .reset(1'b0), .in(lat_mar), .out(reg_mar));
-  latch           #(.WIDTH(8))                  lat_reg_mdr_l(.clk(reg_mdr_l_load), .reset(1'b0), .in(lat_mdr[7:0]),  .out(reg_mdr[7:0]));
-  latch           #(.WIDTH(8))                  lat_reg_mdr_h(.clk(reg_mdr_h_load), .reset(1'b0), .in(lat_mdr[15:8]), .out(reg_mdr[15:8]));
+  latch           #(.WIDTH(8))                  lat_reg_mdr_l(.clk(~(reg_mdr_load & ~mdr_byte)), .reset(1'b0), .in(lat_mdr[7:0]),  .out(reg_mdr[7:0]));
+  latch           #(.WIDTH(8))                  lat_reg_mdr_h(.clk(~(reg_mdr_load & mdr_byte)), .reset(1'b0), .in(lat_mdr[15:8]), .out(reg_mdr[15:8]));
   demux_38                                      dmx_reg_load(load_reg, reg_load);
   demux_38                                      dmx_reg_load_ir(reg_x_load_ir_src, reg_load_via_ir);
   mux_88                                        mux_xy_src_l(.sel(reg_xy_src), .a(xy_imm_val[7:0]), .b(reg_a[7:0]), .c(reg_b[7:0]), .d(reg_c[7:0]), .e(reg_d[7:0]), .f(reg_sp[7:0]), .h(reg_mdr[7:0]),  .y(lat_xy[7:0]));
@@ -150,9 +150,10 @@ module ECLair();
   mux_2x                                        mux_mar_h(.sel(mux_mar_src), .a(reg_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
   mux_2x                                        mux_mdr_l(.sel(mux_mdr_src), .a(reg_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
   mux_2x                                        mux_mdr_h(.sel(mux_mdr_src), .a(reg_z[15:8]), .b(bus_data[7:0]), .y(lat_mdr[15:8]));
+  mux_2x                                        mux_mdr_byte(.sel(mdr_byte), .a(reg_mdr[7:0]), .b(reg_mdr[15:8]), .y(reg_mdr_8bit));
   mux_2x          #(.WIDTH(6))                  mux_ptb(.sel(mode), .a(6'b000000), .b(reg_ptb), .y(ptb));
   alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(1'b0), .x(reg_x), .y(reg_y), .z(alu_z), .c_out8(alu_cout8), .c_out16(alu_cout16));
-  main_ram      #(.WIDTH(16), .ADDR_WIDTH(12))  ram_paging(._cs(1'b0), ._oe(1'b0), ._w(~write_pte), .addr(pagetable_addr), .data_in(reg_z), .data_out(pagetable_out));
+  main_ram      #(.WIDTH(16), .ADDR_WIDTH(12), .TYPE("Page Table"))  ram_paging(._cs(1'b0), ._oe(1'b0), ._w(~write_pte), .addr(pagetable_addr), .data_in(reg_z), .data_out(pagetable_out));
   mux_2x                                        mux_paging_l(.sel(paging_enabled), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr[17:10]));
   mux_2x        #(.WIDTH(6))                    mux_paging_h(.sel(paging_enabled), .a(6'b0),           .b(pagetable_out[13:8]), .y(bus_addr[23:18]));
   flipflop_d    #(.WIDTH(8))                    flp_reg_flags(.clk(load_flags), .reset(~_reset), .in(reg_z[7:0]), .out(flags));
@@ -162,8 +163,8 @@ module ECLair();
   
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
-  assign reg_mdr_l_load = ~cs_data[1];
-  assign reg_mdr_h_load = ~cs_data[2];
+  assign reg_mdr_load = cs_data[1];
+  // bit 2 is currently available
   assign reg_mar_load = ~cs_data[3];
   assign reg_ir_load = ~cs_data[4];
   assign inc_pc = cs_data[5];
@@ -175,6 +176,7 @@ module ECLair();
   assign load_ptb = ~cs_data[13];
   assign load_flags = cs_data[14];
   assign load_status = ~cs_data[15];
+  assign ram_write = cs_data[17];
   
   // level-sensitive microcode signals
   assign xy_imm_lsb = cs_data[24];
@@ -185,9 +187,10 @@ module ECLair();
   assign alu_op = cs_data[39:36];
   assign reg_xy_src = cs_data[42:40];
   assign ram_read = cs_data[43];
-  assign ram_write = cs_data[44];
+  // bit 44 is currently available
   assign op_16bit = cs_data[45];
   assign branch_cond = cs_data[48:46];
+  assign mdr_byte = cs_data[49];
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
@@ -205,7 +208,7 @@ module ECLair();
   assign reg_x_load_ir = ~reg_load[7];
   assign addr_rom = ~(bus_addr[23:20] == 4'b0000);
   assign addr_device = ~(bus_addr[23:20] == 4'b0111);
-  assign addr_ram = ~(addr_rom ~| addr_device);
+  assign addr_ram = ~(addr_rom & addr_device);
   assign bus_addr[9:0] = reg_mar[9:0];  // the rest of the bus goes through the paging mechanism
   assign reg_x_load_ir_src[0] = reg_x_load_ir;
   assign reg_x_load_ir_src[1] = reg_x_load_ir & reg_ir[6];
