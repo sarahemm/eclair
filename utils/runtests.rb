@@ -42,19 +42,35 @@ def run_test(filename)
   File.unlink "../sim/sysrom.bin"
   
   # read the log and store all the register values
-  # results are stored only for the last cycle at each pc
+  # register results are stored only for the last cycle at each pc
+  # RAM changes are output as they happen
   results = Hash.new
   last_pc = 0
+  ram_contents = Hash.new;
   stdout.each_line do |out_line|
     #if(out_line =~ /^\s*$/) then
     #  puts "Cycle at PC #{last_pc} is complete."
     #end
-    next if !reg_val = out_line.match(/(\S+):\s*(\S+)/)
-    if(reg_val[1] == "pc") then
-      last_pc = reg_val[2].to_i(16)
+    if(reg_val = out_line.match(/(\S+):\s*(\S+)/)) then
+      if(reg_val[1] == "pc") then
+        last_pc = reg_val[2].to_i(16)        
+        results[last_pc] = Hash.new if !results[last_pc]
+        # the simulator doesn't report RAM contents on each pc change, so add them in from our local copy
+        ram_contents.each do |addr, data|
+          results[last_pc]["ram[0x#{addr.to_s(16)}]"] = "0x#{data.to_s(16)}"
+        end
+      end
+      results[last_pc] = Hash.new if !results[last_pc]
+      results[last_pc][reg_val[1]] = reg_val[2]
+    elsif(reg_val = out_line.match(/Main RAM wrote data [01XZxz]+ \((\S+)\) to address [01XZxz]+ \((\S+)\)/)) then
+      data = reg_val[1].to_i(16)
+      addr = reg_val[2].to_i(16) + 0x100000;  # ram starts at 0x100000, writes are reported as offset into ram
+      ram_contents[addr] = data
+      results[last_pc] = Hash.new if !results[last_pc]
+      results[last_pc]["ram[0x#{addr.to_s(16)}]"] = "0x#{data.to_s(16)}"
+      #puts "results[0x#{last_pc.to_s(16)}][ram[0x#{addr.to_s(16)}]]"
+      #puts "Found a RAM write of data #{reg_val[1]} to address #{reg_val[2]} at pc #{last_pc}"
     end
-    results[last_pc] = Hash.new if !results[last_pc]
-    results[last_pc][reg_val[1]] = reg_val[2]
   end
   
   # check each register to make sure it matches what we think it should
