@@ -5,32 +5,35 @@ file  microcode.bin  0   64
 
 # fields - names for bit positions
 # edge-sensitive signals
-field write_pte   0     1
-field load_mdr_l  1     1
-field load_mdr_h  2     1
-field load_mar    3     1
-field load_ir     4     1
-field inc_pc      5     1
-field load_pc     6     1
-field load_reg    7     3
-field load_x      10    1
-field load_y      11    1
-field load_z      12    1
-field load_ptb    13    1
-field load_flags  14    1
-field load_status 15    1
+field write_pte     0     1
+field load_mdr      1     1
+# bit 2 is currently available
+field load_mar      3     1
+field load_ir       4     1
+field inc_pc        5     1
+field load_pc       6     1
+field load_reg      7     3
+field load_x        10    1
+field load_y        11    1
+field load_z        12    1
+field load_ptb      13    1
+field load_flags    14    1
+field load_status   15    1
+field clr_intflg    16    1
+field mem_write     17    1
 # level-sensitive signals
-field xy_imm_lsb  24    1
-field next_addr   25    8
-field src_mar     33    1
-field src_mdr     34    1
-field alu_mode    35    1
-field alu_op      36    4
-field src_xy      40    3
-field mem_read    43    1
-field mem_write   44    1
-field op_16bit    45    1
-field branch_cond 46    3
+field xy_imm_lsb    24    1
+field next_addr     25    8
+field src_mar       33    1
+field src_mdr       34    1
+field alu_mode      35    1
+field alu_op        36    4
+field src_xy        40    3
+field mem_read      43    1
+field data_bus_src  44    1
+field op_16bit      45    1
+field branch_cond   46    3
+field mdr_byte      49    1
 
 # enums - names for values that go into bit positions
 enum  src_mar     z       0
@@ -60,6 +63,8 @@ enum  src_xy      mdr     7
 enum  branch_cond always  0
 enum  branch_cond z       1
 enum  branch_cond co      2
+enum  mdr_byte    low     0
+enum  mdr_byte    high    1
 
 # locations - start addresses of instructions
 location    init        0
@@ -102,23 +107,23 @@ instruction ldi16.c     next_addr(ldi16.?)
 instruction ldi16.d     next_addr(ldi16.?)
 
 instruction ldi8.ptb    src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar
-instruction ldi8.ptb    hold_last     load_mar        load_mdr_l      load_x      load_z  load_ptb
+instruction ldi8.ptb    hold_last     load_mar        mdr_byte(low)   load_mdr    load_x      load_z  load_ptb
 instruction ldi8.ptb    inc_pc        next_addr(fetch)
 
 instruction ldi16.sp    src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read
-instruction ldi16.sp    hold_last     load_mar        load_mdr_l
+instruction ldi16.sp    hold_last     load_mar        mdr_byte(low)   load_mdr
 instruction ldi16.sp    src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    inc_pc          op_16bit
-instruction ldi16.sp    src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        load_mdr_h      load_y    load_x      load_z  load_reg(sp)  op_16bit  load_status
+instruction ldi16.sp    src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(high)  load_mdr      load_y    load_x      load_z  load_reg(sp)  op_16bit  load_status
 instruction ldi16.sp    inc_pc        next_addr(fetch)
 
 instruction ldi8.?l     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar
-instruction ldi8.?l     hold_last     load_mar        load_mdr_l      load_x      load_z  load_reg(via_ir)  load_status
+instruction ldi8.?l     hold_last     load_mar        mdr_byte(low)   load_mdr    load_x          load_z          load_reg(via_ir)  load_status
 instruction ldi8.?l     inc_pc        next_addr(fetch)
 
 instruction ldi16.?     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read
-instruction ldi16.?     hold_last     load_mar        load_mdr_l
+instruction ldi16.?     hold_last     load_mar        mdr_byte(low)   load_mdr
 instruction ldi16.?     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    inc_pc          op_16bit
-instruction ldi16.?     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        load_mdr_h      load_y    load_x      load_z  load_reg(via_ir)  op_16bit  load_status
+instruction ldi16.?     src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(high)    load_mdr      load_y    load_x      load_z  load_reg(via_ir)  op_16bit  load_status
 instruction ldi16.?     inc_pc        next_addr(fetch)
 
 instruction add16.ab    src_xy(a)     load_x
@@ -129,13 +134,13 @@ instruction add8.ab     src_xy(a)     load_x
 instruction add8.ab     src_xy(b)     load_y
 instruction add8.ab     alu_mode(arith) alu_op(add)                   load_z        load_reg(a)     next_addr(fetch)  load_status
 
-instruction jmp                       src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       load_mdr_l
-instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       load_mdr_h
+instruction jmp                       src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
+instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
 instruction jmp         src_xy(mdr)   alu_op(x)       load_x          load_z
 instruction jmp         branch_cond(always)           load_pc         next_addr(fetch)
 
-instruction jmpz                      src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       load_mdr_l
-instruction jmpz        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       load_mdr_h
+instruction jmpz                      src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
+instruction jmpz        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
 instruction jmpz        src_xy(mdr)   alu_op(x)       load_x          load_z
 instruction jmpz        branch_cond(z)                inc_pc          load_pc       next_addr(fetch)
 
@@ -144,20 +149,17 @@ instruction wrpte       alu_op(x)     src_xy(a)       load_x          load_z    
 instruction wrpte       write_pte     next_addr(fetch)
 
 instruction ldi8.flags  src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read      load_mar
-instruction ldi8.flags  hold_last     load_mar        load_mdr_l      load_x        load_z      load_status
+instruction ldi8.flags  hold_last     load_mar        mdr_byte(low)   load_mdr      load_x        load_z      load_status
 instruction ldi8.flags  load_flags    inc_pc          next_addr(fetch)
 
 # load the value of SP into X/Z/MAR
-instruction push        alu_op(x)     src_xy(sp)      load_x          load_z        src_mar(z)  load_mar
-# load address pointed to by SP into X/Z
-instruction push        src_mdr(data) load_mdr_l      load_mdr_h      alu_op(x)     src_xy(mdr) load_x    load_z
+instruction push        alu_op(x)     src_xy(sp)      load_x          load_z        src_mar(z)    load_mar
 # load immediate value from address pointed to by PC into MDR
-instruction push        src_mar(pc)   load_mar        src_mdr(data)   mem_read      load_mdr_l  load_mdr_h
+instruction push        src_mar(pc)   load_mar        src_mdr(data)   mem_read      mdr_byte(low) load_mdr
 # write immediate value from MDR into address pointed to by SP (now in Z)
 instruction push        src_mar(z)    load_mar        mem_write
-# load SP into X, 1'b1 into Y, add them, then put the result back into SP
-instruction push        alu_op(x)     src_xy(sp)      load_x
-instruction push        src_xy(imm)   xy_imm_lsb(1)   load_y
+# load 1'b1 into Y, add it to X (already contains SP), then put the result back into SP
+instruction push        src_xy(imm)   xy_imm_lsb(1)   load_y          
 instruction push        alu_op(add)   load_z          load_reg(sp)
 # increment PC and jump back to fetching the next instruction
 instruction push        inc_pc        next_addr(fetch)
