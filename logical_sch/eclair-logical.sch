@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="yes"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -6250,6 +6250,10 @@ In this library the device names are the same as the pin names of the symbols, t
 <part name="PRIENC1" library="logicalgates-sen" deviceset="PRIORITYENC-8" device="" value="Interrupt Encoder"/>
 <part name="P-1" library="supply1" deviceset="V-" device=""/>
 <part name="OR9" library="logicalgates-sen" deviceset="OR-4" device=""/>
+<part name="AND20" library="logicalgates-sen" deviceset="AND-2" device=""/>
+<part name="NOT3" library="logicalgates-sen" deviceset="NOT" device=""/>
+<part name="AND21" library="logicalgates-sen" deviceset="AND-2" device=""/>
+<part name="MUX14" library="logicalgates-sen" deviceset="MUX-2X8" device="" value="MDR Output Byte Mux"/>
 </parts>
 <sheets>
 <sheet>
@@ -6259,7 +6263,10 @@ In this library the device names are the same as the pin names of the symbols, t
 </plain>
 <instances>
 <instance part="MUX2" gate="G$1" x="53.34" y="30.48" rot="R90"/>
-<instance part="LAT2" gate="G$1" x="58.42" y="58.42" rot="R90"/>
+<instance part="LAT2" gate="G$1" x="58.42" y="58.42" smashed="yes" rot="R90">
+<attribute name="VALUE" x="44.704" y="49.53" size="1.778" layer="96" rot="R90"/>
+<attribute name="NAME" x="75.946" y="59.69" size="1.778" layer="95" rot="R90"/>
+</instance>
 <instance part="LAT4" gate="G$1" x="63.5" y="180.34" rot="R90"/>
 <instance part="CTR2" gate="G$1" x="73.66" y="106.68" rot="R90"/>
 <instance part="LAT9" gate="G$1" x="121.92" y="180.34" rot="R90"/>
@@ -6276,6 +6283,13 @@ In this library the device names are the same as the pin names of the symbols, t
 <attribute name="REV" x="173.99" y="0" size="1.778" layer="96" display="off"/>
 </instance>
 <instance part="AND11" gate="G$1" x="30.48" y="86.36"/>
+<instance part="AND20" gate="G$1" x="30.48" y="43.18"/>
+<instance part="NOT3" gate="G$1" x="17.78" y="30.48" rot="R90"/>
+<instance part="AND21" gate="G$1" x="88.9" y="43.18"/>
+<instance part="MUX14" gate="G$1" x="218.44" y="78.74" smashed="yes" rot="R90">
+<attribute name="NAME" x="200.152" y="71.374" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="253.746" y="66.04" size="1.778" layer="96" rot="R90"/>
+</instance>
 </instances>
 <busses>
 <bus name="DATA[0..7]">
@@ -6290,6 +6304,11 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="134.62" y1="76.2" x2="132.08" y2="73.66" width="0.762" layer="92"/>
 <wire x1="132.08" y1="73.66" x2="55.88" y2="73.66" width="0.762" layer="92"/>
 <label x="135.382" y="76.962" size="1.778" layer="95"/>
+</segment>
+<segment>
+<wire x1="256.54" y1="60.96" x2="254" y2="63.5" width="0.762" layer="92"/>
+<wire x1="254" y1="63.5" x2="210.82" y2="63.5" width="0.762" layer="92"/>
+<label x="257.048" y="58.674" size="1.778" layer="95"/>
 </segment>
 </bus>
 <bus name="MAR[0..15]">
@@ -6315,6 +6334,13 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="129.54" y1="10.16" x2="127" y2="12.7" width="0.762" layer="92"/>
 <wire x1="127" y1="12.7" x2="48.26" y2="12.7" width="0.762" layer="92"/>
 <label x="130.302" y="7.874" size="1.778" layer="95"/>
+</segment>
+</bus>
+<bus name="MDR_8BIT[0..7]">
+<segment>
+<wire x1="243.84" y1="96.52" x2="241.3" y2="93.98" width="0.762" layer="92"/>
+<wire x1="241.3" y1="93.98" x2="220.98" y2="93.98" width="0.762" layer="92"/>
+<label x="244.348" y="97.028" size="1.778" layer="95"/>
 </segment>
 </bus>
 </busses>
@@ -6528,11 +6554,19 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="55.88" y1="73.66" x2="53.34" y2="71.12" width="0.1524" layer="91"/>
 <pinref part="LAT2" gate="G$1" pin="Y0"/>
 </segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="A0"/>
+<wire x1="208.28" y1="66.04" x2="210.82" y2="63.5" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="MDR1" class="0">
 <segment>
 <wire x1="58.42" y1="73.66" x2="55.88" y2="71.12" width="0.1524" layer="91"/>
 <pinref part="LAT2" gate="G$1" pin="Y1"/>
+</segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="A1"/>
+<wire x1="210.82" y1="66.04" x2="213.36" y2="63.5" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="MDR2" class="0">
@@ -6540,11 +6574,19 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="60.96" y1="73.66" x2="58.42" y2="71.12" width="0.1524" layer="91"/>
 <pinref part="LAT2" gate="G$1" pin="Y2"/>
 </segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="A2"/>
+<wire x1="213.36" y1="66.04" x2="215.9" y2="63.5" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="MDR3" class="0">
 <segment>
 <wire x1="63.5" y1="73.66" x2="60.96" y2="71.12" width="0.1524" layer="91"/>
 <pinref part="LAT2" gate="G$1" pin="Y3"/>
+</segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="A3"/>
+<wire x1="215.9" y1="66.04" x2="218.44" y2="63.5" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="MDR4" class="0">
@@ -6552,11 +6594,19 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="66.04" y1="73.66" x2="63.5" y2="71.12" width="0.1524" layer="91"/>
 <pinref part="LAT2" gate="G$1" pin="Y4"/>
 </segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="A4"/>
+<wire x1="218.44" y1="66.04" x2="220.98" y2="63.5" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="MDR5" class="0">
 <segment>
 <wire x1="68.58" y1="73.66" x2="66.04" y2="71.12" width="0.1524" layer="91"/>
 <pinref part="LAT2" gate="G$1" pin="Y5"/>
+</segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="A5"/>
+<wire x1="220.98" y1="66.04" x2="223.52" y2="63.5" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="MDR6" class="0">
@@ -6564,11 +6614,19 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="71.12" y1="73.66" x2="68.58" y2="71.12" width="0.1524" layer="91"/>
 <pinref part="LAT2" gate="G$1" pin="Y6"/>
 </segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="A6"/>
+<wire x1="223.52" y1="66.04" x2="226.06" y2="63.5" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="MDR7" class="0">
 <segment>
 <wire x1="73.66" y1="73.66" x2="71.12" y2="71.12" width="0.1524" layer="91"/>
 <pinref part="LAT2" gate="G$1" pin="Y7"/>
+</segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="A7"/>
+<wire x1="226.06" y1="66.04" x2="228.6" y2="63.5" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$9" class="0">
@@ -7080,11 +7138,19 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="LAT1" gate="G$1" pin="Y7"/>
 <wire x1="129.54" y1="73.66" x2="127" y2="71.12" width="0.1524" layer="91"/>
 </segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="B7"/>
+<wire x1="248.92" y1="66.04" x2="251.46" y2="63.5" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="MDR14" class="0">
 <segment>
 <pinref part="LAT1" gate="G$1" pin="Y6"/>
 <wire x1="127" y1="73.66" x2="124.46" y2="71.12" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="B6"/>
+<wire x1="246.38" y1="66.04" x2="248.92" y2="63.5" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="MDR13" class="0">
@@ -7092,11 +7158,19 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="LAT1" gate="G$1" pin="Y5"/>
 <wire x1="124.46" y1="73.66" x2="121.92" y2="71.12" width="0.1524" layer="91"/>
 </segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="B5"/>
+<wire x1="243.84" y1="66.04" x2="246.38" y2="63.5" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="MDR12" class="0">
 <segment>
 <pinref part="LAT1" gate="G$1" pin="Y4"/>
 <wire x1="121.92" y1="73.66" x2="119.38" y2="71.12" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="B4"/>
+<wire x1="241.3" y1="66.04" x2="243.84" y2="63.5" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="MDR11" class="0">
@@ -7104,11 +7178,19 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="LAT1" gate="G$1" pin="Y3"/>
 <wire x1="116.84" y1="71.12" x2="119.38" y2="73.66" width="0.1524" layer="91"/>
 </segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="B3"/>
+<wire x1="238.76" y1="66.04" x2="241.3" y2="63.5" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="MDR10" class="0">
 <segment>
 <pinref part="LAT1" gate="G$1" pin="Y2"/>
 <wire x1="114.3" y1="71.12" x2="116.84" y2="73.66" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="B2"/>
+<wire x1="236.22" y1="66.04" x2="238.76" y2="63.5" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="MDR9" class="0">
@@ -7116,11 +7198,19 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="LAT1" gate="G$1" pin="Y1"/>
 <wire x1="111.76" y1="71.12" x2="114.3" y2="73.66" width="0.1524" layer="91"/>
 </segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="B1"/>
+<wire x1="233.68" y1="66.04" x2="236.22" y2="63.5" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="MDR8" class="0">
 <segment>
 <pinref part="LAT1" gate="G$1" pin="Y0"/>
 <wire x1="109.22" y1="71.12" x2="111.76" y2="73.66" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="B0"/>
+<wire x1="231.14" y1="66.04" x2="233.68" y2="63.5" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$141" class="0">
@@ -7184,15 +7274,15 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="LAT1" gate="G$1" pin="LATCHED"/>
 <wire x1="104.14" y1="45.72" x2="104.14" y2="43.18" width="0.1524" layer="91"/>
 <wire x1="104.14" y1="43.18" x2="101.6" y2="43.18" width="0.1524" layer="91"/>
-<label x="101.6" y="43.18" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="AND21" gate="G$1" pin="Y"/>
 </segment>
 </net>
 <net name="LOAD_MDR_L" class="0">
 <segment>
 <pinref part="LAT2" gate="G$1" pin="LATCHED"/>
 <wire x1="48.26" y1="45.72" x2="48.26" y2="43.18" width="0.1524" layer="91"/>
-<wire x1="48.26" y1="43.18" x2="45.72" y2="43.18" width="0.1524" layer="91"/>
-<label x="45.72" y="43.18" size="1.27" layer="95" rot="R180" xref="yes"/>
+<wire x1="48.26" y1="43.18" x2="43.18" y2="43.18" width="0.1524" layer="91"/>
+<pinref part="AND20" gate="G$1" pin="Y"/>
 </segment>
 </net>
 <net name="LOAD_MAR" class="0">
@@ -7223,8 +7313,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <segment>
 <pinref part="MUX2" gate="G$1" pin="SEL"/>
 <wire x1="38.1" y1="17.78" x2="38.1" y2="15.24" width="0.1524" layer="91"/>
-<wire x1="38.1" y1="15.24" x2="35.56" y2="15.24" width="0.1524" layer="91"/>
-<label x="35.56" y="15.24" size="1.27" layer="95" rot="R180" xref="yes"/>
+<label x="38.1" y="15.24" size="1.27" layer="95" rot="R180" xref="yes"/>
 </segment>
 </net>
 <net name="MAR_SRC" class="0">
@@ -7264,6 +7353,92 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="AND11" gate="G$1" pin="B"/>
 <wire x1="17.78" y1="83.82" x2="20.32" y2="83.82" width="0.1524" layer="91"/>
 <label x="17.78" y="83.82" size="1.27" layer="95" rot="R270" xref="yes"/>
+</segment>
+</net>
+<net name="LOAD_MDR" class="0">
+<segment>
+<pinref part="AND20" gate="G$1" pin="A"/>
+<wire x1="20.32" y1="45.72" x2="20.32" y2="48.26" width="0.1524" layer="91"/>
+<label x="20.32" y="48.26" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+<segment>
+<pinref part="AND21" gate="G$1" pin="A"/>
+<wire x1="78.74" y1="45.72" x2="78.74" y2="48.26" width="0.1524" layer="91"/>
+<label x="78.74" y="48.26" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+</net>
+<net name="MDR_LOW_BYTE" class="0">
+<segment>
+<pinref part="AND20" gate="G$1" pin="B"/>
+<pinref part="NOT3" gate="G$1" pin="Y"/>
+<wire x1="20.32" y1="40.64" x2="17.78" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="17.78" y1="38.1" x2="17.78" y2="40.64" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="MDR_BYTE" class="0">
+<segment>
+<pinref part="NOT3" gate="G$1" pin="Q"/>
+<wire x1="17.78" y1="22.86" x2="17.78" y2="20.32" width="0.1524" layer="91"/>
+<label x="17.78" y="17.78" size="1.27" layer="95" rot="R270" xref="yes"/>
+<wire x1="17.78" y1="17.78" x2="17.78" y2="20.32" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="AND21" gate="G$1" pin="B"/>
+<wire x1="78.74" y1="40.64" x2="76.2" y2="40.64" width="0.1524" layer="91"/>
+<label x="76.2" y="40.64" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+<segment>
+<pinref part="MUX14" gate="G$1" pin="SEL"/>
+<wire x1="203.2" y1="66.04" x2="203.2" y2="63.5" width="0.1524" layer="91"/>
+<label x="203.2" y="63.5" size="1.27" layer="95" rot="R270" xref="yes"/>
+</segment>
+</net>
+<net name="MDR_8BIT0" class="0">
+<segment>
+<wire x1="218.44" y1="91.44" x2="220.98" y2="93.98" width="0.1524" layer="91"/>
+<pinref part="MUX14" gate="G$1" pin="Y0"/>
+</segment>
+</net>
+<net name="MDR_8BIT1" class="0">
+<segment>
+<wire x1="223.52" y1="93.98" x2="220.98" y2="91.44" width="0.1524" layer="91"/>
+<pinref part="MUX14" gate="G$1" pin="Y1"/>
+</segment>
+</net>
+<net name="MDR_8BIT2" class="0">
+<segment>
+<wire x1="226.06" y1="93.98" x2="223.52" y2="91.44" width="0.1524" layer="91"/>
+<pinref part="MUX14" gate="G$1" pin="Y2"/>
+</segment>
+</net>
+<net name="MDR_8BIT3" class="0">
+<segment>
+<wire x1="228.6" y1="93.98" x2="226.06" y2="91.44" width="0.1524" layer="91"/>
+<pinref part="MUX14" gate="G$1" pin="Y3"/>
+</segment>
+</net>
+<net name="MDR_8BIT4" class="0">
+<segment>
+<wire x1="231.14" y1="93.98" x2="228.6" y2="91.44" width="0.1524" layer="91"/>
+<pinref part="MUX14" gate="G$1" pin="Y4"/>
+</segment>
+</net>
+<net name="MDR_8BIT5" class="0">
+<segment>
+<wire x1="233.68" y1="93.98" x2="231.14" y2="91.44" width="0.1524" layer="91"/>
+<pinref part="MUX14" gate="G$1" pin="Y5"/>
+</segment>
+</net>
+<net name="MDR_8BIT6" class="0">
+<segment>
+<wire x1="236.22" y1="93.98" x2="233.68" y2="91.44" width="0.1524" layer="91"/>
+<pinref part="MUX14" gate="G$1" pin="Y6"/>
+</segment>
+</net>
+<net name="MDR_8BIT7" class="0">
+<segment>
+<wire x1="238.76" y1="93.98" x2="236.22" y2="91.44" width="0.1524" layer="91"/>
+<pinref part="MUX14" gate="G$1" pin="Y7"/>
 </segment>
 </net>
 </nets>
@@ -10308,24 +10483,10 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="193.04" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
-<net name="LOAD_MDR_H" class="0">
-<segment>
-<pinref part="LINK1" gate="G$1" pin="B3"/>
-<wire x1="22.86" y1="187.96" x2="22.86" y2="185.42" width="0.1524" layer="91"/>
-<label x="22.86" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
-</segment>
-</net>
 <net name="CS_NEXT_ADDR7" class="0">
 <segment>
 <pinref part="LINK5" gate="G$1" pin="B1"/>
 <wire x1="152.4" y1="187.96" x2="152.4" y2="185.42" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="LOAD_MDR_L" class="0">
-<segment>
-<pinref part="LINK1" gate="G$1" pin="B2"/>
-<wire x1="20.32" y1="185.42" x2="20.32" y2="187.96" width="0.1524" layer="91"/>
-<label x="20.32" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 <net name="LOAD_MAR" class="0">
@@ -10415,9 +10576,9 @@ In this library the device names are the same as the pin names of the symbols, t
 </net>
 <net name="RAM_WRITE" class="0">
 <segment>
-<pinref part="LINK6" gate="G$1" pin="B5"/>
-<wire x1="195.58" y1="185.42" x2="195.58" y2="187.96" width="0.1524" layer="91"/>
-<label x="195.58" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
+<pinref part="LINK3" gate="G$1" pin="B2"/>
+<wire x1="86.36" y1="185.42" x2="86.36" y2="187.96" width="0.1524" layer="91"/>
+<label x="86.36" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 <net name="XY_SRC2" class="0">
@@ -11055,6 +11216,20 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="LINK4" gate="G$1" pin="B1"/>
 <wire x1="116.84" y1="185.42" x2="116.84" y2="187.96" width="0.1524" layer="91"/>
 <label x="116.84" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+</net>
+<net name="LOAD_MDR" class="0">
+<segment>
+<pinref part="LINK1" gate="G$1" pin="B2"/>
+<wire x1="20.32" y1="185.42" x2="20.32" y2="187.96" width="0.1524" layer="91"/>
+<label x="20.32" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+</net>
+<net name="MDR_BYTE" class="0">
+<segment>
+<pinref part="LINK7" gate="G$1" pin="B2"/>
+<wire x1="220.98" y1="185.42" x2="220.98" y2="187.96" width="0.1524" layer="91"/>
+<label x="220.98" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 </nets>
@@ -12837,11 +13012,6 @@ In this library the device names are the same as the pin names of the symbols, t
 <busses>
 <bus name="DATA[0..7]">
 <segment>
-<wire x1="142.24" y1="101.6" x2="139.7" y2="104.14" width="0.762" layer="92"/>
-<wire x1="139.7" y1="104.14" x2="119.38" y2="104.14" width="0.762" layer="92"/>
-<label x="142.494" y="101.346" size="1.27" layer="95" rot="R270"/>
-</segment>
-<segment>
 <wire x1="142.24" y1="157.48" x2="139.7" y2="154.94" width="0.762" layer="92"/>
 <wire x1="139.7" y1="154.94" x2="119.38" y2="154.94" width="0.762" layer="92"/>
 <label x="142.494" y="157.734" size="1.27" layer="95" rot="MR90"/>
@@ -12871,13 +13041,16 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="86.106" y="35.052" size="1.778" layer="95" rot="R180"/>
 </segment>
 </bus>
+<bus name="MDR_8BIT[0..7]">
+<segment>
+<wire x1="142.24" y1="101.6" x2="139.7" y2="104.14" width="0.762" layer="92"/>
+<wire x1="139.7" y1="104.14" x2="119.38" y2="104.14" width="0.762" layer="92"/>
+<label x="142.494" y="101.346" size="1.27" layer="95" rot="R270"/>
+</segment>
+</bus>
 </busses>
 <nets>
 <net name="DATA0" class="0">
-<segment>
-<pinref part="RAM2" gate="G$1" pin="Q0"/>
-<wire x1="116.84" y1="106.68" x2="119.38" y2="104.14" width="0.1524" layer="91"/>
-</segment>
 <segment>
 <wire x1="116.84" y1="152.4" x2="119.38" y2="154.94" width="0.1524" layer="91"/>
 <pinref part="RAM2" gate="G$1" pin="Y0"/>
@@ -12889,10 +13062,6 @@ In this library the device names are the same as the pin names of the symbols, t
 </net>
 <net name="DATA1" class="0">
 <segment>
-<pinref part="RAM2" gate="G$1" pin="Q1"/>
-<wire x1="119.38" y1="106.68" x2="121.92" y2="104.14" width="0.1524" layer="91"/>
-</segment>
-<segment>
 <wire x1="119.38" y1="152.4" x2="121.92" y2="154.94" width="0.1524" layer="91"/>
 <pinref part="RAM2" gate="G$1" pin="Y1"/>
 </segment>
@@ -12902,10 +13071,6 @@ In this library the device names are the same as the pin names of the symbols, t
 </segment>
 </net>
 <net name="DATA2" class="0">
-<segment>
-<pinref part="RAM2" gate="G$1" pin="Q2"/>
-<wire x1="121.92" y1="106.68" x2="124.46" y2="104.14" width="0.1524" layer="91"/>
-</segment>
 <segment>
 <wire x1="121.92" y1="152.4" x2="124.46" y2="154.94" width="0.1524" layer="91"/>
 <pinref part="RAM2" gate="G$1" pin="Y2"/>
@@ -12917,10 +13082,6 @@ In this library the device names are the same as the pin names of the symbols, t
 </net>
 <net name="DATA3" class="0">
 <segment>
-<pinref part="RAM2" gate="G$1" pin="Q3"/>
-<wire x1="124.46" y1="106.68" x2="127" y2="104.14" width="0.1524" layer="91"/>
-</segment>
-<segment>
 <wire x1="124.46" y1="152.4" x2="127" y2="154.94" width="0.1524" layer="91"/>
 <pinref part="RAM2" gate="G$1" pin="Y3"/>
 </segment>
@@ -12930,10 +13091,6 @@ In this library the device names are the same as the pin names of the symbols, t
 </segment>
 </net>
 <net name="DATA4" class="0">
-<segment>
-<pinref part="RAM2" gate="G$1" pin="Q4"/>
-<wire x1="127" y1="106.68" x2="129.54" y2="104.14" width="0.1524" layer="91"/>
-</segment>
 <segment>
 <wire x1="127" y1="152.4" x2="129.54" y2="154.94" width="0.1524" layer="91"/>
 <pinref part="RAM2" gate="G$1" pin="Y4"/>
@@ -12945,10 +13102,6 @@ In this library the device names are the same as the pin names of the symbols, t
 </net>
 <net name="DATA5" class="0">
 <segment>
-<pinref part="RAM2" gate="G$1" pin="Q5"/>
-<wire x1="129.54" y1="106.68" x2="132.08" y2="104.14" width="0.1524" layer="91"/>
-</segment>
-<segment>
 <wire x1="129.54" y1="152.4" x2="132.08" y2="154.94" width="0.1524" layer="91"/>
 <pinref part="RAM2" gate="G$1" pin="Y5"/>
 </segment>
@@ -12959,10 +13112,6 @@ In this library the device names are the same as the pin names of the symbols, t
 </net>
 <net name="DATA6" class="0">
 <segment>
-<pinref part="RAM2" gate="G$1" pin="Q6"/>
-<wire x1="132.08" y1="106.68" x2="134.62" y2="104.14" width="0.1524" layer="91"/>
-</segment>
-<segment>
 <wire x1="132.08" y1="152.4" x2="134.62" y2="154.94" width="0.1524" layer="91"/>
 <pinref part="RAM2" gate="G$1" pin="Y6"/>
 </segment>
@@ -12972,10 +13121,6 @@ In this library the device names are the same as the pin names of the symbols, t
 </segment>
 </net>
 <net name="DATA7" class="0">
-<segment>
-<pinref part="RAM2" gate="G$1" pin="Q7"/>
-<wire x1="134.62" y1="106.68" x2="137.16" y2="104.14" width="0.1524" layer="91"/>
-</segment>
 <segment>
 <wire x1="134.62" y1="152.4" x2="137.16" y2="154.94" width="0.1524" layer="91"/>
 <pinref part="RAM2" gate="G$1" pin="Y7"/>
@@ -13290,6 +13435,54 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="AND3" gate="G$1" pin="B"/>
 <wire x1="154.94" y1="111.76" x2="154.94" y2="114.3" width="0.1524" layer="91"/>
 <label x="154.94" y="111.76" size="1.27" layer="95" rot="R270" xref="yes"/>
+</segment>
+</net>
+<net name="MDR_8BIT0" class="0">
+<segment>
+<pinref part="RAM2" gate="G$1" pin="Q0"/>
+<wire x1="116.84" y1="106.68" x2="119.38" y2="104.14" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="MDR_8BIT1" class="0">
+<segment>
+<pinref part="RAM2" gate="G$1" pin="Q1"/>
+<wire x1="119.38" y1="106.68" x2="121.92" y2="104.14" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="MDR_8BIT2" class="0">
+<segment>
+<pinref part="RAM2" gate="G$1" pin="Q2"/>
+<wire x1="121.92" y1="106.68" x2="124.46" y2="104.14" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="MDR_8BIT3" class="0">
+<segment>
+<pinref part="RAM2" gate="G$1" pin="Q3"/>
+<wire x1="124.46" y1="106.68" x2="127" y2="104.14" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="MDR_8BIT4" class="0">
+<segment>
+<pinref part="RAM2" gate="G$1" pin="Q4"/>
+<wire x1="127" y1="106.68" x2="129.54" y2="104.14" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="MDR_8BIT5" class="0">
+<segment>
+<pinref part="RAM2" gate="G$1" pin="Q5"/>
+<wire x1="129.54" y1="106.68" x2="132.08" y2="104.14" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="MDR_8BIT6" class="0">
+<segment>
+<pinref part="RAM2" gate="G$1" pin="Q6"/>
+<wire x1="132.08" y1="106.68" x2="134.62" y2="104.14" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="MDR_8BIT7" class="0">
+<segment>
+<pinref part="RAM2" gate="G$1" pin="Q7"/>
+<wire x1="134.62" y1="106.68" x2="137.16" y2="104.14" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
