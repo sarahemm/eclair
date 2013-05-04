@@ -87,7 +87,8 @@ location    wrpte       18    # write page table entry using data in a and addre
 location    ldi8.flags  21    # load immediate 8 bits into system flags
 location    add8.ab     24    # add lower 8 bits of a and b registers, result goes into a
 location    jmpz        27    # jump if Z
-location    push        31    # push immediate to address pointed to by SP++
+location    push8.imm   31    # push immediate 8 bits to address pointed to by SP++
+location    push8       33    # common latter half of push8.*
 location    hlt         254
 
 # instructions - each one is one word of microcode, glues everything above together
@@ -153,15 +154,16 @@ instruction ldi8.flags  hold_last     load_mar        mdr_byte(low)   load_mdr  
 instruction ldi8.flags  load_flags    inc_pc          next_addr(fetch)
 
 # load the value of SP into X/Z/MAR
-instruction push        alu_op(x)     src_xy(sp)      load_x          load_z        src_mar(z)    load_mar
+instruction push8.imm   alu_op(x)     src_xy(sp)      load_x          load_z        src_mar(z)    load_mar
 # load immediate value from address pointed to by PC into MDR
-instruction push        src_mar(pc)   load_mar        src_mdr(data)   mem_read      mdr_byte(low) load_mdr
+instruction push8.imm   src_mar(pc)   load_mar        src_mdr(data)   mem_read      mdr_byte(low) load_mdr    next_addr(push8)
+
 # write immediate value from MDR into address pointed to by SP (now in Z)
-instruction push        src_mar(z)    load_mar        mem_write
+instruction push8       src_mar(z)    load_mar        mem_write
 # load 1'b1 into Y, add it to X (already contains SP), then put the result back into SP
-instruction push        src_xy(imm)   xy_imm_lsb(1)   load_y          
-instruction push        alu_op(add)   load_z          load_reg(sp)
+instruction push8       src_xy(imm)   xy_imm_lsb(1)   load_y          
+instruction push8       alu_op(add)   load_z          load_reg(sp)
 # increment PC and jump back to fetching the next instruction
-instruction push        inc_pc        next_addr(fetch)
+instruction push8       inc_pc        next_addr(fetch)
 
 instruction hlt         next_addr(hlt)

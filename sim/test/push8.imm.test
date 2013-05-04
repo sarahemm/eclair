@@ -28,7 +28,7 @@
 00010101    // write system flags
 00000001    // immediate for --^ (system mode, paging on)
 @015
-00011111    // push immediate
+00011111    // push8.imm
 01010101    // immediate for --^
 00011111    // push immediate
 10101010    // immediate for --^
