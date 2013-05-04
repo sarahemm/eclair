@@ -31,11 +31,11 @@
 00101100    // push16.imm
 01010101    // immediate for --^
 10101010    // immediate for --^
-@18
+@018
 00101100    // push immediate
 11000010    // immediate for --^
 00001110    // immediate for --^
-@1B
+@01B
 11111110    // halt
 
 // expect: pc=0x00001c
