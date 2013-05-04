@@ -155,11 +155,11 @@ instruction ldi8.flags  src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read  
 instruction ldi8.flags  hold_last     load_mar        mdr_byte(low)   load_mdr      load_x        load_z      load_status
 instruction ldi8.flags  load_flags    inc_pc          next_addr(fetch)
 
-# load the value of SP into X/Z/MAR
-instruction push8.imm   alu_op(x)     src_xy(sp)      load_x          load_z        src_mar(z)    load_mar
 # load immediate value from address pointed to by PC into MDR
 instruction push8.imm   src_mar(pc)   load_mar        src_mdr(data)   mem_read      mdr_byte(low) load_mdr    next_addr(push8.?)
 
+# load the value of SP into X/Z/MAR
+instruction push8.?     alu_op(x)     src_xy(sp)      load_x          load_z        src_mar(z)    load_mar
 # write immediate value from MDR into address pointed to by SP (now in Z)
 instruction push8.?     src_mar(z)    load_mar        mem_write
 # load 1'b1 into Y, add it to X (already contains SP), then put the result back into SP
