@@ -12,9 +12,11 @@
 00001101    // immediate low byte for --^
 00000000    // immediate high byte for --^
 @00A
-11111110    // halt
-11111110    // halt
+11111110    // halt - should jump over this
+11111110    // halt - should jump over this
 @00D
 11111110    // halt
-// FIXME: next line is a hack for "complain if you ever get here"
 // expect: pc=0x00000d
+@00E
+11111110    // halt - should never get here
+
