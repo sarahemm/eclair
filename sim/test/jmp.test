@@ -2,9 +2,11 @@
 00001110    // jmp
 00001111    // immediate low byte for --^
 00000000    // immediate high byte for --^
-11111110    // halt
+11111110    // halt - should jump over here
 @00F
 11111110    // halt
+@010
+11111110    // halt - should never get here
 
 
 // expect: reg_a=xxxxxxxx_xxxxxxxx
