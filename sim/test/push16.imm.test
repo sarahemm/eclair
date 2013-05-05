@@ -38,7 +38,7 @@
 @01B
 11111110    // halt
 
-// expect: pc=0x00001c
+// expect: pc=0x00001b
 // expect: reg_sp=00000100_00000100
 // expect: ram[0x100000]=0x55
 // expect: ram[0x100001]=0xaa

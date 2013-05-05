@@ -12,4 +12,4 @@
 // expect: reg_b=01100000_00000101
 // expect: reg_c=xxxxxxxx_xxxxxxxx
 // expect: reg_d=xxxxxxxx_xxxxxxxx
-// expect: pc=0x000008
+// expect: pc=0x000007

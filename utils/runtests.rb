@@ -10,6 +10,7 @@ def run_test(filename)
   expects = Array.new
   File.open(filename, "r") do |infile|
     addr = nil
+    addr_set_last = false
     infile.each_line do |line|
       if(matches = line.match(/expect:\s*([^=]+)=(.*)/)) then
         # expect line, record it in the array
@@ -18,12 +19,20 @@ def run_test(filename)
         # new address where ppc=pc
         addr = matches[1].to_i(16)
         expects[addr] = Hash.new
+        addr_set_last = true
       elsif(matches = line.match(/^@([0-9A-Fa-f]+)\s*\/\/\s*pc:\s*([0-9A-Fa-f]+)$/)) then
         # new address where ppc and pc are specified separately
         addr = matches[2].to_i(16)
         expects[addr] = Hash.new
+        addr_set_last = true
       elsif(line.match(/^[01]{8}/)) then
         # instruction, increment address by 1
+        if(addr_set_last) then
+          # the last thing we found was an address set
+          # this instruction /is/ that address, so don't increment addr
+          addr_set_last = false
+          next
+        end
         addr += 1
         expects[addr] = Hash.new
       end
