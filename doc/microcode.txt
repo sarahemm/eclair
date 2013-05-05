@@ -142,12 +142,12 @@ instruction add8.ab     alu_mode(arith) alu_op(add)                   load_z    
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
 instruction jmp         src_xy(mdr)   alu_op(x)       load_x          load_z
-instruction jmp         branch_cond(always)           load_pc         next_addr(fetch)
+instruction jmp         branch_cond(always)           load_pc         next_addr(fetch2)
 
 instruction jmpz        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
 instruction jmpz        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
-instruction jmpz        src_xy(mdr)   alu_op(x)       load_x          load_z
-instruction jmpz        branch_cond(z)                load_pc         next_addr(fetch)
+instruction jmpz        inc_pc        src_xy(mdr)     alu_op(x)       load_x        load_z
+instruction jmpz        branch_cond(z)                load_pc         next_addr(fetch2)
 
 instruction wrpte       alu_op(x)     src_xy(d)       load_x          load_z        src_mar(z)      load_mar
 instruction wrpte       alu_op(x)     src_xy(a)       load_x          load_z        load_status
@@ -187,5 +187,10 @@ instruction push16.?    mdr_byte(high)  mem_write
 instruction push16.?    src_xy(mar)   load_x          alu_op(add)     load_z        load_reg(sp)
 # increment PC and jump back to fetching the next instruction
 instruction push16.?    next_addr(fetch)
+
+instruction call        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
+instruction call        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
+instruction call        src_xy(mdr)   alu_op(x)       load_x          load_z
+instruction call        branch_cond(always)           load_pc         next_addr(fetch)
 
 instruction hlt         next_addr(hlt)
