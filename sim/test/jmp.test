@@ -5,12 +5,11 @@
 11111110    // halt - should jump over here
 @00F
 11111110    // halt
-@010
-11111110    // halt - should never get here
-
-
 // expect: reg_a=xxxxxxxx_xxxxxxxx
 // expect: reg_b=xxxxxxxx_xxxxxxxx
 // expect: reg_c=xxxxxxxx_xxxxxxxx
 // expect: reg_d=xxxxxxxx_xxxxxxxx
 // expect: pc=0x00000f
+@010
+11111110    // halt - should never get here
+
