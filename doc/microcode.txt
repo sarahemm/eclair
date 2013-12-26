@@ -93,6 +93,7 @@ location    push8.?     33    # common latter half of push8.*
 location    push16.imm  44    # push immediate 16 bits to address pointed to by SP++
 location    push16.pc   52    # push PC to address pointed to by SP++
 location    push16.?    47    # common latter half of push16.*
+location    call        207   # push PC to stack then jump immediate
 location    hlt         254
 
 # instructions - each one is one word of microcode, glues everything above together
@@ -206,6 +207,20 @@ instruction push16.?    mdr_byte(high)  mem_write
 instruction push16.?    src_xy(mar)   load_x          alu_op(add)     load_z        load_reg(sp)
 # increment PC and jump back to fetching the next instruction
 instruction push16.?    next_addr(fetch)
+
+# push current pc onto stack then jump to immediate location
+# see push16.pc / push16.? for details on this part
+instruction call        src_mar(pc)     load_mar      src_xy(mar)     load_x        alu_op(x)       load_z    src_mdr(z)  mdr_byte(low) load_mdr
+instruction call        mdr_byte(high)  load_mdr
+instruction call        alu_op(x)       src_xy(sp)    load_x          load_z        src_mar(z)      load_mar  mem_write
+instruction call        xy_imm_lsb(1)   load_y        alu_op(add)     load_z        src_mar(z)      load_mar 
+instruction call        mdr_byte(high)  mem_write
+instruction call        src_xy(mar)     load_x        alu_op(add)     load_z        load_reg(sp)
+# see jmp for details on this part
+instruction call        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
+instruction call        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
+instruction call        src_xy(mdr)   alu_op(x)       load_x          load_z
+instruction call        branch_cond(always)           load_pc         next_addr(fetch2)
 
 # halt forever
 instruction hlt         next_addr(hlt)

@@ -1,0 +1,41 @@
+@000
+00010101    // write system flags
+00000000    // immediate for --^ (system mode, paging off)
+// set up the system page table (so we can get to RAM)
+// page table address 0 = 00000000_00000000 (first block of ROM)
+@002
+00000110    // ldi16.a
+00000000    // immediate low byte for --^
+00000000    // immediate high byte for --^
+11000110    // ldi16.d
+00000000    // immediate low byte for --^
+00000000    // immediate high byte for --^
+00010010    // write page table entry (data from a, addr from d)
+// page table address 1 = 00000100_00000000 (first block of RAM)
+@009
+00000110    // ldi16.a
+00000000    // immediate low byte for --^
+00000100    // immediate high byte for --^
+11000110    // ldi16.d
+00000001    // immediate low byte for --^
+00000100    // immediate high byte for --^
+00010010    // write page table entry (data from a, addr from d)
+// set up the stack pointer to the bottom of RAM and enable paging
+@010
+00100111    // ldi16.sp
+00000000    // immediate low byte for --^
+00000100    // immediate high byte for --^
+00010101    // write system flags
+00000001    // immediate for --^ (system mode, paging on)
+@015
+11001111    // call
+00011001    // immediate low byte for --^
+00000000    // immediate high byte for --^
+@018
+11111110    // halt - should jump over here
+@019
+11111110    // halt - should halt here
+
+// expect: pc=0x000019
+// expect: reg_sp=00000100_00000010
+// expect: ram[0x100000]=0x15
