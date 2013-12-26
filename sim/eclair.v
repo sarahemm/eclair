@@ -234,7 +234,7 @@ module ECLair();
   always @ (clk_main) begin
     if(cs_ready) begin
       $display("resets:   m:%0b e:%0b p:%0b c:%0b", _reset, _ext_reset, _por_reset, cs_ready);
-      $display("cs_addr:  %0h", cs_addr);
+      $display("cs_addr:  0x%0h", cs_addr);
       $display("cs_data:  %08b_%08b_%08b_%08b", cs_data[31:24], cs_data[23:16], cs_data[15:8], cs_data[7:0]);
       $display("pc:       0x%06X", pc);
       $display("flags:    %08b", flags);
