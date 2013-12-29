@@ -70,18 +70,10 @@ mc_descs = []
   instructions[instruction].each do |data|
     raise "#{instruction} overlaps with previous instruction at address 0x%03X" % addr if mc_bits[addr]
     mc_bits[addr] = 0
-    if(data[0] == "hold_last") then
-      # start off with what we used last time if the first field is "hold_last"
-      mc_bits[addr] = last_mc_bits
-    end
     description = "";
     next_addr = nil;
     data.each do |field|
       field_name, enum_name = field.match(/([^\(]+)\(?([^\)]*)\)?/).captures
-      if(field_name == "hold_last") then
-        description += "#{field_name} "
-        next
-      end
       if(field_name == "next_addr") then
         if(enum_name == "ir") then
           description = "next: ir #{description}"
