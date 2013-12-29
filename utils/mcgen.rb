@@ -123,7 +123,10 @@ files.each do |file_info|
   File.open(filename, 'w') do |mcfile|
     mcfile.puts "// #{filename} - bits #{start}-#{start+length-1} of ECLair microcode"
     mc_bits.each_index do |addr|
-      next if !mc_bits[addr]
+      if(!mc_bits[addr]) then
+        mcfile.puts "@%03X // no microcode at this address" % addr
+        next
+      end
       my_bits = (mc_bits[addr] & mask) >> start
       mcfile.puts "@%03X // #{locations[addr]}" % addr if locations[addr]
       bit_string = ("%0#{length}b" % my_bits).gsub(/(\d)(?=(\d\d\d\d\d\d\d\d)+(?!\d))/, "\\1_")
