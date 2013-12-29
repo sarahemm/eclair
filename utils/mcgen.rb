@@ -3,9 +3,9 @@
 
 files = []
 mapfiles = []
-fields = {}
-enums = {}
-locations = []
+@fields = {}
+@enums = {}
+@locations = []
 instructions = {}
 # read in the microcode text file and fill a bunch of arrays with the info we'll need
 File.open(ARGV[0], "r") do |infile|
@@ -29,22 +29,22 @@ File.open(ARGV[0], "r") do |infile|
         field = values.shift
         start_addr = values.shift.to_i
         end_addr = start_addr + values.shift.to_i - 1
-        fields[field] = (start_addr..end_addr)
+        @fields[field] = (start_addr..end_addr)
       when "enum" then
         # enums specify a name for a bit or combination of bits used in a field
         field = values.shift
         name = values.shift
         value = values.shift.to_i
-        enums[field] = {} if !enums[field]
-        enums[field][name] = value
+        @enums[field] = {} if !@enums[field]
+        @enums[field][name] = value
       when "location" then
         # locations specify where instructions start in microcode
         instruction = values.shift
         start_addr = values.shift.to_i
-        if(locations[start_addr]) then
+        if(@locations[start_addr]) then
           raise "Location #{start_addr} already in use by '#{locations[start_addr]}', can't use it for '#{instruction}'"
         end
-        locations[start_addr] = instruction
+        @locations[start_addr] = instruction
       when "instruction" then
         # instructions list which values need to be set for each row of an instruction
         instruction = values.shift
@@ -56,53 +56,81 @@ File.open(ARGV[0], "r") do |infile|
   end
 end
 
+# given the name of an instruction, the address it's at, and a list of fields, generate a microcode word
+# returns a two element array with the word and a text description of the contents
+def gen_mc_word(instruction, addr, ins_fields, next_addr_override = nil)
+  next_addr = nil;
+  desc = "";
+  bits = 0
+  ins_fields.each do |ins_field|
+    field_name, enum_name = ins_field.match(/([^\(]+)\(?([^\)]*)\)?/).captures
+    if(field_name == "next_addr") then
+      next if next_addr_override != nil
+      if(enum_name == "ir") then
+        desc = "next: ir #{desc}"
+        next_addr = 0
+        next
+      end
+      loc_addr = @locations.find_index(enum_name)
+      next_addr = loc_addr
+      desc = "next: 0x#{loc_addr.to_s(16)}(#{enum_name}) #{desc}"
+      next
+    end
+    raise "Invalid field '#{field_name}' in instruction '#{instruction}'" if !@fields[field_name]
+    # find out if there are enums for this field, and make sure they're valid and used if so
+    raise "Enum expected for field '#{field_name}' in instruction #{instruction}" if @enums[field_name] and enum_name == ""
+    raise "No enum expected for field #{field_name} in instruction #{instruction}" if enum_name != "" and !@enums[field_name]
+    raise "Invalid enum '#{enum_name}' given for field '#{field_name}' in instruction #{instruction}" if enum_name != "" and !@enums[field_name][enum_name]
+    # TODO: check that we don't overflow the length of the field
+    # if no enum used, then specifying the field means we want it as a 1
+    bit_val = 1
+    bit_val = @enums[field_name][enum_name] if @enums[field_name]
+    bits |= bit_val << @fields[field_name].begin
+    desc += "#{field_name}(#{enum_name}) " if enum_name != ""
+    desc += "#{field_name} " if enum_name == ""
+  end
+  if(next_addr_override) then
+    next_addr = next_addr_override
+    desc = "next: 0x#{next_addr_override.to_s(16)} #{desc}"
+  else
+    next_addr = addr + 1 if next_addr == nil
+  end
+  bits |= next_addr << @fields["next_addr"].begin
+  return [bits, desc]
+end
+
 # generate the actual array of bits for the output
 # FIXME: right now we assume the last start_addr + 4 is the end, shouldn't do this
 mc_bits = []
 mc_descs = []
-(0..locations.length+4).each do |addr|
-  instruction = locations[addr]
+(0..@locations.length+4).each do |addr|
+  instruction = @locations[addr]
   next if !instruction
-  last_mc_bits = 0
   if(!instructions.include? instruction) then
     raise "No definition found for instruction #{instruction} at address #{addr}"
   end
-  instructions[instruction].each do |data|
+  instructions[instruction].each do |ins_fields|
     raise "#{instruction} overlaps with previous instruction at address 0x%03X" % addr if mc_bits[addr]
     mc_bits[addr] = 0
-    description = "";
-    next_addr = nil;
-    data.each do |field|
-      field_name, enum_name = field.match(/([^\(]+)\(?([^\)]*)\)?/).captures
-      if(field_name == "next_addr") then
-        if(enum_name == "ir") then
-          description = "next: ir #{description}"
-          next_addr = 0
-          next
+    if(include_data = ins_fields[0].match(/include\(([^)]+)\)/)) then
+      # include another instruction's words in this one (used for things like call = push16.pc + jmp)
+      (include_instruction, options) = include_data.captures[0].split(",")
+      instructions[include_instruction].each do |include_ins_fields|
+        if(options == "no_next") then
+          # the 'no_next' option means to force all next_addrs to the literal next address
+          # this lets us chain includes of instructions that normally jump back to fetch or the like
+          # TODO: optimize out any words that end up /only/ nexting to the literal next address
+          (mc_bits[addr], mc_descs[addr]) = gen_mc_word(include_instruction, addr, include_ins_fields, addr+1)
+        else
+          (mc_bits[addr], mc_descs[addr]) = gen_mc_word(include_instruction, addr, include_ins_fields)          
         end
-        loc_addr = locations.find_index(enum_name)
-        next_addr = loc_addr
-        description = "next: 0x#{loc_addr.to_s(16)} #{description}"
-        next
+        mc_descs[addr] = "include(#{include_instruction}) #{mc_descs[addr]}"
+        addr += 1
       end
-      raise "Invalid field '#{field_name}' in instruction '#{instruction}'" if !fields[field_name]
-      # find out if there are enums for this field, and make sure they're valid and used if so
-      raise "Enum expected for field '#{field_name}' in instruction #{instruction}" if enums[field_name] and enum_name == ""
-      raise "No enum expected for field #{field_name} in instruction #{instruction}" if enum_name != "" and !enums[field_name]
-      raise "Invalid enum '#{enum_name}' given for field '#{field_name}' in instruction #{instruction}" if enum_name != "" and !enums[field_name][enum_name]
-      # TODO: check that we don't overflow the length of the field
-      # if no enum used, then specifying the field means we want it as a 1
-      bit_val = 1
-      bit_val = enums[field_name][enum_name] if enums[field_name]
-      mc_bits[addr] |= bit_val << fields[field_name].begin
-      description += "#{field_name}(#{enum_name}) " if enum_name != ""
-      description += "#{field_name} " if enum_name == ""
+    else
+      (mc_bits[addr], mc_descs[addr]) = gen_mc_word(instruction, addr, ins_fields)
+      addr += 1      
     end
-    next_addr = addr + 1 if next_addr == nil
-    last_mc_bits = mc_bits[addr]
-    mc_bits[addr] |= next_addr << fields["next_addr"].begin
-    mc_descs[addr] = description
-    addr += 1
   end
 end
 
@@ -120,7 +148,7 @@ files.each do |file_info|
         next
       end
       my_bits = (mc_bits[addr] & mask) >> start
-      mcfile.puts "@%03X // #{locations[addr]}" % addr if locations[addr]
+      mcfile.puts "@%03X // #{@locations[addr]}" % addr if @locations[addr]
       bit_string = ("%0#{length}b" % my_bits).gsub(/(\d)(?=(\d\d\d\d\d\d\d\d)+(?!\d))/, "\\1_")
       mcfile.puts "#{bit_string} // #{mc_descs[addr]}" % addr
     end

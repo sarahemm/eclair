@@ -209,18 +209,9 @@ instruction push16.?    src_xy(mar)   load_x          alu_op(add)     load_z    
 instruction push16.?    next_addr(fetch)
 
 # push current pc onto stack then jump to immediate location
-# see push16.pc / push16.? for details on this part
-instruction call        src_mar(pc)     load_mar      src_xy(mar)     load_x        alu_op(x)       load_z    src_mdr(z)  mdr_byte(low) load_mdr
-instruction call        mdr_byte(high)  load_mdr
-instruction call        alu_op(x)       src_xy(sp)    load_x          load_z        src_mar(z)      load_mar  mem_write
-instruction call        xy_imm_lsb(1)   load_y        alu_op(add)     load_z        src_mar(z)      load_mar 
-instruction call        mdr_byte(high)  mem_write
-instruction call        src_xy(mar)     load_x        alu_op(add)     load_z        load_reg(sp)
-# see jmp for details on this part
-instruction call        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
-instruction call        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
-instruction call        src_xy(mdr)   alu_op(x)       load_x          load_z
-instruction call        branch_cond(always)           load_pc         next_addr(fetch2)
+instruction call        include(push16.pc,no_next)
+instruction call        include(push16.?,no_next)
+instruction call        include(jmp)
 
 # halt forever
 instruction hlt         next_addr(hlt)
