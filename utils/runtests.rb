@@ -112,6 +112,9 @@ def run_test(filename)
   if(stdout.split(/\n/)[-1] == "PROCESSOR HALTED") then
     pass += 1
     puts "PASS:    Processor halted successfully.".light_green
+  elsif(stdout.split(/\n/)[-1] =~ /ILLEGAL MICROINSTRUCTION EXECUTED.*/) then
+    fails += 1
+    puts "FAIL:    Illegal microinstruction executed.".light_red
   else
     fails += 1
     puts "FAIL:    Processor ran away and failed to halt.".light_red
