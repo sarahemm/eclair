@@ -1,0 +1,12 @@
+@000
+00000101    // ldi8.al
+00011000    // immediate for --^
+01000101    // ldi8.b
+00010100    // immediate for --^
+00111101    // sub8.ab
+11111110    // halt
+
+// expect: reg_a=xxxxxxxx_00000111
+// expect: reg_b=xxxxxxxx_00010100
+// expect: reg_c=xxxxxxxx_xxxxxxxx
+// expect: reg_d=xxxxxxxx_xxxxxxxx

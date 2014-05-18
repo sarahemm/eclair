@@ -50,6 +50,7 @@ enum  alu_mode    arith   0
 enum  alu_mode    logic   1
 enum  alu_op      x       0
 enum  alu_op      add     6
+enum  alu_op      sub     13
 enum  xy_imm_lsb  0       0
 enum  xy_imm_lsb  1       1
 enum  src_xy      imm     0
@@ -87,6 +88,7 @@ location    jmp         14    # unconditional immediate jump
 location    wrpte       18    # write page table entry using data in a and address in d
 location    ldi8.flags  21    # load immediate 8 bits into system flags
 location    add8.ab     24    # add lower 8 bits of a and b registers, result goes into a
+location    sub8.ab     61    # subtract lower 8 bits of a and b registers, result goes into a
 location    jmpz        27    # jump if Z
 location    push8.imm   31    # push immediate 8 bits to address pointed to by SP++
 location    push8.?     33    # common latter half of push8.*
@@ -151,6 +153,11 @@ instruction add16.ab    alu_mode(arith) alu_op(add)   op_16bit        load_z    
 instruction add8.ab     src_xy(a)     load_x
 instruction add8.ab     src_xy(b)     load_y
 instruction add8.ab     alu_mode(arith) alu_op(add)                   load_z        load_reg(a)     next_addr(fetch)  load_status
+
+# subtract 8 bits from low bytes of registers A and B, result goes into A
+instruction sub8.ab     src_xy(a)     load_x
+instruction sub8.ab     src_xy(b)     load_y
+instruction sub8.ab     alu_mode(arith) alu_op(sub)                   load_z        load_reg(a)     next_addr(fetch)  load_status
 
 # immediate jump to the address specified
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
