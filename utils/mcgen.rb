@@ -163,8 +163,8 @@ mapfiles.each do |file_info|
   File.open(filename, 'w') do |mapfile|
     mc_bits.each_index do |addr|
       next if !mc_bits[addr]
-      if(locations[addr]) then
-        last_instruction = locations[addr] 
+      if(@locations[addr]) then
+        last_instruction = @locations[addr] 
         last_instruction_baseaddr = addr
       end
       mapfile.puts "#{addr.to_s(16).upcase.rjust(2, "0")} #{last_instruction}-#{addr-last_instruction_baseaddr}"
