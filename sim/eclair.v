@@ -152,7 +152,7 @@ module ECLair();
   mux_2x                                        mux_mdr_h(.sel(mux_mdr_src), .a(reg_z[15:8]), .b(bus_data[7:0]), .y(lat_mdr[15:8]));
   mux_2x                                        mux_mdr_byte(.sel(mdr_byte), .a(reg_mdr[7:0]), .b(reg_mdr[15:8]), .y(reg_mdr_8bit));
   mux_2x          #(.WIDTH(6))                  mux_ptb(.sel(mode), .a(6'b000000), .b(reg_ptb), .y(ptb));
-  alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(1'b0), .x(reg_x), .y(reg_y), .z(alu_z), .c_out8(alu_cout8), .c_out16(alu_cout16));
+  alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(carry_in), .x(reg_x), .y(reg_y), .z(alu_z), .c_out8(alu_cout8), .c_out16(alu_cout16));
   main_ram      #(.WIDTH(16), .ADDR_WIDTH(12), .TYPE("Page Table"))  ram_paging(._cs(1'b0), ._oe(1'b0), ._w(~write_pte), .addr(pagetable_addr), .data_in(reg_z), .data_out(pagetable_out));
   mux_2x                                        mux_paging_l(.sel(paging_enabled), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr[17:10]));
   mux_2x        #(.WIDTH(6))                    mux_paging_h(.sel(paging_enabled), .a(6'b0),           .b(pagetable_out[13:8]), .y(bus_addr[23:18]));
@@ -187,7 +187,7 @@ module ECLair();
   assign alu_op = cs_data[39:36];
   assign reg_xy_src = cs_data[42:40];
   assign ram_read = cs_data[43];
-  // bit 44 is currently available
+  assign carry_in = cs_data[44];
   assign op_16bit = cs_data[45];
   assign branch_cond = cs_data[48:46];
   assign mdr_byte = cs_data[49];

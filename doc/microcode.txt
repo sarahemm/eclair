@@ -33,7 +33,7 @@ field alu_mode      35    1
 field alu_op        36    4
 field src_xy        40    3
 field mem_read      43    1
-field data_bus_src  44    1
+field carry_in      44    1
 field op_16bit      45    1
 field branch_cond   46    3
 field mdr_byte      49    1
@@ -53,7 +53,7 @@ enum  alu_mode    arith   0
 enum  alu_mode    logic   1
 enum  alu_op      x       0
 enum  alu_op      add     6
-enum  alu_op      sub     7
+enum  alu_op      sub     9
 enum  alu_op      x-1     15
 enum  xy_imm_lsb  0       0
 enum  xy_imm_lsb  1       1
@@ -70,6 +70,8 @@ enum  branch_cond z       1
 enum  branch_cond co      2
 enum  mdr_byte    low     0
 enum  mdr_byte    high    1
+enum  carry_in    0       0
+enum  carry_in    1       1
 
 # locations - start addresses of instructions
 location    init        0
@@ -162,7 +164,7 @@ instruction add8.ab     alu_mode(arith) alu_op(add)                   load_z    
 # subtract 8 bits from low bytes of registers A and B, result goes into A
 instruction sub8.ab     src_xy(a)     load_x
 instruction sub8.ab     src_xy(b)     load_y
-instruction sub8.ab     alu_mode(logic) alu_op(sub) load_z          load_reg(a)   next_addr(fetch)  load_status
+instruction sub8.ab     alu_mode(arith) alu_op(sub)   carry_in(1)     load_z        load_reg(a)     next_addr(fetch)  load_status
 
 # immediate jump to the address specified
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr

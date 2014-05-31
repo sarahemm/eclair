@@ -1,12 +1,49 @@
 @000
 00000101    // ldi8.al
-00011000    // immediate for --^
-01000101    // ldi8.b
-00010100    // immediate for --^
+11111111    // immediate for --^
+01000101    // ldi8.bl
+11111111    // immediate for --^
+// expect: reg_a=xxxxxxxx_11111111
+// expect: reg_b=xxxxxxxx_11111111
 00111101    // sub8.ab
+// expect: reg_a=xxxxxxxx_00000000
+// expect: reg_b=xxxxxxxx_11111111
+
+@005
+00000101    // ldi8.al
+11111111    // immediate for --^
+01000101    // ldi8.bl
+00000000    // immediate for --^
+// expect: reg_a=xxxxxxxx_11111111
+// expect: reg_b=xxxxxxxx_00000000
+00111101    // sub8.ab
+// expect: reg_a=xxxxxxxx_11111111
+// expect: reg_b=xxxxxxxx_00000000
+
+@00A
+00000101    // ldi8.al
+00011000    // immediate for --^
+01000101    // ldi8.bl
+00010100    // immediate for --^
+// expect: reg_a=xxxxxxxx_00011000
+// expect: reg_b=xxxxxxxx_00010100
+00111101    // sub8.ab
+// expect: reg_a=xxxxxxxx_00000100
+// expect: reg_b=xxxxxxxx_00010100
+
+@00F
+00000101    // ldi8.al
+00000011    // immediate for --^
+01000101    // ldi8.bl
+00000001    // immediate for --^
+// expect: reg_a=xxxxxxxx_00000011
+// expect: reg_b=xxxxxxxx_00000001
+00111101    // sub8.ab
+// expect: reg_a=xxxxxxxx_00000010
+// expect: reg_b=xxxxxxxx_00000001
+
+@014
 11111110    // halt
 
-// expect: reg_a=xxxxxxxx_00000111
-// expect: reg_b=xxxxxxxx_00010100
 // expect: reg_c=xxxxxxxx_xxxxxxxx
 // expect: reg_d=xxxxxxxx_xxxxxxxx

@@ -6114,7 +6114,6 @@ In this library the device names are the same as the pin names of the symbols, t
 <part name="LAT16" library="logicalgates-sen" deviceset="LATCH-8" device="" value="Register Y"/>
 <part name="LAT17" library="logicalgates-sen" deviceset="LATCH-8" device="" value="Register Y"/>
 <part name="CLAG1" library="logicalgates-sen" deviceset="CLAG-4" device=""/>
-<part name="SUPPLY6" library="supply2" deviceset="V-" device=""/>
 <part name="SUPPLY7" library="supply2" deviceset="V-" device=""/>
 <part name="DEMUX2" library="logicalgates-sen" deviceset="DEMUX-8X8" device="" value="X/Y Source"/>
 <part name="SUPPLY4" library="supply2" deviceset="V-" device=""/>
@@ -7459,7 +7458,6 @@ In this library the device names are the same as the pin names of the symbols, t
 <instance part="LAT16" gate="G$1" x="111.76" y="22.86" rot="R90"/>
 <instance part="LAT17" gate="G$1" x="144.78" y="22.86" rot="R90"/>
 <instance part="CLAG1" gate="G$1" x="129.54" y="116.84" rot="R90"/>
-<instance part="SUPPLY6" gate="1" x="33.02" y="60.96" rot="R270"/>
 <instance part="SUPPLY7" gate="1" x="114.3" y="104.14" rot="R270"/>
 <instance part="DEMUX2" gate="G$1" x="71.12" y="170.18" rot="R90"/>
 <instance part="SUPPLY4" gate="1" x="20.32" y="144.78" rot="R270"/>
@@ -8364,11 +8362,6 @@ In this library the device names are the same as the pin names of the symbols, t
 </net>
 <net name="V-" class="0">
 <segment>
-<pinref part="ALU1" gate="G$1" pin="CN"/>
-<pinref part="SUPPLY6" gate="1" pin="V-"/>
-<wire x1="35.56" y1="60.96" x2="38.1" y2="60.96" width="0.1524" layer="91"/>
-</segment>
-<segment>
 <pinref part="CLAG1" gate="G$1" pin="CN"/>
 <pinref part="SUPPLY7" gate="1" pin="V-"/>
 <wire x1="116.84" y1="104.14" x2="119.38" y2="104.14" width="0.1524" layer="91"/>
@@ -8964,6 +8957,13 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="22.86" y="139.7" size="1.27" layer="95" rot="R270" xref="yes"/>
 </segment>
 </net>
+<net name="CARRY_IN" class="0">
+<segment>
+<pinref part="ALU1" gate="G$1" pin="CN"/>
+<wire x1="35.56" y1="60.96" x2="38.1" y2="60.96" width="0.1524" layer="91"/>
+<label x="35.56" y="60.96" size="1.27" layer="95" rot="R180" xref="yes"/>
+</segment>
+</net>
 </nets>
 </sheet>
 <sheet>
@@ -9372,6 +9372,14 @@ In this library the device names are the same as the pin names of the symbols, t
 <rectangle x1="226.06" y1="167.64" x2="228.6" y2="190.5" layer="97" rot="R90"/>
 <rectangle x1="259.08" y1="167.64" x2="261.62" y2="190.5" layer="97" rot="R90"/>
 <text x="271.78" y="208.28" size="7.62" layer="94" ratio="10" rot="R180">Microcode</text>
+<text x="22.86" y="157.48" size="1.27" layer="91" align="center">Bits 0-7</text>
+<text x="55.88" y="157.48" size="1.27" layer="91" align="center">Bits 8-15</text>
+<text x="88.9" y="157.48" size="1.27" layer="91" align="center">Bits 16-23</text>
+<text x="121.92" y="157.48" size="1.27" layer="91" align="center">Bits 24-31</text>
+<text x="157.48" y="157.48" size="1.27" layer="91" align="center">Bits 32-39</text>
+<text x="190.5" y="157.48" size="1.27" layer="91" align="center">Bits 40-47</text>
+<text x="223.52" y="157.48" size="1.27" layer="91" align="center">Bits 48-55</text>
+<text x="256.54" y="157.48" size="1.27" layer="91" align="center">Bits 56-63</text>
 </plain>
 <instances>
 <instance part="ROM1" gate="G$1" x="139.7" y="50.8" rot="R90"/>
@@ -11230,6 +11238,13 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="LINK7" gate="G$1" pin="B2"/>
 <wire x1="220.98" y1="185.42" x2="220.98" y2="187.96" width="0.1524" layer="91"/>
 <label x="220.98" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
+</segment>
+</net>
+<net name="CARRY_IN" class="0">
+<segment>
+<pinref part="LINK6" gate="G$1" pin="B5"/>
+<wire x1="195.58" y1="187.96" x2="195.58" y2="185.42" width="0.1524" layer="91"/>
+<label x="195.58" y="187.96" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 </nets>
