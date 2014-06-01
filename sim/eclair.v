@@ -103,8 +103,6 @@ module ECLair();
   wire          carry_in;       // carry input to the ALU, from a microcode bit
   
   initial begin
-    //$dumpfile("eclair.vcd");
-    //$dumpvars(0,ECLair);
     clk_main = 1'b0;
     _ext_reset = 1'b1;
     _por_reset = 1'b0;
@@ -229,7 +227,7 @@ module ECLair();
   assign xy_imm_val[15:1] = 15'b000000000000000;
   
   always begin
-    #40 clk_main = ~clk_main;
+    #40 clk_main = ~clk_main; // 25MHz main clock
   end
   
   always @ (clk_main) begin
