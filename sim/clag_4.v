@@ -22,8 +22,8 @@ module clag_4(g, p, cn, cn2, cn4, pg, gg);
   assign gate7_out = ~g[1];
   assign gate8_out = ~(p[1] | g[0]);
   assign gate9_out = ~(p[1] | cn | p[0]);
-  assign cn2 = ~(gate7_out | gate8_out | gate9_out);
-  assign cn4 = ~(gate1_out | gate2_out | gate3_out | gate4_out | gate5_out);
-  assign gg  = ~(gate1_out | gate2_out | gate3_out | gate4_out);
-  assign pg = gate6_out;
+  assign #2.5 cn2 = ~(gate7_out | gate8_out | gate9_out);
+  assign #2.5 cn4 = ~(gate1_out | gate2_out | gate3_out | gate4_out | gate5_out);
+  assign #2.5 gg  = ~(gate1_out | gate2_out | gate3_out | gate4_out);
+  assign #2.5 pg = gate6_out;
 endmodule
