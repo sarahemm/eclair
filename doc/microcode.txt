@@ -103,7 +103,7 @@ location    push16.pc   52    # push PC to address pointed to by SP++
 location    push16.?    47    # common latter half of push16.*
 location    pop16.pc    54    # pop 16 bits from address pointed to by SP-- into PC
 location    call        207   # push PC to stack then jump immediate
-location    hlt         254
+location    halt        254
 
 # instructions - each one is one word of microcode, glues everything above together
 # initialize the cpu when first starting up
@@ -244,4 +244,4 @@ instruction call        include(push16.?,no_next)
 instruction call        include(jmp)
 
 # halt forever
-instruction hlt         next_addr(hlt)
+instruction halt        next_addr(halt)
