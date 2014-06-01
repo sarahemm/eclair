@@ -100,6 +100,7 @@ module ECLair();
   wire          branch_cond_met;  // branch condition is met
   wire          really_load_pc;   // request to load pc and branch condition is met
   wire  [2:0]   branch_cond;    // which branch condition to use
+  wire          carry_in;       // carry input to the ALU, from a microcode bit
   
   initial begin
     //$dumpfile("eclair.vcd");
