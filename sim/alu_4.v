@@ -81,7 +81,7 @@ module alu_4(s, a, b, cn, m, f, gg, pg, cn4);
   assign gate_fb8 = ~(m | gate_2r1 | gate_1r1 | gate_0r0);
   assign gate_fb9 = ~(m | gate_2r1 | gate_1r1 | gate_0r1 | cn);
   
-  assign pg = gate_3r1 | gate_2r1 | gate_1r1 | gate_0r1;
+  assign #4.0 pg = gate_3r1 | gate_2r1 | gate_1r1 | gate_0r1;
   
   assign gate_fb11 = ~gate_3r0;
   assign gate_fb12 = ~(gate_3r1 | gate_2r0);
@@ -93,11 +93,11 @@ module alu_4(s, a, b, cn, m, f, gg, pg, cn4);
   assign gate_fc1 = gate_fb3  | gate_fb4  | gate_fb5;
   assign gate_fc2 = gate_fb6  | gate_fb7  | gate_fb8  | gate_fb9;
   assign gate_fc3 = gate_fb11 | gate_fb12 | gate_fb13 | gate_fb14;
-  assign gg = ~gate_fc3;
+  assign #4.5 gg = ~gate_fc3;
   
-  assign f[0] = gate_fa0 ~^ gate_fb0;
-  assign f[1] = gate_fa1 ~^ gate_fc0;
-  assign f[2] = gate_fa2 ~^ gate_fc1;
-  assign f[3] = gate_fa3 ~^ gate_fc2;
-  assign cn4 = gate_fb15 ~| gate_fc3;
+  assign #4.5 f[0] = gate_fa0 ~^ gate_fb0;
+  assign #4.5 f[1] = gate_fa1 ~^ gate_fc0;
+  assign #4.5 f[2] = gate_fa2 ~^ gate_fc1;
+  assign #4.5 f[3] = gate_fa3 ~^ gate_fc2;
+  assign #4.0 cn4 = gate_fb15 ~| gate_fc3;
 endmodule

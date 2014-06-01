@@ -18,7 +18,7 @@ module main_ram(_cs, _oe, _w, addr, data_in, data_out);
   assign data_out = _oe ? 16'bZ : data_val;
   
   always @ (negedge _w) begin
-    ram[addr] <= data_in;
+    #4 ram[addr] <= data_in;
     $display("%s RAM wrote data %b (0x%0h) to address %b (0x%0h)", TYPE, data_in, data_in, addr, addr);
   end
 endmodule
