@@ -42,7 +42,7 @@ File.open(ARGV[0], "r") do |infile|
         instruction = values.shift
         start_addr = values.shift.to_i
         if(@locations[start_addr]) then
-          raise "Location #{start_addr} already in use by '#{locations[start_addr]}', can't use it for '#{instruction}'"
+          raise "Location #{start_addr} already in use by '#{@locations[start_addr]}', can't use it for '#{instruction}'"
         end
         @locations[start_addr] = instruction
       when "instruction" then
