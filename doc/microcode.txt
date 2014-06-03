@@ -105,6 +105,9 @@ location    pop16.pc    54    # pop 16 bits from address pointed to by SP-- into
 location    call        207   # push PC to stack then jump immediate
 location    halt        254
 
+# aliases - other names for instructions
+alias       ret         pop16.pc
+
 # instructions - each one is one word of microcode, glues everything above together
 # initialize the cpu when first starting up
 instruction init        src_xy(imm)   alu_mode(arith)   alu_op(x) load_x      load_y  load_z

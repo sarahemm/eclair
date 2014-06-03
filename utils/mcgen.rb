@@ -50,6 +50,8 @@ File.open(ARGV[0], "r") do |infile|
         instruction = values.shift
         instructions[instruction] = [] if !instructions[instruction]
         instructions[instruction] << values
+      when "alias" then
+        # we don't do anything with aliases, other tools use them
       else
         raise "Unknown field type."
     end
