@@ -94,14 +94,14 @@ location    jmp         14    # unconditional immediate jump
 location    wrpte       18    # write page table entry using data in a and address in d
 location    ldi8.flags  21    # load immediate 8 bits into system flags
 location    add8.ab     24    # add lower 8 bits of a and b registers, result goes into a
-location    sub8.ab     61    # subtract lower 8 bits of a and b registers, result goes into a
+location    sub8.ab     62    # subtract lower 8 bits of a and b registers, result goes into a
 location    jmpz        27    # jump if Z
 location    push8.imm   31    # push immediate 8 bits to address pointed to by SP++
 location    push8.?     33    # common latter half of push8.*
 location    push16.imm  44    # push immediate 16 bits to address pointed to by SP++
 location    push16.pc   52    # push PC to address pointed to by SP++
 location    push16.?    47    # common latter half of push16.*
-location    pop16.pc    54    # pop 16 bits from address pointed to by SP-- into PC
+location    pop16.pc    55    # pop 16 bits from address pointed to by SP-- into PC
 location    call        207   # push PC to stack then jump immediate
 location    halt        254
 
@@ -211,7 +211,8 @@ instruction push16.imm  next_addr(push16.?)
 # push program counter onto stack
 # pc -> mar -> x -> z -> mdr
 instruction push16.pc   src_mar(pc)     load_mar      src_xy(mar)     load_x        alu_op(x)       load_z    src_mdr(z)  mdr_byte(low) load_mdr
-instruction push16.pc   mdr_byte(high)  load_mdr      next_addr(push16.?)
+instruction push16.pc   mdr_byte(high)  src_xy(mdr)   load_mdr        load_x
+instruction push16.pc   xy_imm_lsb(1)   src_xy(imm)   load_y          alu_op(add)   load_z          load_mdr        next_addr(push16.?)
 
 # push 16 bits from register selected by IR[6..7]
 # write immediate value from low byte of MDR into address pointed to by SP (via SP->X->Z->MAR)

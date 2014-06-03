@@ -5,7 +5,7 @@
 11111111    // immediate for --^
 // expect: reg_a=xxxxxxxx_11111111
 // expect: reg_b=xxxxxxxx_11111111
-00111101    // sub8.ab
+00111110    // sub8.ab
 // expect: reg_a=xxxxxxxx_00000000
 // expect: reg_b=xxxxxxxx_11111111
 
@@ -16,7 +16,7 @@
 00000000    // immediate for --^
 // expect: reg_a=xxxxxxxx_11111111
 // expect: reg_b=xxxxxxxx_00000000
-00111101    // sub8.ab
+00111110    // sub8.ab
 // expect: reg_a=xxxxxxxx_11111111
 // expect: reg_b=xxxxxxxx_00000000
 
@@ -27,7 +27,7 @@
 00010100    // immediate for --^
 // expect: reg_a=xxxxxxxx_00011000
 // expect: reg_b=xxxxxxxx_00010100
-00111101    // sub8.ab
+00111110    // sub8.ab
 // expect: reg_a=xxxxxxxx_00000100
 // expect: reg_b=xxxxxxxx_00010100
 
@@ -38,7 +38,7 @@
 00000001    // immediate for --^
 // expect: reg_a=xxxxxxxx_00000011
 // expect: reg_b=xxxxxxxx_00000001
-00111101    // sub8.ab
+00111110    // sub8.ab
 // expect: reg_a=xxxxxxxx_00000010
 // expect: reg_b=xxxxxxxx_00000001
 

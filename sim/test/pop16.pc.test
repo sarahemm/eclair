@@ -41,7 +41,7 @@
 // expect: ram[0x100002]=0x1d
 // expect: ram[0x100003]=0x0
 @01B
-00110110		// pop16.pc - this should pop us to 0x1D
+00110111		// pop16.pc - this should pop us to 0x1D
 @01C
 11111110    // halt
 @01D
