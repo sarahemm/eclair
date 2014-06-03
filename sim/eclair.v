@@ -101,6 +101,10 @@ module ECLair();
   wire          really_load_pc;   // request to load pc and branch condition is met
   wire  [2:0]   branch_cond;    // which branch condition to use
   wire          carry_in;       // carry input to the ALU, from a microcode bit
+  wire  [3:0]   xy_nibble;      // XY nibble input (A input to the XY mux)
+  wire  [7:0]   xy_nibble_padded; // XY nibble padded to 8 bits with 0s
+  wire  [3:0]   int_vect;       // highest-priority interrupt flag currently active
+  wire          reg_xy_nibble_sel;  // which nibble we want to access via the XY mux (imm or int_vect)
   
   initial begin
     clk_main = 1'b0;
@@ -143,8 +147,9 @@ module ECLair();
   latch           #(.WIDTH(8))                  lat_reg_mdr_h(.clk(~(reg_mdr_load & mdr_byte)), .reset(1'b0), .in(lat_mdr[15:8]), .out(reg_mdr[15:8]));
   demux_38                                      dmx_reg_load(load_reg, reg_load);
   demux_38                                      dmx_reg_load_ir(reg_x_load_ir_src, reg_load_via_ir);
-  mux_88                                        mux_xy_src_l(.sel(reg_xy_src), .a(xy_imm_val[7:0]), .b(reg_a[7:0]), .c(reg_b[7:0]), .d(reg_c[7:0]), .e(reg_d[7:0]), .f(reg_sp[7:0]), .g(reg_mar[7:0]), .h(reg_mdr[7:0]),  .y(lat_xy[7:0]));
-  mux_88                                        mux_xy_src_h(.sel(reg_xy_src), .a(xy_imm_val[15:8]), .b(reg_a[15:8]), .c(reg_b[15:8]), .d(reg_c[15:8]), .e(reg_d[15:8]), .f(reg_sp[15:8]), .g(reg_mar[15:8]), .h(reg_mdr[15:8]), .y(lat_xy[15:8]));
+  mux_88                                        mux_xy_src_l(.sel(reg_xy_src), .a(xy_nibble_padded), .b(reg_a[7:0]), .c(reg_b[7:0]), .d(reg_c[7:0]), .e(reg_d[7:0]), .f(reg_sp[7:0]), .g(reg_mar[7:0]), .h(reg_mdr[7:0]),  .y(lat_xy[7:0]));
+  mux_88                                        mux_xy_src_h(.sel(reg_xy_src), .a(8'b00000000), .b(reg_a[15:8]), .c(reg_b[15:8]), .d(reg_c[15:8]), .e(reg_d[15:8]), .f(reg_sp[15:8]), .g(reg_mar[15:8]), .h(reg_mdr[15:8]), .y(lat_xy[15:8]));
+  mux_2x          #(.WIDTH(4))                  mux_xy_nibble_sel(.sel(reg_xy_nibble_sel), .a(xy_imm_val), .b(int_vect), .y(xy_nibble));
   mux_2x                                        mux_mar_l(.sel(mux_mar_src), .a(reg_z[7:0]),  .b(pc[7:0]),  .y(lat_mar[7:0]));
   mux_2x                                        mux_mar_h(.sel(mux_mar_src), .a(reg_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
   mux_2x                                        mux_mdr_l(.sel(mux_mdr_src), .a(reg_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
@@ -190,6 +195,7 @@ module ECLair();
   assign op_16bit = cs_data[45];
   assign branch_cond = cs_data[48:46];
   assign xy_imm_lsb = cs_data[50:49];
+  assign reg_xy_nibble_sel = cs_data[51];
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
@@ -224,7 +230,9 @@ module ECLair();
   assign status_16[1] = alu_cout16;
   assign really_load_pc = load_pc & branch_cond_met;
   assign xy_imm_val[1:0] = xy_imm_lsb;
-  assign xy_imm_val[15:2] = 14'b00000000000000;
+  assign xy_imm_val[7:2] = 6'b000000;
+  assign xy_nibble_padded[3:0] = xy_nibble;
+  assign xy_nibble_padded[7:4] = 4'b0000;
   
   always begin
     #40 clk_main = ~clk_main; // 25MHz main clock

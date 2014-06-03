@@ -37,6 +37,7 @@ field carry_in      44    1
 field op_16bit      45    1
 field branch_cond   46    3
 field xy_imm_lsb    49    2
+field xy_nibble_sel 51    1
 
 # enums - names for values that go into bit positions
 enum  src_mar     z       0
@@ -74,6 +75,8 @@ enum  mdr_byte    low     0
 enum  mdr_byte    high    1
 enum  carry_in    0       0
 enum  carry_in    1       1
+enum  xy_nibble_sel imm   0
+enum  xy_nibble_sel int   1
 
 # locations - start addresses of instructions
 location    init        0
