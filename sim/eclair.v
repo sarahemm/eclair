@@ -46,7 +46,7 @@ module ECLair();
   wire  [2:0]   load_reg;         // load general register
   wire  [7:0]   reg_load;         // load signals (latch clocks) for registers
   wire  [7:0]   reg_load_via_ir;  // load signals (latch clocks) for registers (when loading via IR)
-  wire          xy_imm_lsb;       // least significant immediate bit (used when reg_xy_src = 3'b000)
+  wire  [1:0]   xy_imm_lsb;       // least significant immediate bits (used when reg_xy_src = 3'b000)
   wire  [15:0]  xy_imm_val;       // xy immediate value (used when reg_xy_src = 3'b000)
   wire  [2:0]   reg_xy_src;       // load source for X and Y registers
   wire  [2:0]   reg_x_load_ir_src;  // bits from IR to determine which register to load
@@ -178,7 +178,7 @@ module ECLair();
   assign ram_write = cs_data[17];
   
   // level-sensitive microcode signals
-  assign xy_imm_lsb = cs_data[24];
+  assign mdr_byte = cs_data[24];
   assign cs_next_addr = cs_data[32:25];
   assign mux_mar_src = cs_data[33];
   assign mux_mdr_src = cs_data[34];
@@ -189,7 +189,7 @@ module ECLair();
   assign carry_in = cs_data[44];
   assign op_16bit = cs_data[45];
   assign branch_cond = cs_data[48:46];
-  assign mdr_byte = cs_data[49];
+  assign xy_imm_lsb = cs_data[50:49];
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
@@ -223,8 +223,8 @@ module ECLair();
   assign status_8[1]  = alu_cout8;
   assign status_16[1] = alu_cout16;
   assign really_load_pc = load_pc & branch_cond_met;
-  assign xy_imm_val[0] = xy_imm_lsb;
-  assign xy_imm_val[15:1] = 15'b000000000000000;
+  assign xy_imm_val[1:0] = xy_imm_lsb;
+  assign xy_imm_val[15:2] = 14'b00000000000000;
   
   always begin
     #40 clk_main = ~clk_main; // 25MHz main clock

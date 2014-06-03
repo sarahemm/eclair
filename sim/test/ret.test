@@ -32,10 +32,11 @@
 00011001    // immediate low byte for --^
 00000000    // immediate high byte for --^
 @018
-11111110    // halt - should jump over here
-@019
-11111110    // halt - should halt here
-
-// expect: pc=0x000019
-// expect: reg_sp=00000100_00000010
+11111110    // halt - should jump over here, then return here from @019
+// expect: pc=0x000018
+// expect: reg_sp=00000100_00000000
 // expect: ram[0x100000]=0x18
+@019
+00110111    // ret - should return to @018
+11111110    // halt - should jump away before here, never get here
+

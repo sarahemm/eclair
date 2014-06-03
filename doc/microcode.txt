@@ -25,7 +25,7 @@ field load_status   15    1
 field clr_intflg    16    1
 field mem_write     17    1
 # level-sensitive signals
-field xy_imm_lsb    24    1
+field mdr_byte      24    1
 field next_addr     25    8
 field src_mar       33    1
 field src_mdr       34    1
@@ -36,7 +36,7 @@ field mem_read      43    1
 field carry_in      44    1
 field op_16bit      45    1
 field branch_cond   46    3
-field mdr_byte      49    1
+field xy_imm_lsb    49    2
 
 # enums - names for values that go into bit positions
 enum  src_mar     z       0
@@ -57,6 +57,8 @@ enum  alu_op      sub     9
 enum  alu_op      x-1     15
 enum  xy_imm_lsb  0       0
 enum  xy_imm_lsb  1       1
+enum  xy_imm_lsb  2       2
+enum  xy_imm_lsb  3       3
 enum  src_xy      imm     0
 enum  src_xy      a       1
 enum  src_xy      b       2
@@ -211,8 +213,7 @@ instruction push16.imm  next_addr(push16.?)
 # push program counter onto stack
 # pc -> mar -> x -> z -> mdr
 instruction push16.pc   src_mar(pc)     load_mar      src_xy(mar)     load_x        alu_op(x)       load_z    src_mdr(z)  mdr_byte(low) load_mdr
-instruction push16.pc   mdr_byte(high)  src_xy(mdr)   load_mdr        load_x
-instruction push16.pc   xy_imm_lsb(1)   src_xy(imm)   load_y          alu_op(add)   load_z          load_mdr        next_addr(push16.?)
+instruction push16.pc   mdr_byte(high)  src_xy(mdr)   load_mdr        load_x        next_addr(push16.?)
 
 # push 16 bits from register selected by IR[6..7]
 # write immediate value from low byte of MDR into address pointed to by SP (via SP->X->Z->MAR)
@@ -244,6 +245,7 @@ instruction pop16.pc    next_addr(fetch2)
 
 # push current pc onto stack then jump to immediate location
 instruction call        include(push16.pc,no_next)
+instruction call        xy_imm_lsb(3) src_xy(imm) load_y      alu_op(add) load_z    load_mdr  
 instruction call        include(push16.?,no_next)
 instruction call        include(jmp)
 

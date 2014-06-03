@@ -35,7 +35,7 @@
 
 // expect: pc=0x000017
 // expect: reg_sp=00000100_00000100
-// expect: ram[0x100000]=0x16
+// expect: ram[0x100000]=0x15
 // expect: ram[0x100001]=0x0
-// expect: ram[0x100002]=0x17
+// expect: ram[0x100002]=0x16
 // expect: ram[0x100003]=0x0
