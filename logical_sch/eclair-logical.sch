@@ -9844,6 +9844,12 @@ In this library the device names are the same as the pin names of the symbols, t
 <text x="190.5" y="157.48" size="1.27" layer="91" align="center">Bits 40-47</text>
 <text x="223.52" y="157.48" size="1.27" layer="91" align="center">Bits 48-55</text>
 <text x="256.54" y="157.48" size="1.27" layer="91" align="center">Bits 56-63</text>
+<rectangle x1="248.92" y1="111.76" x2="251.46" y2="134.62" layer="94" rot="R90"/>
+<rectangle x1="248.92" y1="106.68" x2="251.46" y2="129.54" layer="97" rot="R90"/>
+<text x="250.19" y="123.19" size="0.8128" layer="91" align="center">Level sensitive
+Latches first</text>
+<text x="250.19" y="118.11" size="0.8128" layer="91" align="center">Edge sensitive
+Latches second</text>
 </plain>
 <instances>
 <instance part="ROM1" gate="G$1" x="139.7" y="50.8" rot="R90"/>
@@ -11559,22 +11565,6 @@ In this library the device names are the same as the pin names of the symbols, t
 </net>
 <net name="CLK_CS_DLY" class="0">
 <segment>
-<pinref part="FLP1" gate="G$1" pin="CLK"/>
-<wire x1="10.16" y1="144.78" x2="10.16" y2="142.24" width="0.1524" layer="91"/>
-<pinref part="FLP3" gate="G$1" pin="CLK"/>
-<wire x1="10.16" y1="142.24" x2="43.18" y2="142.24" width="0.1524" layer="91"/>
-<wire x1="43.18" y1="142.24" x2="43.18" y2="144.78" width="0.1524" layer="91"/>
-<pinref part="FLP4" gate="G$1" pin="CLK"/>
-<wire x1="43.18" y1="142.24" x2="76.2" y2="142.24" width="0.1524" layer="91"/>
-<wire x1="76.2" y1="142.24" x2="76.2" y2="144.78" width="0.1524" layer="91"/>
-<junction x="43.18" y="142.24"/>
-<wire x1="10.16" y1="142.24" x2="10.16" y2="139.7" width="0.1524" layer="91"/>
-<junction x="10.16" y="142.24"/>
-<label x="10.16" y="139.7" size="1.27" layer="95" rot="R270" xref="yes"/>
-</segment>
-</net>
-<net name="N$11" class="0">
-<segment>
 <pinref part="FLP5" gate="G$1" pin="CLK"/>
 <wire x1="109.22" y1="144.78" x2="109.22" y2="142.24" width="0.1524" layer="91"/>
 <pinref part="FLP6" gate="G$1" pin="CLK"/>
@@ -11592,6 +11582,10 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="210.82" y1="142.24" x2="243.84" y2="142.24" width="0.1524" layer="91"/>
 <wire x1="243.84" y1="142.24" x2="243.84" y2="144.78" width="0.1524" layer="91"/>
 <junction x="210.82" y="142.24"/>
+<wire x1="243.84" y1="142.24" x2="269.24" y2="142.24" width="0.1524" layer="91"/>
+<wire x1="269.24" y1="142.24" x2="269.24" y2="139.7" width="0.1524" layer="91"/>
+<junction x="243.84" y="142.24"/>
+<label x="269.24" y="139.7" size="1.27" layer="95" rot="R270" xref="yes"/>
 </segment>
 </net>
 <net name="CS_EDGE_SUPRESS" class="0">
@@ -11628,6 +11622,20 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="NAND1" gate="G$1" pin="B"/>
 <wire x1="22.86" y1="111.76" x2="22.86" y2="114.3" width="0.1524" layer="91"/>
 <label x="22.86" y="111.76" size="1.27" layer="95" rot="R270" xref="yes"/>
+</segment>
+<segment>
+<pinref part="FLP1" gate="G$1" pin="CLK"/>
+<wire x1="10.16" y1="144.78" x2="10.16" y2="142.24" width="0.1524" layer="91"/>
+<pinref part="FLP3" gate="G$1" pin="CLK"/>
+<wire x1="10.16" y1="142.24" x2="43.18" y2="142.24" width="0.1524" layer="91"/>
+<wire x1="43.18" y1="142.24" x2="43.18" y2="144.78" width="0.1524" layer="91"/>
+<pinref part="FLP4" gate="G$1" pin="CLK"/>
+<wire x1="43.18" y1="142.24" x2="76.2" y2="142.24" width="0.1524" layer="91"/>
+<wire x1="76.2" y1="142.24" x2="76.2" y2="144.78" width="0.1524" layer="91"/>
+<junction x="43.18" y="142.24"/>
+<wire x1="10.16" y1="142.24" x2="10.16" y2="139.7" width="0.1524" layer="91"/>
+<junction x="10.16" y="142.24"/>
+<label x="10.16" y="139.7" size="1.27" layer="95" rot="R270" xref="yes"/>
 </segment>
 </net>
 <net name="LOAD_PTB" class="0">
@@ -15457,4 +15465,10 @@ In this library the device names are the same as the pin names of the symbols, t
 </sheets>
 </schematic>
 </drawing>
+<compatibility>
+<note version="6.3" minversion="6.2.2" severity="warning">
+Since Version 6.2.2 text objects can contain more than one line,
+which will not be processed correctly with this version.
+</note>
+</compatibility>
 </eagle>
