@@ -166,7 +166,7 @@ module ECLair();
   flipflop_d    #(.WIDTH(8))                    flp_reg_flags(.clk(load_flags), .reset(~_reset), .in(reg_z[7:0]), .out(flags));
   latch         #(.WIDTH(8))                    lat_reg_status(.clk(load_status), .reset(~_reset), .in(status_in), .out(status));
   mux_2x                                        mux_status(.sel(op_16bit), .a(status_8), .b(status_16), .y(status_in));
-  mux_18                                        mux_branch_cond(.sel(branch_cond), .a(1'b1), .b(status[0]), .c(status[1]), .y(branch_cond_met));
+  mux_18                                        mux_branch_cond(.sel(branch_cond), .a(1'b1), .b(status[0]), .c(status[1]), .d(1'b0), .e(1'b0), .f(1'b0), .g(1'b0), .h(1'b0), .y(branch_cond_met));
   prienc_8                                      pri_intvect(1'b0, intflg[7:0], intvect);
   latch         #(.WIDTH(1))                    lat_int_0(.clk(int[0]), .reset(intclr[0]), .in(1'b1), .out(intflg[0]));
   latch         #(.WIDTH(1))                    lat_int_1(.clk(int[1]), .reset(intclr[1]), .in(1'b1), .out(intflg[1]));
