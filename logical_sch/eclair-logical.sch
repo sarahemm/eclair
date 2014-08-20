@@ -9466,7 +9466,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <instance part="OR8" gate="G$1" x="208.28" y="124.46" rot="R270"/>
 <instance part="NOR6" gate="G$1" x="185.42" y="93.98" rot="R270"/>
 <instance part="NOR7" gate="G$1" x="170.18" y="93.98" rot="R270"/>
-<instance part="MUX10" gate="G$1" x="99.06" y="88.9" rot="R270"/>
+<instance part="MUX10" gate="G$1" x="101.6" y="88.9" rot="R270"/>
 <instance part="LAT19" gate="G$1" x="96.52" y="43.18" rot="R270"/>
 </instances>
 <busses>
@@ -9480,6 +9480,13 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="149.86" y1="139.7" x2="152.4" y2="137.16" width="0.762" layer="92"/>
 <wire x1="152.4" y1="137.16" x2="210.82" y2="137.16" width="0.762" layer="92"/>
 <label x="149.606" y="141.986" size="1.778" layer="95" rot="R180"/>
+</segment>
+</bus>
+<bus name="STATUS[0..7]">
+<segment>
+<wire x1="76.2" y1="25.4" x2="78.74" y2="27.94" width="0.762" layer="92"/>
+<wire x1="78.74" y1="27.94" x2="99.06" y2="27.94" width="0.762" layer="92"/>
+<label x="68.326" y="22.606" size="1.778" layer="95"/>
 </segment>
 </bus>
 </busses>
@@ -9762,8 +9769,8 @@ In this library the device names are the same as the pin names of the symbols, t
 </segment>
 <segment>
 <pinref part="MUX10" gate="G$1" pin="B0"/>
-<wire x1="86.36" y1="101.6" x2="86.36" y2="104.14" width="0.1524" layer="91"/>
-<label x="86.36" y="104.14" size="1.27" layer="95" rot="R90" xref="yes"/>
+<wire x1="88.9" y1="101.6" x2="88.9" y2="104.14" width="0.1524" layer="91"/>
+<label x="88.9" y="104.14" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 <net name="STATUS_Z-8" class="0">
@@ -9774,45 +9781,47 @@ In this library the device names are the same as the pin names of the symbols, t
 </segment>
 <segment>
 <pinref part="MUX10" gate="G$1" pin="A0"/>
-<wire x1="109.22" y1="101.6" x2="109.22" y2="104.14" width="0.1524" layer="91"/>
-<label x="109.22" y="104.14" size="1.27" layer="95" rot="R90" xref="yes"/>
+<wire x1="111.76" y1="101.6" x2="111.76" y2="104.14" width="0.1524" layer="91"/>
+<label x="111.76" y="104.14" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 <net name="STATUS_Z" class="0">
 <segment>
 <pinref part="MUX10" gate="G$1" pin="Y0"/>
-<wire x1="99.06" y1="76.2" x2="99.06" y2="55.88" width="0.1524" layer="91"/>
-<label x="100.33" y="62.484" size="1.016" layer="95" rot="R90"/>
-<pinref part="LAT19" gate="G$1" pin="A1"/>
+<wire x1="101.6" y1="76.2" x2="101.6" y2="58.42" width="0.1524" layer="91"/>
+<label x="102.87" y="62.484" size="1.016" layer="95" rot="R90"/>
+<pinref part="LAT19" gate="G$1" pin="A0"/>
+<wire x1="101.6" y1="58.42" x2="101.6" y2="55.88" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="STATUS_CO" class="0">
 <segment>
 <pinref part="MUX10" gate="G$1" pin="Y1"/>
-<wire x1="96.52" y1="55.88" x2="96.52" y2="76.2" width="0.1524" layer="91"/>
-<label x="97.79" y="61.976" size="1.016" layer="95" rot="R90"/>
-<pinref part="LAT19" gate="G$1" pin="A2"/>
+<label x="100.33" y="61.976" size="1.016" layer="95" rot="R90"/>
+<pinref part="LAT19" gate="G$1" pin="A1"/>
+<wire x1="99.06" y1="58.42" x2="99.06" y2="76.2" width="0.1524" layer="91"/>
+<wire x1="99.06" y1="58.42" x2="99.06" y2="55.88" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="OP_16BIT" class="0">
 <segment>
 <pinref part="MUX10" gate="G$1" pin="SEL"/>
-<wire x1="114.3" y1="101.6" x2="114.3" y2="104.14" width="0.1524" layer="91"/>
-<label x="114.3" y="104.14" size="1.27" layer="95" rot="R90" xref="yes"/>
+<wire x1="116.84" y1="101.6" x2="116.84" y2="104.14" width="0.1524" layer="91"/>
+<label x="116.84" y="104.14" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 <net name="STATUS_CO-16" class="0">
 <segment>
 <pinref part="MUX10" gate="G$1" pin="B1"/>
-<wire x1="83.82" y1="101.6" x2="83.82" y2="104.14" width="0.1524" layer="91"/>
-<label x="83.82" y="104.14" size="1.27" layer="95" rot="R90" xref="yes"/>
+<wire x1="86.36" y1="101.6" x2="86.36" y2="104.14" width="0.1524" layer="91"/>
+<label x="86.36" y="104.14" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 <net name="STATUS_CO-8" class="0">
 <segment>
 <pinref part="MUX10" gate="G$1" pin="A1"/>
-<wire x1="106.68" y1="104.14" x2="106.68" y2="101.6" width="0.1524" layer="91"/>
-<label x="106.68" y="104.14" size="1.27" layer="95" rot="R90" xref="yes"/>
+<wire x1="109.22" y1="104.14" x2="109.22" y2="101.6" width="0.1524" layer="91"/>
+<label x="109.22" y="104.14" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 <net name="MODE" class="0">
@@ -9820,6 +9829,54 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="FLP11" gate="G$1" pin="Y1"/>
 <wire x1="60.96" y1="30.48" x2="60.96" y2="27.94" width="0.1524" layer="91"/>
 <label x="60.96" y="27.94" size="1.27" layer="95" rot="R270" xref="yes"/>
+</segment>
+</net>
+<net name="STATUS0" class="0">
+<segment>
+<pinref part="LAT19" gate="G$1" pin="Y0"/>
+<wire x1="99.06" y1="27.94" x2="101.6" y2="30.48" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="STATUS1" class="0">
+<segment>
+<pinref part="LAT19" gate="G$1" pin="Y1"/>
+<wire x1="96.52" y1="27.94" x2="99.06" y2="30.48" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="STATUS2" class="0">
+<segment>
+<pinref part="LAT19" gate="G$1" pin="Y2"/>
+<wire x1="93.98" y1="27.94" x2="96.52" y2="30.48" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="STATUS3" class="0">
+<segment>
+<pinref part="LAT19" gate="G$1" pin="Y3"/>
+<wire x1="91.44" y1="27.94" x2="93.98" y2="30.48" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="STATUS4" class="0">
+<segment>
+<pinref part="LAT19" gate="G$1" pin="Y4"/>
+<wire x1="88.9" y1="27.94" x2="91.44" y2="30.48" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="STATUS5" class="0">
+<segment>
+<pinref part="LAT19" gate="G$1" pin="Y5"/>
+<wire x1="86.36" y1="27.94" x2="88.9" y2="30.48" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="STATUS6" class="0">
+<segment>
+<pinref part="LAT19" gate="G$1" pin="Y6"/>
+<wire x1="83.82" y1="27.94" x2="86.36" y2="30.48" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="STATUS7" class="0">
+<segment>
+<pinref part="LAT19" gate="G$1" pin="Y7"/>
+<wire x1="81.28" y1="27.94" x2="83.82" y2="30.48" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
