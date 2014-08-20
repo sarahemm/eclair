@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.2">
+<eagle version="6.6.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="yes"/>
@@ -9365,7 +9365,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="243.84" y1="144.78" x2="246.38" y2="147.32" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$175" class="0">
+<net name="XY_NIBBLE3" class="0">
 <segment>
 <pinref part="DEMUX2" gate="G$1" pin="A3"/>
 <wire x1="35.56" y1="147.32" x2="30.48" y2="142.24" width="0.1524" layer="91"/>
@@ -9373,7 +9373,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <pinref part="MUX13" gate="G$1" pin="Y3"/>
 </segment>
 </net>
-<net name="N$176" class="0">
+<net name="XY_NIBBLE2" class="0">
 <segment>
 <pinref part="DEMUX2" gate="G$1" pin="A2"/>
 <wire x1="33.02" y1="147.32" x2="27.94" y2="142.24" width="0.1524" layer="91"/>
@@ -9381,7 +9381,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="27.94" y1="142.24" x2="27.94" y2="139.7" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$177" class="0">
+<net name="XY_NIBBLE1" class="0">
 <segment>
 <pinref part="DEMUX2" gate="G$1" pin="A1"/>
 <wire x1="30.48" y1="147.32" x2="25.4" y2="142.24" width="0.1524" layer="91"/>
@@ -9389,7 +9389,7 @@ In this library the device names are the same as the pin names of the symbols, t
 <wire x1="25.4" y1="142.24" x2="25.4" y2="139.7" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$178" class="0">
+<net name="XY_NIBBLE0" class="0">
 <segment>
 <pinref part="DEMUX2" gate="G$1" pin="A0"/>
 <wire x1="27.94" y1="147.32" x2="22.86" y2="142.24" width="0.1524" layer="91"/>

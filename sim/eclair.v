@@ -149,7 +149,7 @@ module ECLair();
   demux_38                                      dmx_reg_load_ir(reg_x_load_ir_src, reg_load_via_ir);
   mux_88                                        mux_xy_src_l(.sel(reg_xy_src), .a(xy_nibble_padded), .b(reg_a[7:0]), .c(reg_b[7:0]), .d(reg_c[7:0]), .e(reg_d[7:0]), .f(reg_sp[7:0]), .g(reg_mar[7:0]), .h(reg_mdr[7:0]),  .y(lat_xy[7:0]));
   mux_88                                        mux_xy_src_h(.sel(reg_xy_src), .a(8'b00000000), .b(reg_a[15:8]), .c(reg_b[15:8]), .d(reg_c[15:8]), .e(reg_d[15:8]), .f(reg_sp[15:8]), .g(reg_mar[15:8]), .h(reg_mdr[15:8]), .y(lat_xy[15:8]));
-  mux_2x          #(.WIDTH(4))                  mux_xy_nibble_sel(.sel(reg_xy_nibble_sel), .a(xy_imm_val), .b(int_vect), .y(xy_nibble));
+  mux_2x          #(.WIDTH(4))                  mux_xy_nibble(.sel(reg_xy_nibble_sel), .a(xy_imm_val), .b(int_vect), .y(xy_nibble));
   mux_2x                                        mux_mar_l(.sel(mux_mar_src), .a(reg_z[7:0]),  .b(pc[7:0]),  .y(lat_mar[7:0]));
   mux_2x                                        mux_mar_h(.sel(mux_mar_src), .a(reg_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
   mux_2x                                        mux_mdr_l(.sel(mux_mdr_src), .a(reg_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
