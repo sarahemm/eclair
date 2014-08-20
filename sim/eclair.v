@@ -103,9 +103,12 @@ module ECLair();
   wire          carry_in;       // carry input to the ALU, from a microcode bit
   wire  [3:0]   xy_nibble;      // XY nibble input (A input to the XY mux)
   wire  [7:0]   xy_nibble_padded; // XY nibble padded to 8 bits with 0s
-  wire  [3:0]   int_vect;       // highest-priority interrupt flag currently active
-  wire          reg_xy_nibble_sel;  // which nibble we want to access via the XY mux (imm or int_vect)
-  
+  wire  [3:0]   intvect;        // highest-priority interrupt flag currently active
+  wire  [7:0]   intflg;         // interrupt flags
+  wire  [7:0]   intclr;         // clear interrupt flag
+  wire  [7:0]   int;            // interrupt "pins" // FIXME - hook these up to something!
+  wire          reg_xy_nibble_sel;  // which nibble we want to access via the XY mux (imm or intvect)
+
   initial begin
     clk_main = 1'b0;
     _ext_reset = 1'b1;
@@ -149,7 +152,7 @@ module ECLair();
   demux_38                                      dmx_reg_load_ir(reg_x_load_ir_src, reg_load_via_ir);
   mux_88                                        mux_xy_src_l(.sel(reg_xy_src), .a(xy_nibble_padded), .b(reg_a[7:0]), .c(reg_b[7:0]), .d(reg_c[7:0]), .e(reg_d[7:0]), .f(reg_sp[7:0]), .g(reg_mar[7:0]), .h(reg_mdr[7:0]),  .y(lat_xy[7:0]));
   mux_88                                        mux_xy_src_h(.sel(reg_xy_src), .a(8'b00000000), .b(reg_a[15:8]), .c(reg_b[15:8]), .d(reg_c[15:8]), .e(reg_d[15:8]), .f(reg_sp[15:8]), .g(reg_mar[15:8]), .h(reg_mdr[15:8]), .y(lat_xy[15:8]));
-  mux_2x          #(.WIDTH(4))                  mux_xy_nibble(.sel(reg_xy_nibble_sel), .a(xy_imm_val), .b(int_vect), .y(xy_nibble));
+  mux_2x          #(.WIDTH(4))                  mux_xy_nibble(.sel(reg_xy_nibble_sel), .a(xy_imm_val), .b(intvect), .y(xy_nibble));
   mux_2x                                        mux_mar_l(.sel(mux_mar_src), .a(reg_z[7:0]),  .b(pc[7:0]),  .y(lat_mar[7:0]));
   mux_2x                                        mux_mar_h(.sel(mux_mar_src), .a(reg_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
   mux_2x                                        mux_mdr_l(.sel(mux_mdr_src), .a(reg_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
@@ -164,6 +167,15 @@ module ECLair();
   latch         #(.WIDTH(8))                    lat_reg_status(.clk(load_status), .reset(~_reset), .in(status_in), .out(status));
   mux_2x                                        mux_status(.sel(op_16bit), .a(status_8), .b(status_16), .y(status_in));
   mux_18                                        mux_branch_cond(.sel(branch_cond), .a(1'b1), .b(status[0]), .c(status[1]), .y(branch_cond_met));
+  prienc_8                                      pri_intvect(1'b0, intflg[7:0], intvect);
+  latch         #(.WIDTH(1))                    lat_int_0(.clk(int[0]), .reset(intclr[0]), .in(1'b1), .out(intflg[0]));
+  latch         #(.WIDTH(1))                    lat_int_1(.clk(int[1]), .reset(intclr[1]), .in(1'b1), .out(intflg[1]));
+  latch         #(.WIDTH(1))                    lat_int_2(.clk(int[2]), .reset(intclr[2]), .in(1'b1), .out(intflg[2]));
+  latch         #(.WIDTH(1))                    lat_int_3(.clk(int[3]), .reset(intclr[3]), .in(1'b1), .out(intflg[3]));
+  latch         #(.WIDTH(1))                    lat_int_4(.clk(int[4]), .reset(intclr[4]), .in(1'b1), .out(intflg[4]));
+  latch         #(.WIDTH(1))                    lat_int_5(.clk(int[5]), .reset(intclr[5]), .in(1'b1), .out(intflg[5]));
+  latch         #(.WIDTH(1))                    lat_int_6(.clk(int[6]), .reset(intclr[6]), .in(1'b1), .out(intflg[6]));
+  latch         #(.WIDTH(1))                    lat_int_7(.clk(int[7]), .reset(intclr[7]), .in(1'b1), .out(intflg[7]));
   
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
