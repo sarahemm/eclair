@@ -37,7 +37,14 @@ File.open(ARGV[1], "r") do |asmfile|
     puts "#{opcode_bin}\t// #{opcode}"
     operand_nbr = 0
     operands.each do |operand_raw|
-      operand = operand_raw.to_i
+      operand = nil
+      if(/^0x/.match(operand_raw)) then
+        operand = operand_raw.to_i 16
+      elsif(/^0b/.match(operand_raw)) then
+        operand = operand_raw.to_i 2
+      else
+        operand = operand_raw.to_i
+      end  
       operand_hex = sprintf("0x%02X", operand)
       if(/16/.match(opcode)) then
         # operand(s) are 16 bits
