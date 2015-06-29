@@ -1,19 +1,16 @@
 @000
 // immediate load two 8s and make sure Z reacts properly
-00000101    // ldi8.al
-10101010    // immediate for --^
+ldi8.al 0xAA
 // expect: status=zzzzzz00
-01000101    // ldi8.bl
-00000000    // immediate for --^
+ldi8.bl 0x00
 // expect: status=zzzzzz01
 // add the two 16s and make sure Z is unset
-00011000    // add8.ab
+add8.ab
 // expect: status=zzzzzz00
 // change register A so that the value will be zero
-00000101    // ldi8.al
-00000000    // immediate for --^
+ldi8.al 0x00
 // expect: status=zzzzzz01
 // add the two 8s and make sure Z is set
-00011000    // add8.ab
+add8.ab
 // expect: status=zzzzzz01
-11111110    // halt
+halt

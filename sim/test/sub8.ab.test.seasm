@@ -1,49 +1,41 @@
 @000
-00000101    // ldi8.al
-11111111    // immediate for --^
-01000101    // ldi8.bl
-11111111    // immediate for --^
+ldi8.al 0xFF
+ldi8.bl 0xFF
 // expect: reg_a=xxxxxxxx_11111111
 // expect: reg_b=xxxxxxxx_11111111
-00111110    // sub8.ab
+sub8.ab
 // expect: reg_a=xxxxxxxx_00000000
 // expect: reg_b=xxxxxxxx_11111111
 
 @005
-00000101    // ldi8.al
-11111111    // immediate for --^
-01000101    // ldi8.bl
-00000000    // immediate for --^
+ldi8.al 0xFF
+ldi8.bl 0x00
 // expect: reg_a=xxxxxxxx_11111111
 // expect: reg_b=xxxxxxxx_00000000
-00111110    // sub8.ab
+sub8.ab
 // expect: reg_a=xxxxxxxx_11111111
 // expect: reg_b=xxxxxxxx_00000000
 
 @00A
-00000101    // ldi8.al
-00011000    // immediate for --^
-01000101    // ldi8.bl
-00010100    // immediate for --^
+ldi8.al 0x18
+ldi8.bl 0x14
 // expect: reg_a=xxxxxxxx_00011000
 // expect: reg_b=xxxxxxxx_00010100
-00111110    // sub8.ab
+sub8.ab
 // expect: reg_a=xxxxxxxx_00000100
 // expect: reg_b=xxxxxxxx_00010100
 
 @00F
-00000101    // ldi8.al
-00000011    // immediate for --^
-01000101    // ldi8.bl
-00000001    // immediate for --^
+ldi8.al 0x03
+ldi8.bl 0x01
 // expect: reg_a=xxxxxxxx_00000011
 // expect: reg_b=xxxxxxxx_00000001
-00111110    // sub8.ab
+sub8.ab
 // expect: reg_a=xxxxxxxx_00000010
 // expect: reg_b=xxxxxxxx_00000001
 
 @014
-11111110    // halt
+halt
 
 // expect: reg_c=xxxxxxxx_xxxxxxxx
 // expect: reg_d=xxxxxxxx_xxxxxxxx
