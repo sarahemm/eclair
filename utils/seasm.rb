@@ -37,6 +37,7 @@ File.open(ARGV[1], "r") do |asmfile|
     puts "#{opcode_bin}\t// #{opcode}"
     operand_nbr = 0
     operands.each do |operand_raw|
+      break if operand_raw == "//"
       operand = nil
       if(/^0x/.match(operand_raw)) then
         operand = operand_raw.to_i 16
