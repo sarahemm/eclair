@@ -107,6 +107,7 @@ module ECLair();
   wire  [7:0]   intflg;         // interrupt flags
   wire  [7:0]   intclr;         // clear interrupt flag
   wire  [7:0]   int;            // interrupt "pins" // FIXME - hook these up to something!
+  wire          int_pending;    // at least one interrupt is waiting to be serviced
   wire          reg_xy_nibble_sel;  // which nibble we want to access via the XY mux (imm or intvect)
 
   initial begin
@@ -245,6 +246,7 @@ module ECLair();
   assign xy_imm_val[7:2] = 6'b000000;
   assign xy_nibble_padded[3:0] = xy_nibble;
   assign xy_nibble_padded[7:4] = 4'b0000;
+  assign int_pending = ~(intvect[3:0] == 4'b0000);
   
   always begin
     #40 clk_main = ~clk_main; // 25MHz main clock
