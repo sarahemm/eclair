@@ -15,6 +15,11 @@ File.open(ARGV[0], "r") do |mcfile|
         instruction = values.shift
         address = values.shift.to_i
         instructions[instruction] = address
+      when "alias" then
+        # alias lines list alternate names for instructions
+        instruction = values.shift
+        real_instruction = values.shift
+        instructions[instruction] = instructions[real_instruction]
     end
   end
 end
