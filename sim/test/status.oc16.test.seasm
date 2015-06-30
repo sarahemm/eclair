@@ -1,0 +1,13 @@
+@000
+// immediate load two 16s
+ldi16.a   0xFFFE
+ldi16.b   0x0001
+// add the two 16s and make sure OC is unset
+add16.ab
+// expect: status=zzzzzz00
+// immediate load a larger 16
+ldi16.a   0xFFFF
+// add the two 16s and make sure OC is now set
+add16.ab
+// expect: status=zzzzzz11
+halt

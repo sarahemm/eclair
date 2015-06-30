@@ -1,8 +1,6 @@
 @000
-11000110    // ldi16.d
-11010101    // immediate for --^
-11110100    // immediate for --^
-11111110    // halt
+ldi16.d 0xF4D5
+halt
 
 // expect: reg_a=xxxxxxxx_xxxxxxxx
 // expect: reg_b=xxxxxxxx_xxxxxxxx
