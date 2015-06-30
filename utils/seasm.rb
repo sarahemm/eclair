@@ -30,8 +30,8 @@ File.open(ARGV[1], "r") do |asmfile|
       next
     end
     if(!instructions[opcode]) then
-      puts "\nERROR: No such instruction '#{opcode}'."
-      break
+      $stderr.puts "\nERROR: No such instruction '#{opcode}'."
+      Kernel.exit 1
     end
     opcode_bin = instructions[opcode].to_s(2).rjust(8, '0')
     puts "#{opcode_bin}\t// #{opcode}"
