@@ -39,22 +39,22 @@ File.open(ARGV[1], "r") do |asmfile|
     operands.each do |operand_raw|
       break if operand_raw == "//"
       operand = nil
+      operand_16bit = false
       if(/^0x/.match(operand_raw)) then
         operand = operand_raw.to_i 16
+        operand_16bit = true if operand_raw.length == 6
       elsif(/^0b/.match(operand_raw)) then
         operand = operand_raw.to_i 2
       else
         operand = operand_raw.to_i
-      end  
+      end
       operand_hex = sprintf("0x%02X", operand)
-      if(/16/.match(opcode)) then
+      if(/16/.match(opcode) or operand_16bit) then
         # operand(s) are 16 bits
         operand_l = operand & 0x00FF
         operand_h = (operand & 0xFF00) >> 8
         operand_lbin = operand_l.to_s(2).rjust(8, '0')
         operand_hbin = operand_h.to_s(2).rjust(8, '0')
-        
-
         puts "#{operand_lbin}\t// low-byte of operand #{operand_nbr} for #{opcode} - #{operand_hex} / #{operand}"
         puts "#{operand_hbin}\t// high-byte of operand #{operand_nbr}"
       else
