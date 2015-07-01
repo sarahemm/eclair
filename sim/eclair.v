@@ -1,6 +1,8 @@
 `timescale 1ns/1ps
 
-module ECLair();
+module ECLair(int);
+  input [7:0]   int;          // interrupt "pins"
+
   reg           clk_main;     // main system clock
   wire          clk_half;     // halved system clock
   wire          clk_quarter;  // quartered system clock
@@ -107,7 +109,6 @@ module ECLair();
   wire  [3:0]   intvect;        // highest-priority interrupt flag currently active
   wire  [7:0]   intflg;         // interrupt flags
   wire  [7:0]   intclr;         // clear interrupt flag
-  wire  [7:0]   int;            // interrupt "pins" // FIXME - hook these up to something!
   wire          int_jmp;        // jump to IRQ area of microcode on next fetch/execute
   wire          int_pending;    // at least one interrupt is waiting to be serviced
   wire          int_en;         // interrupts are enabled
@@ -253,7 +254,16 @@ module ECLair();
   assign xy_nibble_padded[7:4] = 4'b0000;
   assign int_pending = ~(intvect[3:0] == 4'b0000);
   assign int_jmp = int_pending & int_en;
-  
+  // FIXME: temporary until proper clear/reset logic is worked out
+  assign intclr[0] = ~_por_reset;
+  assign intclr[1] = ~_por_reset;
+  assign intclr[2] = ~_por_reset;
+  assign intclr[3] = ~_por_reset;
+  assign intclr[4] = ~_por_reset;
+  assign intclr[5] = ~_por_reset;
+  assign intclr[6] = ~_por_reset;
+  assign intclr[7] = ~_por_reset;
+
   always begin
     #40 clk_main = ~clk_main; // 25MHz main clock
   end
@@ -287,7 +297,7 @@ module ECLair();
       if(^cs_data == 1'b1 || ^cs_data == 1'b0) begin
       end else begin
         if(cs_addr != 8'hFF) begin
-          $display("\nILLEGAL MICROINSTRUCTION EXECUTED (pc=0x%06X cs_addr=0x%06X)", pc, cs_addr);
+          $display("\nILLEGAL MICROINSTRUCTION EXECUTED (pc=0x%06X cs_addr=0x%06X time=%0d)", pc, cs_addr, $stime);
           $finish;
         end
       end
