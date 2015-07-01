@@ -24,8 +24,10 @@ module prienc_8(clk, a, y);
       y = 4'b0111;
     end else if(a[7]) begin
       y = 4'b1000;
+    end else begin
+      y = 4'b0000;
     end
-	end
+  end
 endmodule
 
 
