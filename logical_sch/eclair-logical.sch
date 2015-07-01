@@ -13381,13 +13381,6 @@ Latches second</text>
 </bus>
 </busses>
 <nets>
-<net name="IR7" class="0">
-<segment>
-<wire x1="66.04" y1="99.06" x2="71.12" y2="99.06" width="0.1524" layer="91"/>
-<label x="66.04" y="99.06" size="1.27" layer="95" rot="R180" xref="yes"/>
-<pinref part="AND2" gate="G$1" pin="B"/>
-</segment>
-</net>
 <net name="REG_LATCH_IR" class="0">
 <segment>
 <pinref part="DEMUX1" gate="G$1" pin="Y7"/>
@@ -13411,7 +13404,7 @@ Latches second</text>
 <label x="99.06" y="101.6" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
-<net name="IR8" class="0">
+<net name="IR7" class="0">
 <segment>
 <wire x1="71.12" y1="86.36" x2="66.04" y2="86.36" width="0.1524" layer="91"/>
 <label x="66.04" y="86.36" size="1.27" layer="95" rot="R180" xref="yes"/>
@@ -13674,6 +13667,13 @@ Latches second</text>
 <pinref part="MUX11" gate="G$1" pin="Y0"/>
 <wire x1="78.74" y1="165.1" x2="81.28" y2="165.1" width="0.1524" layer="91"/>
 <label x="81.28" y="165.1" size="1.27" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="IR6" class="0">
+<segment>
+<wire x1="66.04" y1="99.06" x2="71.12" y2="99.06" width="0.1524" layer="91"/>
+<label x="66.04" y="99.06" size="1.27" layer="95" rot="R180" xref="yes"/>
+<pinref part="AND2" gate="G$1" pin="B"/>
 </segment>
 </net>
 </nets>
