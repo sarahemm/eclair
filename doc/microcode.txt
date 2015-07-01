@@ -23,10 +23,13 @@ field load_x        10    1
 field load_y        11    1
 field load_z        12    1
 field load_ptb      13    1
-field load_flags    14    1
+# bit 14 is currently available
 field load_status   15    1
 field clr_intflg    16    1
 field mem_write     17    1
+field load_flag_pe  18    1
+field load_flag_m   19    1
+field load_flag_ie  20    1
 # level-sensitive signals
 field mdr_byte      24    1
 field next_addr     25    8
@@ -153,7 +156,7 @@ instruction ldi8.ptb    next_addr(fetch)
 
 # load immediate 8 bits into the FLAGS register
 instruction ldi8.flags  inc_pc        src_mar(pc)   load_mar        mem_read        src_mdr(data) mdr_byte(low) load_mdr        src_xy(mdr)   load_x    load_z      load_status
-instruction ldi8.flags  load_flags    next_addr(fetch)
+instruction ldi8.flags  load_flag_pe  load_flag_m   load_flag_ie    next_addr(fetch)
 
 # load immediate 16 bit into the stack pointer
 instruction ldi16.sp    inc_pc        src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(low)   load_mdr

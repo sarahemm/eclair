@@ -93,8 +93,12 @@ module ECLair(int);
   wire          load_status;    // load system status from ALU
   wire  [7:0]   flags;          // system flags (paging enabled, etc.)
   wire  [7:0]   status;         // system status (ALU zero, carry/overflow, etc.)
-  wire          paging_enabled; // paging is enabled, all addresses run through the page table
-  wire          mode;           // supervisor (0) or user (1) mode
+  wire          flag_pe;        // paging is enabled, all addresses run through the page table
+  wire          flag_m;         // supervisor (0) or user (1) mode
+  wire          flag_ie;        // interrupts are enabled
+  wire          load_flag_pe;   // load PE flag from z[0]
+  wire          load_flag_m;    // load M flag from z[1]
+  wire          load_flag_ie;   // load IE flag from z[2]
   wire  [7:0]   status_in;      // input to status latch (output from 8/16 status selector mux)
   wire          status_z_8;     // last operation result was zero (8-bit)
   wire          status_z_16;    // last operation result was zero (16-bit)
@@ -111,7 +115,6 @@ module ECLair(int);
   wire  [7:0]   intclr;         // clear interrupt flag
   wire          int_jmp;        // jump to IRQ area of microcode on next fetch/execute
   wire          int_pending;    // at least one interrupt is waiting to be serviced
-  wire          int_en;         // interrupts are enabled
   wire          reg_xy_nibble_sel;  // which nibble we want to access via the XY mux (imm or intvect)
 
   initial begin
@@ -164,12 +167,14 @@ module ECLair(int);
   mux_2x                                        mux_mdr_l(.sel(mux_mdr_src), .a(reg_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
   mux_2x                                        mux_mdr_h(.sel(mux_mdr_src), .a(reg_z[15:8]), .b(bus_data[7:0]), .y(lat_mdr[15:8]));
   mux_2x                                        mux_mdr_byte(.sel(mdr_byte), .a(reg_mdr[7:0]), .b(reg_mdr[15:8]), .y(reg_mdr_8bit));
-  mux_2x          #(.WIDTH(6))                  mux_ptb(.sel(mode), .a(6'b000000), .b(reg_ptb), .y(ptb));
+  mux_2x          #(.WIDTH(6))                  mux_ptb(.sel(flag_m), .a(6'b000000), .b(reg_ptb), .y(ptb));
   alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(carry_in), .x(reg_x), .y(reg_y), .z(alu_z), .c_out8(alu_cout8), .c_out16(alu_cout16));
   main_ram      #(.WIDTH(16), .ADDR_WIDTH(12), .TYPE("Page Table"))  ram_paging(._cs(1'b0), ._oe(1'b0), ._w(~write_pte), .addr(pagetable_addr), .data_in(reg_z), .data_out(pagetable_out));
-  mux_2x                                        mux_paging_l(.sel(paging_enabled), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr[17:10]));
-  mux_2x        #(.WIDTH(6))                    mux_paging_h(.sel(paging_enabled), .a(6'b0),           .b(pagetable_out[13:8]), .y(bus_addr[23:18]));
-  flipflop_d    #(.WIDTH(8))                    flp_reg_flags(.clk(load_flags), .reset(~_reset), .in(reg_z[7:0]), .out(flags));
+  mux_2x                                        mux_paging_l(.sel(flag_pe), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr[17:10]));
+  mux_2x        #(.WIDTH(6))                    mux_paging_h(.sel(flag_pe), .a(6'b0),           .b(pagetable_out[13:8]), .y(bus_addr[23:18]));
+  flipflop_d    #(.WIDTH(1))                    flp_flag_pe(.clk(load_flag_pe), .reset(~_reset), .in(reg_z[0]), .out(flag_pe));
+  flipflop_d    #(.WIDTH(1))                    flp_flag_m(.clk(load_flag_m), .reset(~_reset), .in(reg_z[1]), .out(flag_m));
+  flipflop_d    #(.WIDTH(1))                    flp_flag_ie(.clk(load_flag_ie), .reset(~_reset), .in(reg_z[2]), .out(flag_ie));
   latch         #(.WIDTH(8))                    lat_reg_status(.clk(load_status), .reset(~_reset), .in(status_in), .out(status));
   mux_2x                                        mux_status(.sel(op_16bit), .a(status_8), .b(status_16), .y(status_in));
   mux_18                                        mux_branch_cond(.sel(branch_cond), .a(1'b1), .b(status[0]), .c(status[1]), .d(1'b0), .e(1'b0), .f(1'b0), .g(1'b0), .h(1'b0), .y(branch_cond_met));
@@ -196,9 +201,12 @@ module ECLair(int);
   assign reg_y_load = ~cs_data[11];
   assign reg_z_load = ~cs_data[12];
   assign load_ptb = ~cs_data[13];
-  assign load_flags = cs_data[14];
+  // bit 14 is currently available
   assign load_status = ~cs_data[15];
   assign ram_write = cs_data[17];
+  assign load_flag_pe = ~cs_data[18];
+  assign load_flag_m = ~cs_data[19];
+  assign load_flag_ie = ~cs_data[20];
   
   // level-sensitive microcode signals
   assign mdr_byte = cs_data[24];
@@ -238,9 +246,10 @@ module ECLair(int);
   assign reg_x_load_ir_src[2] = reg_x_load_ir & reg_ir[7];
   assign pagetable_addr[5:0] = reg_mar[15:10];
   assign pagetable_addr[11:6] = ptb[5:0];
-  assign paging_enabled = flags[0];
-  assign mode = flags[1];
-  assign int_en = flags[2];
+  assign flags[0] = flag_pe;
+  assign flags[1] = flag_m;
+  assign flags[2] = flag_ie;
+  assign flags[7:3] = 5'b00000;
   assign status_z_8  = (reg_z[7:0] == 8'd0);
   assign status_z_16 = (reg_z == 16'd0);
   assign status_8[0]  = status_z_8;
@@ -253,7 +262,7 @@ module ECLair(int);
   assign xy_nibble_padded[3:0] = xy_nibble;
   assign xy_nibble_padded[7:4] = 4'b0000;
   assign int_pending = ~(intvect[3:0] == 4'b0000);
-  assign int_jmp = int_pending & int_en;
+  assign int_jmp = int_pending & flag_ie;
   // FIXME: temporary until proper clear/reset logic is worked out
   assign intclr[0] = ~_por_reset;
   assign intclr[1] = ~_por_reset;
