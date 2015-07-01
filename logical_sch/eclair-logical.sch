@@ -9743,10 +9743,10 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="200.914" y="149.86" size="1.016" layer="95" rot="R270"/>
 </segment>
 <segment>
-<pinref part="FLP23" gate="G$1" pin="D"/>
-<wire x1="137.16" y1="58.42" x2="139.7" y2="58.42" width="0.1524" layer="91"/>
-<wire x1="139.7" y1="58.42" x2="139.7" y2="60.96" width="0.1524" layer="91"/>
-<label x="139.7" y="60.96" size="1.27" layer="95" rot="R90" xref="yes"/>
+<pinref part="FLP21" gate="G$1" pin="D"/>
+<wire x1="71.12" y1="58.42" x2="73.66" y2="58.42" width="0.1524" layer="91"/>
+<wire x1="73.66" y1="58.42" x2="73.66" y2="60.96" width="0.1524" layer="91"/>
+<label x="73.66" y="60.96" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 <net name="FLAG_PE" class="0">
@@ -9922,10 +9922,10 @@ In this library the device names are the same as the pin names of the symbols, t
 <label x="208.534" y="149.86" size="1.016" layer="95" rot="R270"/>
 </segment>
 <segment>
-<pinref part="FLP21" gate="G$1" pin="D"/>
-<wire x1="71.12" y1="58.42" x2="73.66" y2="58.42" width="0.1524" layer="91"/>
-<wire x1="73.66" y1="58.42" x2="73.66" y2="60.96" width="0.1524" layer="91"/>
-<label x="73.66" y="60.96" size="1.27" layer="95" rot="R90" xref="yes"/>
+<pinref part="FLP23" gate="G$1" pin="D"/>
+<wire x1="137.16" y1="58.42" x2="139.7" y2="58.42" width="0.1524" layer="91"/>
+<wire x1="139.7" y1="58.42" x2="139.7" y2="60.96" width="0.1524" layer="91"/>
+<label x="139.7" y="60.96" size="1.27" layer="95" rot="R90" xref="yes"/>
 </segment>
 </net>
 <net name="Z1" class="0">

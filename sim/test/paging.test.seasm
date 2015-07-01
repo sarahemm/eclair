@@ -15,7 +15,7 @@ wrpte
 // switch back to PTB 1, enable paging, and make sure the address jumps
 @014
 ldi8.ptb    0x01
-ldi8.flags  0x03  // enables paging, which means the next code runs from 0x417
+ldi8.flags  0x06  // enables paging, which means the next code runs from 0x417
 halt
 @417        // pc: 017
 halt

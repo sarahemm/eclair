@@ -7,7 +7,7 @@ file    microcode.bin  0   64
 mapfile microcode_map.txt
 
 # graphfile - output a digraph of the microcode flow
-graphfile microcode_graph.pdf
+#graphfile microcode_graph.pdf
 
 # fields - names for bit positions
 # edge-sensitive signals
@@ -86,6 +86,8 @@ enum  xy_nibble_sel int   1
 
 # locations - start addresses of instructions
 location    init        0
+location    ei          1
+location    di          2
 #location    irq1        1
 #location    irq2        2
 #location    irq3        3
@@ -137,6 +139,12 @@ instruction init2       load_pc       next_addr(fetch2)
 instruction fetch       inc_pc
 # fetch the next instruction and start executing it
 instruction fetch2      src_mar(pc)   load_mar          mem_read  load_ir     next_addr(ir)
+
+# enable interrupts
+instruction ei          src_xy(imm)   alu_mode(arith)   alu_op(x) xy_imm_lsb(1)   load_x  load_y  load_z  load_flag_ie  next_addr(fetch)
+
+# disable interrupts
+instruction di          src_xy(imm)   alu_mode(arith)   alu_op(x) xy_imm_lsb(0)   load_x  load_y  load_z  load_flag_ie  next_addr(fetch)
 
 # load immediate 8 bits into low byte of supplied register
 instruction ldi8.al     next_addr(ldi8.?l)
