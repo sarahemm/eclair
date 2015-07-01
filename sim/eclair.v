@@ -31,6 +31,7 @@ module ECLair();
   reg   [63:0]  cs_data_in;
   wire          cs_ram__w;        // RAM control store write signal
   wire  [7:0]   cs_next_addr;     // control store next microcode address bits
+  wire  [7:0]   cs_next_addr_alt; // control store next microcode address bits from alternate source
   wire  [7:0]   next_addr;        // next microcode address to visit, either the above bits or IR if above is 8'b0
   wire          inc_pc;           // increment PC
   wire          load_pc;          // load PC from Z
@@ -107,7 +108,9 @@ module ECLair();
   wire  [7:0]   intflg;         // interrupt flags
   wire  [7:0]   intclr;         // clear interrupt flag
   wire  [7:0]   int;            // interrupt "pins" // FIXME - hook these up to something!
+  wire          int_jmp;        // jump to IRQ area of microcode on next fetch/execute
   wire          int_pending;    // at least one interrupt is waiting to be serviced
+  wire          int_en;         // interrupts are enabled
   wire          reg_xy_nibble_sel;  // which nibble we want to access via the XY mux (imm or intvect)
 
   initial begin
@@ -122,7 +125,8 @@ module ECLair();
   flipflop_jk                                   flp_cs_ready(.clk(top_of_cs), .j(1'b1), .k(1'b0), .q(cs_ready));
   mux_21                                        mux_cs_clk_selector(cs_ready, clk_quarter, clk_main, clk_cs);
   mux_2x                                        mux_cs_addr(.sel(cs_ready), .a(cs_addr_init), .b(cs_addr_run), .y(cs_addr));
-  mux_2x                                        mux_cs_next_addr(.sel(cs_next_addr == 8'b00000000), .a(cs_next_addr), .b(reg_ir), .y(next_addr));
+  mux_2x                                        mux_cs_next_addr(.sel(cs_next_addr == 8'b00000000), .a(cs_next_addr), .b(cs_next_addr_alt), .y(next_addr));
+  mux_2x                                        mux_cs_next_addr_alt(.sel(int_jmp), .a(reg_ir), .b(intvect), .y(cs_next_addr_alt));
   counter         #(.WIDTH(8))                  ctr_cs_seq(.clk(clk_cs), .ce(~cs_ready), .reset(~_por_reset), .out(cs_addr_init), .load(1'b0), .preset(8'b00000000));
   flipflop_d      #(.WIDTH(8))                  flp_cs_addr(.clk(clk_cs), .reset(~cs_ready), .in(next_addr), .out(cs_addr_run));
   microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(1'b0, 1'b0, cs_addr, cs_rom_data);
@@ -235,6 +239,7 @@ module ECLair();
   assign pagetable_addr[11:6] = ptb[5:0];
   assign paging_enabled = flags[0];
   assign mode = flags[1];
+  assign int_en = flags[2];
   assign status_z_8  = (reg_z[7:0] == 8'd0);
   assign status_z_16 = (reg_z == 16'd0);
   assign status_8[0]  = status_z_8;
@@ -247,6 +252,7 @@ module ECLair();
   assign xy_nibble_padded[3:0] = xy_nibble;
   assign xy_nibble_padded[7:4] = 4'b0000;
   assign int_pending = ~(intvect[3:0] == 4'b0000);
+  assign int_jmp = int_pending & int_en;
   
   always begin
     #40 clk_main = ~clk_main; // 25MHz main clock
