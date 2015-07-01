@@ -1,8 +1,9 @@
-#!/usr/bin/ruby
+#!/opt/local/bin/ruby2.0
 # mcgen - generate microcode binary output based on a text input file
 
 files = []
 mapfiles = []
+graphfiles = []
 @fields = {}
 @enums = {}
 @locations = []
@@ -24,6 +25,10 @@ File.open(ARGV[0], "r") do |infile|
         # mapfiles specify an output file for mapping address to instruction (for gtkwave or similar)
         filename = values.shift
         mapfiles.push :filename => filename
+      when "graphfile" then
+        # graphfiles specify an output file for digraph documentation
+        filename = values.shift
+        graphfiles.push :filename => filename
       when "field" then
         # fields specify a name for a bit or series of bits in the microcode
         field = values.shift
@@ -172,4 +177,69 @@ mapfiles.each do |file_info|
       mapfile.puts "#{addr.to_s(16).upcase.rjust(2, "0")} #{last_instruction}-#{addr-last_instruction_baseaddr}"
     end
   end
+end
+
+# output any required documentation files
+Kernel.exit(0) if !graphfiles
+require 'graphviz'
+
+class GraphViz
+  def search_node_startswith(search_string)
+    @hoNodes.each do |name, val|
+      return name if name.start_with? search_string
+    end
+  end
+end
+
+# TODO: make this support includes
+graphfiles.each do |file_info|
+  graph = GraphViz::new(:G, :type => :digraph)
+  # first build all the nodes (and edges from IR to the instruction start points)
+  ir_node = graph.add_node "IR"
+  ir_node[:shape] = "circle"
+  instructions.each do |instruction, words|
+    addr = @locations.find_index(instruction)
+    first_addr = addr
+    words.each do |word_bits|
+      node = graph.add_node "0x#{sprintf("%02X", addr)}\n#{instruction}"
+      node[:xlabel] = word_bits.join("\n")
+      node[:fontsize] = 6
+      node[:shape] = "circle"
+      node[:margin] = "0.05,0.055"
+      addr += 1
+    end
+    unless /fetch\d*|init\d*/.match(instruction) or instruction.end_with? "?" then
+      graph.add_edge ir_node, graph.get_node("0x#{sprintf("%02X", first_addr)}\n#{instruction}") 
+    end
+  end
+  # now go through again and build all the edges
+  instructions.each do |instruction, words|
+    addr = @locations.find_index(instruction)
+    words.each do |word_bits|
+      next_addr = addr + 1
+      word_bits.each do |word_bit|
+        next_addr_match = /next_addr\(([^\)]+)\)/.match(word_bit)
+        next if !next_addr_match
+        next_instruction = next_addr_match[1]
+        if(next_instruction == "ir") then
+          next_addr = "ir"
+        else
+          next_addr = @locations.find_index(next_instruction)
+        end
+      end
+      from_node = graph.get_node(graph.search_node_startswith("0x#{sprintf("%02X", addr)}"))
+      to_node = nil
+      if next_addr == "ir"
+        to_node = ir_node
+      else
+        to_node = graph.get_node(graph.search_node_startswith("0x#{sprintf("%02X", next_addr)}"))
+      end
+      next if !to_node
+      
+      graph.add_edge from_node, to_node
+      addr = next_addr
+    end
+  end
+
+  graph.output :pdf => file_info[:filename]
 end

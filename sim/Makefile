@@ -18,5 +18,5 @@ microcode.bin: ../doc/microcode.txt ../utils/mcgen.rb
 	../utils/mcgen.rb ../doc/microcode.txt
 
 clean:
-	rm -f *.vvp *.vcd a.out microcode*.bin microcode_map.txt sysrom.bin
+	rm -f *.vvp *.vcd a.out microcode*.bin microcode_map.txt microcode_graph.pdf sysrom.bin
 	make -C test clean

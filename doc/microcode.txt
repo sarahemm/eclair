@@ -6,6 +6,9 @@ file    microcode.bin  0   64
 # mapfile - output a map of addresses to instructions for gtkwave to use
 mapfile microcode_map.txt
 
+# graphfile - output a digraph of the microcode flow
+graphfile microcode_graph.pdf
+
 # fields - names for bit positions
 # edge-sensitive signals
 field write_pte     0     1
@@ -80,6 +83,14 @@ enum  xy_nibble_sel int   1
 
 # locations - start addresses of instructions
 location    init        0
+#location    irq1        1
+#location    irq2        2
+#location    irq3        3
+#location    irq4        4
+#location    irq5        5
+#location    irq6        6
+#location    irq7        7
+#location    irq8        8
 location    init2       223
 location    fetch       224
 location    fetch2      225
