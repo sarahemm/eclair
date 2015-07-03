@@ -21,7 +21,7 @@ field load_pc       6     1
 field load_reg      7     3
 field load_x        10    1
 field load_y        11    1
-field load_z        12    1
+# bit 12 is currently available
 field load_ptb      13    1
 # bit 14 is currently available
 field load_status   15    1
@@ -132,7 +132,7 @@ alias       ret         pop16.pc
 
 # instructions - each one is one word of microcode, glues everything above together
 # initialize the cpu when first starting up
-instruction init        src_xy(imm)   alu_mode(arith)   alu_op(x) load_x      load_y  load_z  next_addr(init2)
+instruction init        src_xy(imm)   alu_mode(arith)   alu_op(x) load_x      load_y  next_addr(init2)
 instruction init2       load_pc       next_addr(fetch2)
 
 # increment PC to get ready for the next instruction fetch
@@ -141,10 +141,10 @@ instruction fetch       inc_pc
 instruction fetch2      src_mar(pc)   load_mar          mem_read  load_ir     next_addr(ir)
 
 # enable interrupts
-instruction ei          src_xy(imm)   alu_mode(arith)   alu_op(x) xy_imm_lsb(1)   load_x  load_y  load_z  load_flag_ie  next_addr(fetch)
+instruction ei          src_xy(imm)   alu_mode(arith)   alu_op(x) xy_imm_lsb(1)   load_x  load_y  load_flag_ie  next_addr(fetch)
 
 # disable interrupts
-instruction di          src_xy(imm)   alu_mode(arith)   alu_op(x) xy_imm_lsb(0)   load_x  load_y  load_z  load_flag_ie  next_addr(fetch)
+instruction di          src_xy(imm)   alu_mode(arith)   alu_op(x) xy_imm_lsb(0)   load_x  load_y  load_flag_ie  next_addr(fetch)
 
 # load immediate 8 bits into low byte of supplied register
 instruction ldi8.al     next_addr(ldi8.?l)
@@ -159,59 +159,59 @@ instruction ldi16.c     next_addr(ldi16.?)
 instruction ldi16.d     next_addr(ldi16.?)
 
 # load immediate 8 bits into the page table block
-instruction ldi8.ptb    inc_pc        src_mar(pc)   load_mar        mem_read        src_mdr(data) mdr_byte(low) load_mdr        src_xy(mdr)   load_x    load_z      load_ptb
+instruction ldi8.ptb    inc_pc        src_mar(pc)   load_mar        mem_read        src_mdr(data) mdr_byte(low) load_mdr        src_xy(mdr)   load_x      load_ptb
 instruction ldi8.ptb    next_addr(fetch)
 
 # load immediate 8 bits into the FLAGS register
-instruction ldi8.flags  inc_pc        src_mar(pc)   load_mar        mem_read        src_mdr(data) mdr_byte(low) load_mdr        src_xy(mdr)   load_x    load_z      load_status
+instruction ldi8.flags  inc_pc        src_mar(pc)   load_mar        mem_read        src_mdr(data) mdr_byte(low) load_mdr        src_xy(mdr)   load_x      load_status
 instruction ldi8.flags  load_flag_pe  load_flag_m   load_flag_ie    next_addr(fetch)
 
 # load immediate 16 bit into the stack pointer
 instruction ldi16.sp    inc_pc        src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(low)   load_mdr
 instruction ldi16.sp                  src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    inc_pc          op_16bit
-instruction ldi16.sp                  src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(high)  load_mdr      load_y    load_x      load_z  load_reg(sp)  op_16bit  load_status
+instruction ldi16.sp                  src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(high)  load_mdr      load_y    load_x  load_reg(sp)  op_16bit  load_status
 instruction ldi16.sp    next_addr(fetch)
 
 # load immediate 8 bits into low byte of register selected by IR[6..7]
-instruction ldi8.?l     inc_pc        src_mar(pc)     load_mar        mem_read    src_mdr(data)   mdr_byte(low)   load_mdr      src_xy(mdr) load_x    load_z  load_reg(via_ir)    load_status
+instruction ldi8.?l     inc_pc        src_mar(pc)     load_mar        mem_read    src_mdr(data)   mdr_byte(low)   load_mdr      src_xy(mdr)   load_x    load_reg(via_ir)    load_status
 instruction ldi8.?l     next_addr(fetch)
 
 # load immediate 8 bits into register selected by IR[6..7]
 instruction ldi16.?     inc_pc        src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(low)     load_mdr
 instruction ldi16.?                   src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    inc_pc          op_16bit
-instruction ldi16.?                   src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(high)    load_mdr      load_y    load_x      load_z  load_reg(via_ir)  op_16bit  load_status
+instruction ldi16.?                   src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(high)    load_mdr      load_y    load_x  load_reg(via_ir)  op_16bit  load_status
 instruction ldi16.?     next_addr(fetch)
 
 # add 16 bits from registers A and B, result goes into A
 instruction add16.ab    src_xy(a)     load_x
 instruction add16.ab    src_xy(b)     load_y
-instruction add16.ab    alu_mode(arith) alu_op(add)   op_16bit        load_z        load_reg(a)     next_addr(fetch)  load_status
+instruction add16.ab    alu_mode(arith) alu_op(add)   op_16bit      load_reg(a)     next_addr(fetch)  load_status
 
 # add 8 bits from low bytes of registers A and B, result goes into A
 instruction add8.ab     src_xy(a)     load_x
 instruction add8.ab     src_xy(b)     load_y
-instruction add8.ab     alu_mode(arith) alu_op(add)                   load_z        load_reg(a)     next_addr(fetch)  load_status
+instruction add8.ab     alu_mode(arith) alu_op(add)                 load_reg(a)     next_addr(fetch)  load_status
 
 # subtract 8 bits from low bytes of registers A and B, result goes into A
 instruction sub8.ab     src_xy(a)     load_x
 instruction sub8.ab     src_xy(b)     load_y
-instruction sub8.ab     alu_mode(arith) alu_op(sub)   carry_in(1)     load_z        load_reg(a)     next_addr(fetch)  load_status
+instruction sub8.ab     alu_mode(arith) alu_op(sub)   carry_in(1)     load_reg(a)     next_addr(fetch)  load_status
 
 # immediate jump to the address specified
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
-instruction jmp         src_xy(mdr)   alu_op(x)       load_x          load_z
+instruction jmp         src_xy(mdr)   alu_op(x)       load_x
 instruction jmp         branch_cond(always)           load_pc         next_addr(fetch2)
 
 # immediate jump to the address specified if Z(ero) is true
 instruction jmpz        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
 instruction jmpz        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
-instruction jmpz        inc_pc        src_xy(mdr)     alu_op(x)       load_x        load_z
+instruction jmpz        inc_pc        src_xy(mdr)     alu_op(x)       load_x
 instruction jmpz        branch_cond(z)                load_pc         next_addr(fetch2)
 
 # write page table entry, get data from A and write to page table address specified in D
-instruction wrpte       alu_op(x)     src_xy(d)       load_x          load_z        src_mar(z)      load_mar
-instruction wrpte       alu_op(x)     src_xy(a)       load_x          load_z        load_status
+instruction wrpte       alu_op(x)     src_xy(d)       load_x          src_mar(z)      load_mar
+instruction wrpte       alu_op(x)     src_xy(a)       load_x          load_status
 instruction wrpte       write_pte     next_addr(fetch)
 
 # load immediate 8 bits into MDR
@@ -220,58 +220,58 @@ instruction push8.imm   next_addr(push8.?)
 
 # TODO: better comment
 # load the value of SP into X/Z/MAR
-instruction push8.?     alu_op(x)     src_xy(sp)      load_x          load_z        src_mar(z)    load_mar
+instruction push8.?     alu_op(x)     src_xy(sp)      load_x        src_mar(z)    load_mar
 # write immediate value from MDR into address pointed to by SP (now in Z)
 instruction push8.?     src_mar(z)    load_mar        mem_write
 # load 1'b1 into Y, add it to X (already contains SP), then put the result back into SP
 instruction push8.?     src_xy(imm)   xy_imm_lsb(1)   load_y          
-instruction push8.?     alu_op(add)   load_z          load_reg(sp)
+instruction push8.?     alu_op(add)   load_reg(sp)
 # increment PC and jump back to fetching the next instruction
 instruction push8.?     next_addr(fetch)
 
 # push immediate 16 bits onto stack
 # load immediate value from address pointed to by PC into low byte of MDR
-instruction push16.imm  inc_pc        src_mar(pc)   load_mar        src_mdr(data)   mem_read      mdr_byte(low)   load_mdr
+instruction push16.imm  inc_pc        src_mar(pc)   load_mar        src_mdr(data)   mem_read    mdr_byte(low)   load_mdr
 # increment pc and load immediate value from address pointed to by PC into high byte of MDR
-instruction push16.imm  inc_pc        src_mar(pc)     load_mar        src_mdr(data)   mem_read      mdr_byte(high)  load_mdr
+instruction push16.imm  inc_pc        src_mar(pc)     load_mar        src_mdr(data)   mem_read  mdr_byte(high)  load_mdr
 instruction push16.imm  next_addr(push16.?)
 
 # push program counter onto stack
 # pc -> mar -> x -> z -> mdr
-instruction push16.pc   src_mar(pc)     load_mar      src_xy(mar)     load_x        alu_op(x)       load_z    src_mdr(z)  mdr_byte(low) load_mdr
+instruction push16.pc   src_mar(pc)     load_mar      src_xy(mar)     load_x        alu_op(x)   src_mdr(z)  mdr_byte(low) load_mdr
 instruction push16.pc   mdr_byte(high)  src_xy(mdr)   load_mdr        load_x        next_addr(push16.?)
 
 # push 16 bits from register selected by IR[6..7]
 # write immediate value from low byte of MDR into address pointed to by SP (via SP->X->Z->MAR)
-instruction push16.?    alu_op(x)     src_xy(sp)      load_x          load_z        src_mar(z)      load_mar  mem_write
+instruction push16.?    alu_op(x)     src_xy(sp)      load_x          src_mar(z)      load_mar  mem_write
 # increment SP into Z and load that into MAR
-instruction push16.?    xy_imm_lsb(1) load_y          alu_op(add)     load_z        src_mar(z)      load_mar 
+instruction push16.?    xy_imm_lsb(1) load_y          alu_op(add)     src_mar(z)      load_mar 
 # write immediate value from high byte of MDR into SP+1
 instruction push16.?    mdr_byte(high)  mem_write
 # add the 1'b1 already in Y to the SP+1 already in MAR, then put the result (SP+2) back into SP
-instruction push16.?    src_xy(mar)   load_x          alu_op(add)     load_z        load_reg(sp)
+instruction push16.?    src_xy(mar)   load_x          alu_op(add)     load_reg(sp)
 # increment PC and jump back to fetching the next instruction
 instruction push16.?    next_addr(fetch)
 
 # pop 16 bits from address pointed to by SP-- into PC
 # load SP into MAR
-instruction pop16.pc    src_xy(sp)      load_x      alu_op(x-1)   load_z        src_mar(z)    load_mar
+instruction pop16.pc    src_xy(sp)      load_x      alu_op(x-1)   src_mar(z)    load_mar
 # load RAM contents into high byte of MDR and load MAR back into SP
-instruction pop16.pc    mdr_byte(high)  mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_z  load_reg(sp)
+instruction pop16.pc    mdr_byte(high)  mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_reg(sp)
 # subtract 1 from SP, put it into the MAR
-instruction pop16.pc    src_xy(sp)      alu_op(x-1) load_z        src_mar(z)    load_mar
+instruction pop16.pc    src_xy(sp)      alu_op(x-1) src_mar(z)    load_mar
 # load RAM contents into the low byte of MDR and push that all the way through to Z
-instruction pop16.pc    mdr_byte(low)   mem_read    src_mdr(data) load_mdr      src_xy(mdr)   load_x  load_z
+instruction pop16.pc    mdr_byte(low)   mem_read    src_mdr(data) load_mdr      src_xy(mdr)   load_x
 # load contents of MDR into PC
-instruction pop16.pc    src_xy(mdr)     load_x      load_z        load_pc
+instruction pop16.pc    src_xy(mdr)     load_x      load_pc
 # load MAR back into SP now that we're done
-instruction pop16.pc    src_xy(mar)     load_x      load_z        load_reg(sp)
+instruction pop16.pc    src_xy(mar)     load_x      load_reg(sp)
 # jump back to fetching the next instruction without incrementing PC
 instruction pop16.pc    next_addr(fetch2)
 
 # push current pc onto stack then jump to immediate location
 instruction call        include(push16.pc,no_next)
-instruction call        xy_imm_lsb(3) src_xy(imm) load_y      alu_op(add) load_z    load_mdr  
+instruction call        xy_imm_lsb(3) src_xy(imm) load_y      alu_op(add) load_mdr  
 instruction call        include(push16.?,no_next)
 instruction call        include(jmp)
 
