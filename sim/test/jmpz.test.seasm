@@ -3,7 +3,7 @@ ldi8.al 0x0F
 jmpz    0x0007
 ldi8.al 0x00
 @007
-// expect: reg_z=00000000_00000000
+// expect: bus_z=00000000_00000000
 jmpz    0x000D
 @00A
 halt    // should jump over this
