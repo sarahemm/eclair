@@ -2,6 +2,7 @@
 # mcgen - generate microcode binary output based on a text input file
 
 files = []
+images = []
 mapfiles = []
 graphfiles = []
 @fields = {}
@@ -16,11 +17,17 @@ File.open(ARGV[0], "r") do |infile|
     next if values[0] == nil
     case values.shift
       when "file" then
-        # files specify an output file and which bits go into it
+        # files specify an output binary-text file and which bits go into it
         filename = values.shift
         start_bit = values.shift.to_i
         nbr_bits = values.shift.to_i
         files.push :filename => filename, :start => start_bit, :length => nbr_bits
+      when "image" then
+        # images specify an output true-binary file and which bits go into it
+        filename = values.shift
+        start_bit = values.shift.to_i
+        nbr_bits = values.shift.to_i
+        images.push :filename => filename, :start => start_bit, :length => nbr_bits
       when "mapfile" then
         # mapfiles specify an output file for mapping address to instruction (for gtkwave or similar)
         filename = values.shift
@@ -141,7 +148,7 @@ mc_descs = []
   end
 end
 
-# assemble the arrays of bits into whatever combination of files the input file requests
+# assemble the arrays of bits into whatever combination of binary-text files the input file requests
 files.each do |file_info|
   filename = file_info[:filename]
   start = file_info[:start]
@@ -158,6 +165,26 @@ files.each do |file_info|
       mcfile.puts "@%03X // #{@locations[addr]}" % addr if @locations[addr]
       bit_string = ("%0#{length}b" % my_bits).gsub(/(\d)(?=(\d\d\d\d\d\d\d\d)+(?!\d))/, "\\1_")
       mcfile.puts "#{bit_string} // #{mc_descs[addr]}" % addr
+    end
+  end
+end
+
+# assemble the arrays of bits into whatever combination of true-binary image files the input file requests
+images.each do |image_info|
+  filename = image_info[:filename]
+  start = image_info[:start]
+  length = image_info[:length]
+  mask = (2 ** length) - 1 << start
+  File.open(filename, 'w') do |mcimage|
+    mc_bits.each_index do |addr|
+      if(!mc_bits[addr]) then
+        my_bits = 0x0000000000000000
+      else
+        my_bits = (mc_bits[addr] & mask) >> start
+      end
+      (0..length-1).step(8).each do |bit_pos_start|
+        mcimage.write (my_bits >> bit_pos_start & 0xFF).chr
+      end
     end
   end
 end
