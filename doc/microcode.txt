@@ -1,7 +1,10 @@
 # ECLair Microcode
 
-# files - output files with which bit positions go in each one
+# files - output binary-text files with which bit positions go in each one
 file    microcode.bin  0   64
+
+# images - output true binary image files with which bit positions go in each one
+image   microcode.img  0   64
 
 # mapfile - output a map of addresses to instructions for gtkwave to use
 mapfile microcode_map.txt
@@ -176,7 +179,7 @@ instruction ldi8.?l     inc_pc        src_mar(pc)     load_mar        mem_read  
 
 # load immediate 8 bits into register selected by IR[6..7]
 instruction ldi16.?     inc_pc        src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(low)     load_mdr
-instruction ldi16.?                   src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    inc_pc          op_16bit
+instruction ldi16.?                   inc_pc
 instruction ldi16.?                   src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(high)    load_mdr      load_y    load_x  load_reg(via_ir)  op_16bit  load_status next_addr(fetch)
 
 # add 16 bits from registers A and B, result goes into A
