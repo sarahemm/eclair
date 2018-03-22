@@ -9,10 +9,10 @@ File.open(ARGV[0], "r") do |txtfile|
       # comments we ignore
       next
     end
-    if(/^@(\d+)$/.match(line)) then
+    if(/^@([0-9A-Fa-f]+)$/.match(line)) then
       # address lines we seek
       addr = $1.to_i(16)
-      puts "Seeked to #{addr}"
+      puts "Seeked to 0x#{addr.to_s(16)}"
       next
     end
     if(/^(\d+).*$/.match(line)) then
