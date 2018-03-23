@@ -1,0 +1,310 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4D35DAFA20601C9300D40218 /* EclairControlWord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D35DAF920601C9300D40218 /* EclairControlWord.swift */; };
+		4D59C9701ED5162700E79FA0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D59C96F1ED5162700E79FA0 /* AppDelegate.swift */; };
+		4D59C9721ED5162700E79FA0 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D59C9711ED5162700E79FA0 /* ViewController.swift */; };
+		4D59C9741ED5162700E79FA0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4D59C9731ED5162700E79FA0 /* Assets.xcassets */; };
+		4D59C9771ED5162800E79FA0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4D59C9751ED5162800E79FA0 /* Main.storyboard */; };
+		4DD560091EE3291B000E1046 /* EclairMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD560081EE3291B000E1046 /* EclairMemory.swift */; };
+		4DD5600B1EE329ED000E1046 /* EclairMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD5600A1EE329ED000E1046 /* EclairMachine.swift */; };
+		4DD5600D1EE32A2C000E1046 /* EclairAddressSpace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD5600C1EE32A2C000E1046 /* EclairAddressSpace.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		4D35DAF920601C9300D40218 /* EclairControlWord.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EclairControlWord.swift; sourceTree = "<group>"; };
+		4D59C96C1ED5162700E79FA0 /* ECLairSimulator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ECLairSimulator.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4D59C96F1ED5162700E79FA0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		4D59C9711ED5162700E79FA0 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		4D59C9731ED5162700E79FA0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4D59C9761ED5162800E79FA0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		4D59C9781ED5162800E79FA0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4DD560081EE3291B000E1046 /* EclairMemory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EclairMemory.swift; sourceTree = "<group>"; };
+		4DD5600A1EE329ED000E1046 /* EclairMachine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EclairMachine.swift; sourceTree = "<group>"; };
+		4DD5600C1EE32A2C000E1046 /* EclairAddressSpace.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EclairAddressSpace.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4D59C9691ED5162700E79FA0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4D59C9631ED5162700E79FA0 = {
+			isa = PBXGroup;
+			children = (
+				4D59C96E1ED5162700E79FA0 /* ECLairSimulator */,
+				4D59C96D1ED5162700E79FA0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4D59C96D1ED5162700E79FA0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4D59C96C1ED5162700E79FA0 /* ECLairSimulator.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4D59C96E1ED5162700E79FA0 /* ECLairSimulator */ = {
+			isa = PBXGroup;
+			children = (
+				4D59C96F1ED5162700E79FA0 /* AppDelegate.swift */,
+				4D59C9711ED5162700E79FA0 /* ViewController.swift */,
+				4D59C9731ED5162700E79FA0 /* Assets.xcassets */,
+				4D59C9751ED5162800E79FA0 /* Main.storyboard */,
+				4D59C9781ED5162800E79FA0 /* Info.plist */,
+				4DD560081EE3291B000E1046 /* EclairMemory.swift */,
+				4DD5600A1EE329ED000E1046 /* EclairMachine.swift */,
+				4D35DAF920601C9300D40218 /* EclairControlWord.swift */,
+				4DD5600C1EE32A2C000E1046 /* EclairAddressSpace.swift */,
+			);
+			path = ECLairSimulator;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4D59C96B1ED5162700E79FA0 /* ECLairSimulator */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4D59C97B1ED5162800E79FA0 /* Build configuration list for PBXNativeTarget "ECLairSimulator" */;
+			buildPhases = (
+				4D59C9681ED5162700E79FA0 /* Sources */,
+				4D59C9691ED5162700E79FA0 /* Frameworks */,
+				4D59C96A1ED5162700E79FA0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ECLairSimulator;
+			productName = ECLairSimulator;
+			productReference = 4D59C96C1ED5162700E79FA0 /* ECLairSimulator.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4D59C9641ED5162700E79FA0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0820;
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = Hackstrich;
+				TargetAttributes = {
+					4D59C96B1ED5162700E79FA0 = {
+						CreatedOnToolsVersion = 8.2.1;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 4D59C9671ED5162700E79FA0 /* Build configuration list for PBXProject "ECLairSimulator" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 4D59C9631ED5162700E79FA0;
+			productRefGroup = 4D59C96D1ED5162700E79FA0 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4D59C96B1ED5162700E79FA0 /* ECLairSimulator */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4D59C96A1ED5162700E79FA0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D59C9741ED5162700E79FA0 /* Assets.xcassets in Resources */,
+				4D59C9771ED5162800E79FA0 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4D59C9681ED5162700E79FA0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D59C9721ED5162700E79FA0 /* ViewController.swift in Sources */,
+				4D35DAFA20601C9300D40218 /* EclairControlWord.swift in Sources */,
+				4D59C9701ED5162700E79FA0 /* AppDelegate.swift in Sources */,
+				4DD560091EE3291B000E1046 /* EclairMemory.swift in Sources */,
+				4DD5600B1EE329ED000E1046 /* EclairMachine.swift in Sources */,
+				4DD5600D1EE32A2C000E1046 /* EclairAddressSpace.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		4D59C9751ED5162800E79FA0 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4D59C9761ED5162800E79FA0 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		4D59C9791ED5162800E79FA0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		4D59C97A1ED5162800E79FA0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+			};
+			name = Release;
+		};
+		4D59C97C1ED5162800E79FA0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = ECLairSimulator/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = cx.sen.hackstrich.ECLairSimulator;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		4D59C97D1ED5162800E79FA0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = ECLairSimulator/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = cx.sen.hackstrich.ECLairSimulator;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4D59C9671ED5162700E79FA0 /* Build configuration list for PBXProject "ECLairSimulator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4D59C9791ED5162800E79FA0 /* Debug */,
+				4D59C97A1ED5162800E79FA0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4D59C97B1ED5162800E79FA0 /* Build configuration list for PBXNativeTarget "ECLairSimulator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4D59C97C1ED5162800E79FA0 /* Debug */,
+				4D59C97D1ED5162800E79FA0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4D59C9641ED5162700E79FA0 /* Project object */;
+}
