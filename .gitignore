@@ -1,0 +1,7 @@
+*.img
+*.rom
+*.test
+*.vcd
+*.vvp
+microcode.bin
+microcode_map.txt
