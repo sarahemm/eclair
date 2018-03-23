@@ -8,3 +8,5 @@ clean:
 %.test: %.test.seasm
 	../../utils/seasm.rb ../../doc/microcode.txt $< > $@
 
+%.test.rom: %.test
+	../../utils/asciitobin.rb $<
