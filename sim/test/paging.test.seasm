@@ -15,10 +15,11 @@ wrpte
 // switch back to PTB 1, enable paging, and make sure the address jumps
 @014
 ldi8.ptb    0x01
-ldi8.flags  0x06  // enables paging, which means the next code runs from 0x417
+ldi8.flags  0x06  // enables paging, which means the next code runs from 0x418
 halt
 @417        // pc: 017
+halt      // should jump over this
 halt
 
-// expect: pc=0x000017
-// expect: bus_addr=00000000_00000100_00010111
+// expect: pc=0x000018
+// expect: bus_addr=00000000_00000100_00011000
