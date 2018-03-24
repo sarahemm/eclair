@@ -58,10 +58,10 @@ struct MachineFlags {
 class Machine {
     var controlStore: [ControlWord]
     var addressSpace: AddressSpace
-
+    var pageTable: Memory
+    
     var cs_addr: Int
     var bus_data: Int
-    var bus_addr: Int
     var pc: Int
     var ir: Int
     var mar: Int
@@ -97,7 +97,21 @@ class Machine {
                 return 0xFF
         }
     }
+
+    var pagetable_addr: Int {
+        return ptb | mar.bitField(startBit: 10, length: 6) << 6
+    }
     
+    var bus_addr: Int {
+        if(flags.pe) {
+            // paging is enabled, run the address through the paging mechanism
+            return mar.bitField(startBit: 0, length: 10) | pageTable[pagetable_addr] << 10
+        } else {
+            // paging is disabled, we just access the first 64k of address space
+            return mar
+        }
+    }
+
     var is_halted: Bool {
         let csNext = (cs_data >> 25 & 0xFF)
         if(csNext == cs_addr) {
@@ -112,8 +126,9 @@ class Machine {
             romStart: 0x000000, romSize: 0x0FFFFF,
             ramStart: 0x100000, ramSize: 0xDFFFFF
         )
-        
-        bus_addr = 0x00000000
+
+        pageTable = Memory(size: 1<<12, width: 16)
+
         bus_data = 0x00
         cs_addr = 0x0000
         pc      = 0x0000
@@ -135,7 +150,6 @@ class Machine {
     }
     
     func reset() {
-        bus_addr = 0x00000000
         bus_data = 0x00
         cs_addr = 0x0000
         pc      = 0x0000
@@ -350,12 +364,12 @@ class Machine {
         }
         if(controlWord.memRead) {
             // Memory Read
-            bus_addr = mar
             try bus_data = addressSpace.read(bus_addr)
             stats.memReads += 1
         }
         if(controlWord.writePTE) {
             // Write PTE
+            pageTable[pagetable_addr] = z
         }
         if(controlWord.loadMDR) {
             // Load MDR

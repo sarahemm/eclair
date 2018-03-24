@@ -85,6 +85,7 @@ class ViewController: NSViewController {
 
     @IBOutlet var csDisasmDisplayTable: NSTableView!
     @IBOutlet var memoryDisplayTable: NSTableView!
+    @IBOutlet var pageTableDisplayTable: NSTableView!
     
     @IBOutlet weak var pcDisplay: NSTextField!
     @IBOutlet weak var irDisplay: NSTextField!
@@ -296,12 +297,16 @@ class ViewController: NSViewController {
         flagsMDisplay.state = machine.flags.m ? 1 : 0
         flagsIEDisplay.state = machine.flags.ie ? 1 : 0
 
+        // update the page table display's contents and highlight the row we're currently using if paging is on
+        pageTableDisplayTable.reloadData()
+        pageTableDisplayTable.centreRow(row: machine.pagetable_addr, animated: true)
+        
         // update the current position in the control store disassembly
         csDisasmDisplayTable.centreRow(row: machine.cs_addr, animated: true)
         
         // update the current position in memory
         // TODO: this should probably change the cell background color rather than using this edit hack
-        memoryDisplayTable.editColumn((machine.pc % 16) + 1, row: machine.pc / 16, with: nil, select: true)
+        memoryDisplayTable.editColumn((machine.bus_addr % 16) + 1, row: machine.bus_addr / 16, with: nil, select: true)
         
         // update the machine's current stats
         statsClockCyclesDisplay.stringValue = String(machine.stats.clockCycles)
@@ -316,13 +321,17 @@ class ViewController: NSViewController {
 
 extension ViewController: NSTableViewDataSource {
     func numberOfRows(in tableView: NSTableView) -> Int {
-        if(tableView.identifier == "ControlStoreTable") {
+        if(tableView.identifier == "ControlStoreDisplayTable") {
             // Control Store Table
             return machine.controlStore.count
-        } else {
+        } else if(tableView.identifier == "MemoryDisplayTable") {
             // Memory Display Table
             return Int(ceil(Double(machine.addressSpace.rom.contents.count) / 16.0))
+        } else if(tableView.identifier == "PageTableDisplayTable") {
+            // Page Table Table
+            return machine.pageTable.memSize
         }
+        return 0
     }
 }
 
@@ -337,7 +346,7 @@ extension ViewController: NSTableViewDelegate {
         var text: String = ""
         var cellIdentifier: String = ""
 
-        if(tableView.identifier == "ControlStoreTable") {
+        if(tableView.identifier == "ControlStoreDisplayTable") {
             // Control Store Table
             //var image: NSImage?
             
@@ -357,7 +366,7 @@ extension ViewController: NSTableViewDelegate {
                 //cell.imageView?.image = image ?? nil
                 return cell
             }
-        } else {
+        } else if(tableView.identifier == "MemoryDisplayTable") {
             // Memory Display Table
             // TODO: this just displays the ROM right now, it should be displaying all of the address space
             if(tableColumn == tableView.tableColumns[0]) {
@@ -370,6 +379,19 @@ extension ViewController: NSTableViewDelegate {
                         cellIdentifier = "Byte" + String(i) + "CellID"
                     }
                 }
+            }
+            
+            if let cell = tableView.make(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView {
+                cell.textField?.stringValue = text
+                return cell
+            }
+        } else if(tableView.identifier == "PageTableDisplayTable") {
+            if(tableColumn == tableView.tableColumns[0]) {
+                text = String(format: "%03X ", row)
+                cellIdentifier = "AddressCellID"
+            } else if(tableColumn == tableView.tableColumns[1]) {
+                text = String(format: "%04X ", machine.pageTable[row])
+                cellIdentifier = "DataCellID"
             }
             
             if let cell = tableView.make(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView {
