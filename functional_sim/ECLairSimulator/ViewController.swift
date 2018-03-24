@@ -81,11 +81,11 @@ extension String {
 class ViewController: NSViewController {
     @IBOutlet weak var runHaltControl: NSSegmentedControl!
     
-    @IBOutlet var memoryDisplay: NSTextView!
     @IBOutlet var logDisplay: NSTextView!
 
     @IBOutlet var csDisasmDisplayTable: NSTableView!
-
+    @IBOutlet var memoryDisplayTable: NSTableView!
+    
     @IBOutlet weak var pcDisplay: NSTextField!
     @IBOutlet weak var irDisplay: NSTextField!
     @IBOutlet weak var csAddrDisplay: NSTextField!
@@ -148,20 +148,12 @@ class ViewController: NSViewController {
         }
         do {
             let romContents = try Data(contentsOf: romURL)
-            memoryDisplay.textStorage?.append(NSAttributedString(
-                string: romContents.hexEncodedStringWithAddress(),
-                attributes: [
-                    NSFontAttributeName: NSFont(
-                        name: "Courier",
-                        size: 12.0
-                    )!
-                ]
-            ))
             var romByteArray: [Int] = []
             romContents.forEach { byte in
                 romByteArray.append(Int(byte))
             }
             machine.loadROM(romContents: romByteArray)
+            memoryDisplayTable.reloadData()
             log("ROM loaded.")
         } catch {
             log("Unable to load ROM")
@@ -307,6 +299,11 @@ class ViewController: NSViewController {
         // update the current position in the control store disassembly
         csDisasmDisplayTable.centreRow(row: machine.cs_addr, animated: true)
         
+        // update the current position in memory
+        // TODO: this should probably change the cell background color rather than using this edit hack
+        memoryDisplayTable.editColumn((machine.pc % 16) + 1, row: machine.pc / 16, with: nil, select: true)
+        
+        // update the machine's current stats
         statsClockCyclesDisplay.stringValue = String(machine.stats.clockCycles)
         statsMemReadsDisplay.stringValue = String(machine.stats.memReads)
         statsMemWritesDisplay.stringValue = String(machine.stats.memWrites)
@@ -319,7 +316,13 @@ class ViewController: NSViewController {
 
 extension ViewController: NSTableViewDataSource {
     func numberOfRows(in tableView: NSTableView) -> Int {
-        return machine.controlStore.count
+        if(tableView.identifier == "ControlStoreTable") {
+            // Control Store Table
+            return machine.controlStore.count
+        } else {
+            // Memory Display Table
+            return Int(ceil(Double(machine.addressSpace.rom.contents.count) / 16.0))
+        }
     }
 }
 
@@ -331,27 +334,49 @@ extension ViewController: NSTableViewDelegate {
     }
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
-        //var image: NSImage?
         var text: String = ""
         var cellIdentifier: String = ""
-        
-        if tableColumn == tableView.tableColumns[0] {
-            text = ""
-            cellIdentifier = CellIdentifiers.FlagsCell
-        } else if tableColumn == tableView.tableColumns[1] {
-            text = String(format: "%02hhX ", row)
-            cellIdentifier = CellIdentifiers.AddressCell
-        } else if tableColumn == tableView.tableColumns[2] {
-            text = machine.disassembleMicrocode(machine.controlStore[row].raw)
-            cellIdentifier = CellIdentifiers.DisasmCell
-        }
-        
-        if let cell = tableView.make(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView {
-            cell.textField?.stringValue = text
-            //cell.imageView?.image = image ?? nil
-            return cell
+
+        if(tableView.identifier == "ControlStoreTable") {
+            // Control Store Table
+            //var image: NSImage?
+            
+            if tableColumn == tableView.tableColumns[0] {
+                text = ""
+                cellIdentifier = CellIdentifiers.FlagsCell
+            } else if tableColumn == tableView.tableColumns[1] {
+                text = String(format: "%02hhX ", row)
+                cellIdentifier = CellIdentifiers.AddressCell
+            } else if tableColumn == tableView.tableColumns[2] {
+                text = machine.disassembleMicrocode(machine.controlStore[row].raw)
+                cellIdentifier = CellIdentifiers.DisasmCell
+            }
+            
+            if let cell = tableView.make(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView {
+                cell.textField?.stringValue = text
+                //cell.imageView?.image = image ?? nil
+                return cell
+            }
+        } else {
+            // Memory Display Table
+            // TODO: this just displays the ROM right now, it should be displaying all of the address space
+            if(tableColumn == tableView.tableColumns[0]) {
+                text = String(format: "%06X ", row * 16)
+                cellIdentifier = "AddressCellID"
+            } else {
+                for i in stride(from: 0, through: 15, by: 1) {
+                    if(tableColumn == tableView.tableColumns[i+1] && row*16+i < machine.addressSpace.rom.contents.count) {
+                        text = String(format: "%02X ", machine.addressSpace.rom.contents[row*16+i])
+                        cellIdentifier = "Byte" + String(i) + "CellID"
+                    }
+                }
+            }
+            
+            if let cell = tableView.make(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView {
+                cell.textField?.stringValue = text
+                return cell
+            }
         }
         return nil
     }
-    
 }
