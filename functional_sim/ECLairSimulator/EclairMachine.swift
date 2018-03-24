@@ -149,6 +149,7 @@ class Machine {
         sp      = 0x0000
         x       = 0x0000
         y       = 0x0000
+        ptb     = 0x00
     }
     
     func loadROM(romContents: Array<Int>) {
