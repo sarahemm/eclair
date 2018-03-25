@@ -120,6 +120,11 @@ class Machine {
         return false
     }
     
+    // true if the microcode instruction we're sitting at is fetch2 (the one that jumps to ir)
+    var at_fetch: Bool {
+        return controlStore[cs_addr].nextCSAddr == 0
+    }
+    
     init() {
         controlStore = []
         addressSpace = AddressSpace(

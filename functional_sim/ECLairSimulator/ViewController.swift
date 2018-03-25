@@ -199,7 +199,7 @@ class ViewController: NSViewController {
         updateUI();
     }
     
-    @IBAction func singleStepButtonClicked(_ sender: Any) {
+    func doSingleMicrocodeStep() {
         do {
             try machine.singleStep()
         } catch(Memory.MemoryError.readFromUninitialized) {
@@ -216,6 +216,16 @@ class ViewController: NSViewController {
         }
     }
     
+    @IBAction func microcodeStepButtonClicked(_ sender: NSButton) {
+        doSingleMicrocodeStep()
+    }
+    
+    @IBAction func instructionStepButtonClicked(_ sender: NSButton) {
+        repeat {
+            doSingleMicrocodeStep()
+        } while(!machine.at_fetch && !machine.is_halted)
+    }
+    
     func haltProcessor() {
         runHaltControl.selectSegment(withTag: 0)
         runHaltClicked(runHaltControl)
@@ -225,17 +235,8 @@ class ViewController: NSViewController {
     var runDelay: TimeInterval = 0.5
     @IBAction func runHaltClicked(_ sender: NSSegmentedControl) {
         if(sender.selectedSegment == 1) {
-            do {
-                try machine.singleStep()
-            } catch(Memory.MemoryError.readFromUninitialized) {
-                log("Processor halted due to read from uninitialized memory location.")
-                haltProcessor()
-            } catch {
-                log("Processor halted due to exception in machine.singleStep().")
-                haltProcessor()
-            }
-            updateUI()
-            runTimer = Timer.scheduledTimer(timeInterval: runDelay, target: self, selector: #selector(self.singleStepButtonClicked), userInfo: nil, repeats: true)
+            doSingleMicrocodeStep()
+            runTimer = Timer.scheduledTimer(timeInterval: runDelay, target: self, selector: #selector(self.microcodeStepButtonClicked), userInfo: nil, repeats: true)
         } else {
             runTimer.invalidate()
         }
@@ -258,7 +259,7 @@ class ViewController: NSViewController {
         }
         if(runTimer.isValid) {
             runTimer.invalidate()
-            runTimer = Timer.scheduledTimer(timeInterval: runDelay, target: self, selector: #selector(self.singleStepButtonClicked), userInfo: nil, repeats: true)
+            runTimer = Timer.scheduledTimer(timeInterval: runDelay, target: self, selector: #selector(self.microcodeStepButtonClicked), userInfo: nil, repeats: true)
         }
     }
     
