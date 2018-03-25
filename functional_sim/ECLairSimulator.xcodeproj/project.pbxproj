@@ -13,6 +13,7 @@
 		4D59C9741ED5162700E79FA0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4D59C9731ED5162700E79FA0 /* Assets.xcassets */; };
 		4D59C9771ED5162800E79FA0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4D59C9751ED5162800E79FA0 /* Main.storyboard */; };
 		4D63A6EF2066E5770085FB2A /* EclairTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D63A6EE2066E5770085FB2A /* EclairTest.swift */; };
+		4D63A6F120686ABF0085FB2A /* TestConsoleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D63A6F020686ABF0085FB2A /* TestConsoleView.swift */; };
 		4DD560091EE3291B000E1046 /* EclairMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD560081EE3291B000E1046 /* EclairMemory.swift */; };
 		4DD5600B1EE329ED000E1046 /* EclairMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD5600A1EE329ED000E1046 /* EclairMachine.swift */; };
 		4DD5600D1EE32A2C000E1046 /* EclairAddressSpace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD5600C1EE32A2C000E1046 /* EclairAddressSpace.swift */; };
@@ -27,6 +28,7 @@
 		4D59C9761ED5162800E79FA0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4D59C9781ED5162800E79FA0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4D63A6EE2066E5770085FB2A /* EclairTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EclairTest.swift; sourceTree = "<group>"; };
+		4D63A6F020686ABF0085FB2A /* TestConsoleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConsoleView.swift; sourceTree = "<group>"; };
 		4DD560081EE3291B000E1046 /* EclairMemory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EclairMemory.swift; sourceTree = "<group>"; };
 		4DD5600A1EE329ED000E1046 /* EclairMachine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EclairMachine.swift; sourceTree = "<group>"; };
 		4DD5600C1EE32A2C000E1046 /* EclairAddressSpace.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EclairAddressSpace.swift; sourceTree = "<group>"; };
@@ -64,6 +66,7 @@
 			children = (
 				4D59C96F1ED5162700E79FA0 /* AppDelegate.swift */,
 				4D59C9711ED5162700E79FA0 /* ViewController.swift */,
+				4D63A6F020686ABF0085FB2A /* TestConsoleView.swift */,
 				4D59C9731ED5162700E79FA0 /* Assets.xcassets */,
 				4D59C9751ED5162800E79FA0 /* Main.storyboard */,
 				4D59C9781ED5162800E79FA0 /* Info.plist */,
@@ -153,6 +156,7 @@
 				4DD560091EE3291B000E1046 /* EclairMemory.swift in Sources */,
 				4D63A6EF2066E5770085FB2A /* EclairTest.swift in Sources */,
 				4DD5600B1EE329ED000E1046 /* EclairMachine.swift in Sources */,
+				4D63A6F120686ABF0085FB2A /* TestConsoleView.swift in Sources */,
 				4DD5600D1EE32A2C000E1046 /* EclairAddressSpace.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

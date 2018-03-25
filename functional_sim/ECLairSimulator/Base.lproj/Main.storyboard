@@ -2256,10 +2256,10 @@
             </objects>
             <point key="canvasLocation" x="1076" y="1063"/>
         </scene>
-        <!--View Controller-->
+        <!--Test Console View Controller-->
         <scene sceneID="xlD-YC-foj">
             <objects>
-                <viewController id="M7Q-AE-xBO" sceneMemberID="viewController">
+                <viewController id="M7Q-AE-xBO" userLabel="Test Console View Controller" customClass="TestConsoleViewController" customModule="ECLairSimulator" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="iMX-t8-kNa">
                         <rect key="frame" x="0.0" y="0.0" width="672" height="289"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -2280,7 +2280,7 @@
                                     <rect key="frame" x="1" y="1" width="426" height="222"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <tableView identifier="ControlStoreDisplayTable" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" columnReordering="NO" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="Ax3-6e-6Gq">
+                                        <tableView identifier="TestDisplayTable" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" columnReordering="NO" columnSelection="YES" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" id="Ax3-6e-6Gq" userLabel="Test Steps Display">
                                             <rect key="frame" x="0.0" y="0.0" width="447" height="222"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
@@ -2453,8 +2453,8 @@
                                                 </tableColumn>
                                             </tableColumns>
                                             <connections>
-                                                <outlet property="dataSource" destination="XfG-lQ-9wD" id="0GB-qd-loa"/>
-                                                <outlet property="delegate" destination="XfG-lQ-9wD" id="Bci-tp-vkn"/>
+                                                <outlet property="dataSource" destination="M7Q-AE-xBO" id="jEU-2o-Q2t"/>
+                                                <outlet property="delegate" destination="M7Q-AE-xBO" id="aPz-LA-JIb"/>
                                             </connections>
                                         </tableView>
                                     </subviews>
@@ -2545,6 +2545,12 @@
                             </button>
                         </subviews>
                     </view>
+                    <connections>
+                        <outlet property="testStepsTable" destination="Ax3-6e-6Gq" id="Mcw-hf-8Sz"/>
+                        <outlet property="testsFailedDisplay" destination="XWG-1k-pNQ" id="UPf-t0-Lxv"/>
+                        <outlet property="testsPassedDisplay" destination="8O2-Ls-qRN" id="wdI-Ty-eki"/>
+                        <outlet property="testsProblemedDisplay" destination="b5Q-9X-2ZU" id="Lwx-Wb-cln"/>
+                    </connections>
                 </viewController>
                 <customObject id="rXG-If-hrg" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
