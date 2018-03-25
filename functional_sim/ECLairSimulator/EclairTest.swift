@@ -46,6 +46,14 @@ extension String {
     func binaryToInt() -> Int {
         return Int(strtoul(self, nil, 2))
     }
+    
+    func decimalToInt() -> Int {
+        var intBuf: Int = 0
+        
+        let scanner = Scanner(string: self)
+        scanner.scanInt(&intBuf)
+        return intBuf
+    }
 }
 
 enum TestRegister {
@@ -116,9 +124,8 @@ class EclairTest {
                     // the tests check that some things are 'x' in verilog, we don't have the concept of 'x' so make sure they're zero
                     testData = testDataRaw.replacingOccurrences(of: "x", with: "0").replacingOccurrences(of: "_", with: "").binaryToInt()
                 } else {
-                    // TODO: this should be reported as a test problem
-                    testData = 0xDECAF000
-                    print("Test data is in unknown format!")
+                    // TODO: should make sure this is really a decimal number
+                    testData = testDataRaw.decimalToInt()
                 }
                 
                 var testRegister: TestRegister
@@ -146,7 +153,8 @@ class EclairTest {
                         testRegister = .Flags
                         print("Skipping unknown test register '" + testRegisterRaw + "'")
                 }
-                self.testSteps[addr].append(TestStep.init(register: testRegister, data: testData))
+                // TODO: addr-1 may not be right in all cases
+                self.testSteps[addr-1].append(TestStep.init(register: testRegister, data: testData))
             }
         }
     }
@@ -167,6 +175,8 @@ class EclairTest {
                     actualData = machine.c
                 case .D:
                     actualData = machine.d
+                case .PC:
+                    actualData = machine.pc
                 default:
                     // TODO: real error
                     actualData = 0xDECAF000

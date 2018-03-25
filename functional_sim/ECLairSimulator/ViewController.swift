@@ -118,6 +118,7 @@ class ViewController: NSViewController {
     @IBOutlet weak var flagsMDisplay: NSButton!
     @IBOutlet weak var flagsIEDisplay: NSButton!
 
+    var testCase: EclairTest?
     
     func displayOpenDialog(_ fileType: String, allowedExtensions: [String] = ["rom"]) -> URL? {
         let dialog = NSOpenPanel();
@@ -157,8 +158,8 @@ class ViewController: NSViewController {
                 memoryDisplayTable.reloadData()
                 log("Binary ROM loaded.")
             } else {
-                let testCase = EclairTest(try String(contentsOf: romURL))
-                machine.loadROM(romContents: testCase.romContents)
+                testCase = EclairTest(try String(contentsOf: romURL))
+                machine.loadROM(romContents: testCase!.romContents)
                 memoryDisplayTable.reloadData()
                 log("Test ROM loaded.")
             }
@@ -210,6 +211,17 @@ class ViewController: NSViewController {
             haltProcessor()
         }
         updateUI()
+        if(testCase != nil && machine.at_fetch) {
+            let testResults = testCase!.runTests(machine: machine)
+            print(testResults)
+            testResults.forEach { testResult in
+                if(testResult.testOK) {
+                    log("Tested " + String(describing: testResult.register) + "=" + String(format: "0x%X", testResult.expectedData) + ", result was OK")
+                } else {
+                    log("Tested " + String(describing: testResult.register) + "=" + String(format: "0x%X", testResult.expectedData) + ", result was FAIL (actual value: " + String(format: "0x%X", testResult.actualData) + ")")
+                }
+            }
+        }
         if(machine.is_halted) {
             log("Processor halted by HALT instruction.")
             haltProcessor()
