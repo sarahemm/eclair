@@ -41,6 +41,11 @@ struct MachineStatus {
         z = false
         co = false
     }
+    
+    mutating func reset() {
+        z = false
+        co = false
+    }
 }
 
 struct MachineFlags {
@@ -49,6 +54,12 @@ struct MachineFlags {
     var ie: Bool
     
     init() {
+        pe = false
+        m = false
+        ie = false
+    }
+    
+    mutating func reset() {
         pe = false
         m = false
         ie = false
@@ -169,6 +180,8 @@ class Machine {
         x       = 0x0000
         y       = 0x0000
         ptb     = 0x00
+        status.reset()
+        flags.reset()
     }
     
     func loadROM(romContents: Array<Int>) {
