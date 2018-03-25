@@ -201,7 +201,13 @@ class ViewController: NSViewController {
     }
     
     func doSingleMicrocodeStep() {
+        var shouldRunTests: Bool = false
+        
         do {
+            if(machine.at_fetch) {
+                // we're about to fetch the next instruction, we should run tests after we do that
+                shouldRunTests = true
+            }
             try machine.singleStep()
         } catch(Memory.MemoryError.readFromUninitialized) {
             log("Processor halted due to read from uninitialized memory location.")
@@ -211,7 +217,7 @@ class ViewController: NSViewController {
             haltProcessor()
         }
         updateUI()
-        if(testCase != nil && machine.at_fetch) {
+        if(testCase != nil && shouldRunTests) {
             let testResults = testCase!.runTests(machine: machine)
             print(testResults)
             testResults.forEach { testResult in

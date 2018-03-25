@@ -100,6 +100,8 @@ class EclairTest {
     
     init(_ testText: String) {
         var addr: Int = 0
+        var testAddr: Int = 0
+        
         // TODO: we can only handle 4k programs right now, I can't make dynamic arrays work though so this will do for now
         romContents = Array(repeating: 0, count: 4096)
         // TODO: same here, we can only do 16 tests per step currently
@@ -107,12 +109,21 @@ class EclairTest {
         
         testText.enumerateLines { testLine, _ in
             if(testLine.hasPrefix("@")) {
-                let newAddr = testLine.capturedGroups("@([0-9A-Za-z]+)")[0].hexToInt()
-                addr = newAddr
+                if(testLine.capturedGroups("@([0-9A-Za-z]+)\\s+//\\s+pc:\\s+([0-9A-Za-z]+)").count == 2) {
+                    // it's a seek where the virtual address != the physical address
+                    addr = testLine.capturedGroups("@([0-9A-Za-z]+)\\s+//\\s+pc:\\s+([0-9A-Za-z]+)")[0].hexToInt()
+                    testAddr = testLine.capturedGroups("@([0-9A-Za-z]+)\\s+//\\s+pc:\\s+([0-9A-Za-z]+)")[1].hexToInt()
+                } else {
+                    // it's a seek where virtual address == physical address
+                    let newAddr = testLine.capturedGroups("@([0-9A-Za-z]+)")[0].hexToInt()
+                    addr = newAddr
+                    testAddr = newAddr
+                }
             } else if(testLine.hasPrefix("0") || testLine.hasPrefix("1")) {
                 let data = testLine.capturedGroups("([01]+)")[0].binaryToInt()
                 self.romContents[addr] = data
                 addr += 1
+                testAddr += 1
             } else if(testLine.hasPrefix("// expect: ")) {
                 let testInfo = testLine.capturedGroups("//\\s+expect:\\s+([a-z_]+)=(.*)")
                 let testRegisterRaw = testInfo[0]
@@ -154,7 +165,7 @@ class EclairTest {
                         print("Skipping unknown test register '" + testRegisterRaw + "'")
                 }
                 // TODO: addr-1 may not be right in all cases
-                self.testSteps[addr-1].append(TestStep.init(register: testRegister, data: testData))
+                self.testSteps[testAddr-1].append(TestStep.init(register: testRegister, data: testData))
             }
         }
     }
@@ -177,6 +188,10 @@ class EclairTest {
                     actualData = machine.d
                 case .PC:
                     actualData = machine.pc
+                case .AddressBus:
+                    actualData = machine.bus_addr
+                case .DataBus:
+                    actualData = machine.bus_data
                 default:
                     // TODO: real error
                     actualData = 0xDECAF000
