@@ -119,7 +119,7 @@ class ViewController: NSViewController {
     @IBOutlet weak var flagsIEDisplay: NSButton!
 
     
-    func displayOpenDialog(_ fileType: String) -> URL? {
+    func displayOpenDialog(_ fileType: String, allowedExtensions: [String] = ["rom"]) -> URL? {
         let dialog = NSOpenPanel();
         
         dialog.title                   = "Choose a " + fileType + " file";
@@ -128,7 +128,7 @@ class ViewController: NSViewController {
         dialog.canChooseDirectories    = false;
         dialog.canCreateDirectories    = false;
         dialog.allowsMultipleSelection = false;
-        dialog.allowedFileTypes        = ["rom"];
+        dialog.allowedFileTypes        = allowedExtensions;
         
         if (dialog.runModal() == NSModalResponseOK) {
             let result = dialog.url // Pathname of the file
@@ -142,20 +142,26 @@ class ViewController: NSViewController {
     }
     
     @IBAction func openButtonClicked(_ sender: Any) {
-        //guard let romURL = URL(string: "file:///Users/sarahemm/eclair/sim/test/add16.ab.test.rom") else {
-        guard let romURL = displayOpenDialog("ROM") else {
+        guard let romURL = displayOpenDialog("ROM", allowedExtensions: ["rom", "test"]) else {
             print("Invalid URL")
             return
         }
         do {
-            let romContents = try Data(contentsOf: romURL)
-            var romByteArray: [Int] = []
-            romContents.forEach { byte in
-                romByteArray.append(Int(byte))
+            if(romURL.absoluteString.hasSuffix("rom")) {
+                let romContents = try Data(contentsOf: romURL)
+                var romByteArray: [Int] = []
+                romContents.forEach { byte in
+                    romByteArray.append(Int(byte))
+                }
+                machine.loadROM(romContents: romByteArray)
+                memoryDisplayTable.reloadData()
+                log("Binary ROM loaded.")
+            } else {
+                let testCase = EclairTest(try String(contentsOf: romURL))
+                machine.loadROM(romContents: testCase.romContents)
+                memoryDisplayTable.reloadData()
+                log("Test ROM loaded.")
             }
-            machine.loadROM(romContents: romByteArray)
-            memoryDisplayTable.reloadData()
-            log("ROM loaded.")
         } catch {
             log("Unable to load ROM")
             return
