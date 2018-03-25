@@ -40,7 +40,6 @@ extension String {
         
         let scanner = Scanner(string: self)
         scanner.scanHexInt32(&uintBuf)
-
         return Int(uintBuf)
     }
     
@@ -49,14 +48,54 @@ extension String {
     }
 }
 
+enum TestRegister {
+    case A
+    case B
+    case C
+    case D
+    case SP
+    case PC
+    case PTB
+    case AddressBus
+    case DataBus
+    case Status
+    case Flags
+}
+
+struct TestStep {
+    var testRegister: TestRegister
+    var testData: Int
+    
+    init(register: TestRegister, data: Int) {
+        testRegister = register
+        testData = data
+    }
+}
+
+struct TestResult {
+    var register: TestRegister
+    var expectedData: Int
+    var actualData: Int
+    var testOK: Bool
+
+    init(register registerParam: TestRegister, expectedData expectedDataParam: Int, actualData actualDataParam: Int, testOK testOKParam: Bool) {
+        register = registerParam
+        expectedData = expectedDataParam
+        actualData = actualDataParam
+        testOK = testOKParam
+    }
+}
 
 class EclairTest {
     var romContents: [Int]
+    var testSteps: [[TestStep]]
     
     init(_ testText: String) {
         var addr: Int = 0
         // TODO: we can only handle 4k programs right now, I can't make dynamic arrays work though so this will do for now
         romContents = Array(repeating: 0, count: 4096)
+        // TODO: same here, we can only do 16 tests per step currently
+        testSteps = Array(repeating: Array(), count: 4096)
         
         testText.enumerateLines { testLine, _ in
             if(testLine.hasPrefix("@")) {
@@ -66,7 +105,75 @@ class EclairTest {
                 let data = testLine.capturedGroups("([01]+)")[0].binaryToInt()
                 self.romContents[addr] = data
                 addr += 1
+            } else if(testLine.hasPrefix("// expect: ")) {
+                let testInfo = testLine.capturedGroups("//\\s+expect:\\s+([a-z_]+)=(.*)")
+                let testRegisterRaw = testInfo[0]
+                let testDataRaw = testInfo[1]
+                var testData: Int
+                if(testDataRaw.hasPrefix("0x")) {
+                    testData = testDataRaw.hexToInt()
+                } else if(testDataRaw.hasPrefix("0") || testDataRaw.hasPrefix("1") || testDataRaw.hasPrefix("x")) {
+                    // the tests check that some things are 'x' in verilog, we don't have the concept of 'x' so make sure they're zero
+                    testData = testDataRaw.replacingOccurrences(of: "x", with: "0").replacingOccurrences(of: "_", with: "").binaryToInt()
+                } else {
+                    // TODO: this should be reported as a test problem
+                    testData = 0xDECAF000
+                    print("Test data is in unknown format!")
+                }
+                
+                var testRegister: TestRegister
+                switch(testRegisterRaw) {
+                    case "reg_a":
+                        testRegister = .A
+                    case "reg_b":
+                        testRegister = .B
+                    case "reg_c":
+                        testRegister = .C
+                    case "reg_d":
+                        testRegister = .D
+                    case "reg_sp":
+                        testRegister = .SP
+                    case "ptb":
+                        testRegister = .PTB
+                    case "pc":
+                        testRegister = .PC
+                    case "bus_addr":
+                        testRegister = .AddressBus
+                    case "bus_data":
+                        testRegister = .DataBus
+                    default:
+                        // TODO: this should be reported as a test problem
+                        testRegister = .Flags
+                        print("Skipping unknown test register '" + testRegisterRaw + "'")
+                }
+                self.testSteps[addr].append(TestStep.init(register: testRegister, data: testData))
             }
         }
+    }
+    
+    func runTests(machine: Machine) -> [TestResult] {
+        var testResults: [TestResult]
+        testResults = Array()
+        
+        testSteps[machine.pc].forEach { testStep in
+            var actualData: Int
+            
+            switch(testStep.testRegister) {
+                case .A:
+                    actualData = machine.a
+                case .B:
+                    actualData = machine.b
+                case .C:
+                    actualData = machine.c
+                case .D:
+                    actualData = machine.d
+                default:
+                    // TODO: real error
+                    actualData = 0xDECAF000
+            }
+            testResults.append(TestResult.init(register: testStep.testRegister, expectedData: testStep.testData, actualData: actualData, testOK: testStep.testData == actualData))
+        }
+        
+        return testResults
     }
 }
