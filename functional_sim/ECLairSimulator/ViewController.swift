@@ -161,6 +161,8 @@ class ViewController: NSViewController {
                 testCase = EclairTest(try String(contentsOf: romURL))
                 machine.loadROM(romContents: testCase!.romContents)
                 memoryDisplayTable.reloadData()
+                let nc = NotificationCenter.default
+                nc.post(name: Notification.Name(rawValue: "TestsLoaded"), object: testCase, userInfo: nil)
                 log("Test ROM loaded.")
             }
         } catch {
@@ -223,8 +225,12 @@ class ViewController: NSViewController {
             testResults.forEach { testResult in
                 if(testResult.testOK) {
                     log("Tested " + String(describing: testResult.register) + "=" + String(format: "0x%X", testResult.expectedData) + ", result was OK")
+                    let nc = NotificationCenter.default
+                    nc.post(name:Notification.Name(rawValue: "TestPassed"), object: nil, userInfo: [:])
                 } else {
                     log("Tested " + String(describing: testResult.register) + "=" + String(format: "0x%X", testResult.expectedData) + ", result was FAIL (actual value: " + String(format: "0x%X", testResult.actualData) + ")")
+                    let nc = NotificationCenter.default
+                    nc.post(name:Notification.Name(rawValue: "TestFailed"), object: nil, userInfo: [:])
                 }
             }
         }
