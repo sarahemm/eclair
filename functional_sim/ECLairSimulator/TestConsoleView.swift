@@ -29,18 +29,95 @@ class TestConsoleViewController: NSViewController {
     }
 
     var addr: Int = 0
+    var testSteps: [TestStep]
+    var testResults: [TestResult?]
+    
+    required init?(coder decoder: NSCoder) {
+        testSteps = Array()
+        // TODO: this should be dynamic, currently only support up to 128 tests
+        testResults = Array()
+        super.init(coder: decoder)        
+    }
+    
     func testsLoaded(notification: Notification) {
-        let testCase: EclairTest = notification.object! as! EclairTest
+        let tests: EclairTest = notification.object! as! EclairTest
         // TODO: actually do something with the test cases to build the table
+        tests.testSteps.forEach { testCases in
+            testCases.forEach { testCase in
+                testSteps.append(TestStep(id: testCase.testStepId, address: testCase.testAddress, register: testCase.testRegister, data: testCase.testData))
+            }
+        }
+        testStepsTable.reloadData()
     }
     
     func testPassed(notification: Notification) {
+        let result: TestResult = notification.object! as! TestResult
+
         testsPassed += 1
         testsPassedDisplay.stringValue = String(testsPassed)
+        while testResults.count <= result.testStepId {
+            testResults.append(nil)
+        }
+        testResults.insert(result, at: result.testStepId)
+        testStepsTable.reloadData()
     }
     
     func testFailed(notification: Notification) {
+        let result: TestResult = notification.object! as! TestResult
+
         testsFailed += 1
         testsFailedDisplay.stringValue = String(testsFailed)
+        while testResults.count <= result.testStepId {
+            testResults.append(nil)
+        }
+        testResults.insert(result, at: result.testStepId)
+        testStepsTable.reloadData()
+    }
+}
+
+extension TestConsoleViewController: NSTableViewDataSource {
+    func numberOfRows(in tableView: NSTableView) -> Int {
+        return testSteps.count
+    }
+}
+
+extension TestConsoleViewController: NSTableViewDelegate {
+    func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
+        var text: String = ""
+        var cellIdentifier: String = ""
+        
+        if(tableColumn == tableView.tableColumns[0]) {
+            text = String(testSteps[row].testStepId)
+            cellIdentifier = "TestIdCell"
+        } else if(tableColumn == tableView.tableColumns[1]) {
+            text = String(format: "%03X ", testSteps[row].testAddress)
+            cellIdentifier = "AddressCell"
+        } else if(tableColumn == tableView.tableColumns[2]) {
+            text = String(describing: testSteps[row].testRegister)
+            cellIdentifier = "TestRegisterCell"
+        } else if(tableColumn == tableView.tableColumns[3]) {
+            text = String(format: "%X ", testSteps[row].testData)
+            cellIdentifier = "ExpectedValueCell"
+        } else if(tableColumn == tableView.tableColumns[4]) {
+            if(row < testResults.count && testResults[row] != nil) {
+                text = String(format: "%X ", testResults[row]!.actualData)
+                cellIdentifier = "ActualValueCell"
+            }
+        } else if(tableColumn == tableView.tableColumns[5]) {
+            if(row < testResults.count && testResults[row] != nil) {
+                if(testResults[row]!.testOK) {
+                    text = "Pass"
+                } else {
+                    text = "Fail"
+                }
+                cellIdentifier = "ResultCell"
+            }
+        }
+        
+        if let cell = tableView.make(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView {
+            cell.textField?.stringValue = text
+            return cell
+        }
+        return nil
     }
 }

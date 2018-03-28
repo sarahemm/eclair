@@ -71,22 +71,28 @@ enum TestRegister {
 }
 
 struct TestStep {
+    var testStepId: Int
+    var testAddress: Int
     var testRegister: TestRegister
     var testData: Int
     
-    init(register: TestRegister, data: Int) {
+    init(id: Int, address: Int, register: TestRegister, data: Int) {
+        testStepId = id
+        testAddress = address
         testRegister = register
         testData = data
     }
 }
 
 struct TestResult {
+    var testStepId: Int
     var register: TestRegister
     var expectedData: Int
     var actualData: Int
     var testOK: Bool
 
-    init(register registerParam: TestRegister, expectedData expectedDataParam: Int, actualData actualDataParam: Int, testOK testOKParam: Bool) {
+    init(id: Int, register registerParam: TestRegister, expectedData expectedDataParam: Int, actualData actualDataParam: Int, testOK testOKParam: Bool) {
+        testStepId = id
         register = registerParam
         expectedData = expectedDataParam
         actualData = actualDataParam
@@ -101,6 +107,7 @@ class EclairTest {
     init(_ testText: String) {
         var addr: Int = 0
         var testAddr: Int = 0
+        var testStepId: Int = 0
         
         // TODO: we can only handle 4k programs right now, I can't make dynamic arrays work though so this will do for now
         romContents = Array(repeating: 0, count: 4096)
@@ -138,7 +145,6 @@ class EclairTest {
                     // TODO: should make sure this is really a decimal number
                     testData = testDataRaw.decimalToInt()
                 }
-                
                 var testRegister: TestRegister
                 switch(testRegisterRaw) {
                     case "reg_a":
@@ -165,7 +171,8 @@ class EclairTest {
                         print("Skipping unknown test register '" + testRegisterRaw + "'")
                 }
                 // TODO: addr-1 may not be right in all cases
-                self.testSteps[testAddr-1].append(TestStep.init(register: testRegister, data: testData))
+                self.testSteps[testAddr-1].append(TestStep.init(id: testStepId, address: testAddr-1, register: testRegister, data: testData))
+                testStepId += 1
             }
         }
     }
@@ -196,7 +203,7 @@ class EclairTest {
                     // TODO: real error
                     actualData = 0xDECAF000
             }
-            testResults.append(TestResult.init(register: testStep.testRegister, expectedData: testStep.testData, actualData: actualData, testOK: testStep.testData == actualData))
+            testResults.append(TestResult.init(id: testStep.testStepId, register: testStep.testRegister, expectedData: testStep.testData, actualData: actualData, testOK: testStep.testData == actualData))
         }
         
         return testResults

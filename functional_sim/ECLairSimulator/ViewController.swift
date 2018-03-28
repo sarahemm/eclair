@@ -226,11 +226,11 @@ class ViewController: NSViewController {
                 if(testResult.testOK) {
                     log("Tested " + String(describing: testResult.register) + "=" + String(format: "0x%X", testResult.expectedData) + ", result was OK")
                     let nc = NotificationCenter.default
-                    nc.post(name:Notification.Name(rawValue: "TestPassed"), object: nil, userInfo: [:])
+                    nc.post(name:Notification.Name(rawValue: "TestPassed"), object: testResult, userInfo: [:])
                 } else {
                     log("Tested " + String(describing: testResult.register) + "=" + String(format: "0x%X", testResult.expectedData) + ", result was FAIL (actual value: " + String(format: "0x%X", testResult.actualData) + ")")
                     let nc = NotificationCenter.default
-                    nc.post(name:Notification.Name(rawValue: "TestFailed"), object: nil, userInfo: [:])
+                    nc.post(name:Notification.Name(rawValue: "TestFailed"), object: testResult, userInfo: [:])
                 }
             }
         }
