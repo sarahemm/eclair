@@ -19,6 +19,16 @@ class TestConsoleViewController: NSViewController {
     var testsFailed: Int = 0
     // TODO: implement test problems
     
+    var addr: Int = 0
+    var testSteps: [TestStep]
+    var testResults: [TestResult?]
+    
+    required init?(coder decoder: NSCoder) {
+        testSteps = Array()
+        testResults = Array()
+        super.init(coder: decoder)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -27,18 +37,17 @@ class TestConsoleViewController: NSViewController {
         nc.addObserver(forName:Notification.Name(rawValue: "TestPassed"), object: nil, queue: nil, using: testPassed)
         nc.addObserver(forName:Notification.Name(rawValue: "TestFailed"), object: nil, queue: nil, using: testFailed)
     }
-
-    var addr: Int = 0
-    var testSteps: [TestStep]
-    var testResults: [TestResult?]
     
-    required init?(coder decoder: NSCoder) {
-        testSteps = Array()
-        // TODO: this should be dynamic, currently only support up to 128 tests
-        testResults = Array()
-        super.init(coder: decoder)        
+    
+    @IBAction func resetTestResults(_ sender: NSButton) {
+        testsPassed = 0
+        testsFailed = 0
+        testsPassedDisplay.stringValue = String(testsPassed)
+        testsFailedDisplay.stringValue = String(testsFailed)
+        testResults.removeAll()
+        testStepsTable.reloadData()
     }
-    
+
     func testsLoaded(notification: Notification) {
         let tests: EclairTest = notification.object! as! EclairTest
         // TODO: actually do something with the test cases to build the table
