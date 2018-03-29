@@ -51,7 +51,6 @@ class TestConsoleViewController: NSViewController {
     func testsLoaded(notification: Notification) {
         testSteps.removeAll()
         let tests: EclairTest = notification.object! as! EclairTest
-        // TODO: actually do something with the test cases to build the table
         tests.testSteps.forEach { testCases in
             testCases.forEach { testCase in
                 testSteps.append(TestStep(id: testCase.testStepId, address: testCase.testAddress, register: testCase.testRegister, data: testCase.testData))
