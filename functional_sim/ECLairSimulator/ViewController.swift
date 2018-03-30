@@ -203,12 +203,10 @@ class ViewController: NSViewController {
     }
     
     func doSingleMicrocodeStep() {
-        var shouldRunTests: Bool = false
-        
         do {
-            if(machine.at_fetch) {
-                // we're about to fetch the next instruction, we should run tests after we do that
-                shouldRunTests = true
+            if(machine.at_fetch && machine.prev_pc != 0 && testCase != nil) {
+                let testAddr = machine.prev_pc
+                processTests(addr: testAddr)
             }
             try machine.singleStep()
         } catch(Memory.MemoryError.readFromUninitialized) {
@@ -218,26 +216,33 @@ class ViewController: NSViewController {
             log("Processor halted due to exception in machine.singleStep().")
             haltProcessor()
         }
+
         updateUI()
-        if(testCase != nil && shouldRunTests) {
-            let testResults = testCase!.runTests(machine: machine)
-            print(testResults)
-            testResults.forEach { testResult in
-                if(testResult.testOK) {
-                    log("Tested " + String(describing: testResult.register) + "=" + String(format: "0x%X", testResult.expectedData) + ", result was OK")
-                    let nc = NotificationCenter.default
-                    nc.post(name:Notification.Name(rawValue: "TestPassed"), object: testResult, userInfo: [:])
-                } else {
-                    log("Tested " + String(describing: testResult.register) + "=" + String(format: "0x%X", testResult.expectedData) + ", result was FAIL (actual value: " + String(format: "0x%X", testResult.actualData) + ")")
-                    let nc = NotificationCenter.default
-                    nc.post(name:Notification.Name(rawValue: "TestFailed"), object: testResult, userInfo: [:])
-                }
-            }
-        }
+
         if(machine.is_halted) {
             log("Processor halted by HALT instruction.")
             haltProcessor()
+
+            if(testCase != nil) {
+                let testAddr = machine.pc
+                processTests(addr: testAddr)
+            }
         }
+    }
+    
+    func processTests(addr: Int) {
+        let testResults = testCase!.runTests(machine: machine, testAddr: addr)
+        print(testResults)
+        testResults.forEach { testResult in
+            if(testResult.testOK) {
+                let nc = NotificationCenter.default
+                nc.post(name:Notification.Name(rawValue: "TestPassed"), object: testResult, userInfo: [:])
+            } else {
+                let nc = NotificationCenter.default
+                nc.post(name:Notification.Name(rawValue: "TestFailed"), object: testResult, userInfo: [:])
+            }
+        }
+
     }
     
     @IBAction func microcodeStepButtonClicked(_ sender: NSButton) {
