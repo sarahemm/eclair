@@ -338,7 +338,7 @@ class ViewController: NSViewController {
         pageTableDisplayTable.centreRow(row: machine.pagetable_addr, animated: true)
         
         // update the current position in the control store disassembly
-        csDisasmDisplayTable.centreRow(row: machine.cs_addr, animated: true)
+        csDisasmDisplayTable.centreRow(row: machine.cs_addr, animated: runDelay >= 0.5)
         
         // update the current position in memory
         // TODO: this should probably change the cell background color rather than using this edit hack
