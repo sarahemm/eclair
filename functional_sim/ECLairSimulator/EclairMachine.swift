@@ -90,6 +90,8 @@ class Machine {
     
     var stats: MachineStats
     
+    var prev_pc: Int    // the value of pc before the most recent change of that register
+    
     var cs_data: Int {
         return controlStore[Int(cs_addr)].raw
     }
@@ -159,6 +161,8 @@ class Machine {
         x       = 0x0000
         y       = 0x0000
         ptb     = 0x00
+        
+        prev_pc = 0x0000
         
         stats = MachineStats.init()
         status = MachineStatus.init()
@@ -370,6 +374,7 @@ class Machine {
         
         if(controlWord.incPC) {
             // Increment PC
+            prev_pc = pc
             pc += 1
         }
         if(controlWord.loadMAR) {
@@ -419,6 +424,7 @@ class Machine {
         }
         if(controlWord.loadPC) {
             // Load PC
+            prev_pc = pc
             pc = z
         }
         if(controlWord.loadX) {
