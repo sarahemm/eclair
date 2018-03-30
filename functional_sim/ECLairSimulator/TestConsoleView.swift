@@ -67,7 +67,7 @@ class TestConsoleViewController: NSViewController {
         while testResults.count <= result.testStepId {
             testResults.append(nil)
         }
-        testResults.insert(result, at: result.testStepId)
+        testResults[result.testStepId] = result
         testStepsTable.reloadData()
     }
     
@@ -79,7 +79,7 @@ class TestConsoleViewController: NSViewController {
         while testResults.count <= result.testStepId {
             testResults.append(nil)
         }
-        testResults.insert(result, at: result.testStepId)
+        testResults[result.testStepId] = result
         testStepsTable.reloadData()
     }
 }

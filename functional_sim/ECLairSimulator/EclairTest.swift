@@ -177,13 +177,14 @@ class EclairTest {
         }
     }
     
-    func runTests(machine: Machine) -> [TestResult] {
+    func runTests(machine: Machine, testAddr: Int) -> [TestResult] {
         var testResults: [TestResult]
         testResults = Array()
         
-        testSteps[machine.pc].forEach { testStep in
+        print("Running tests for " + String(testAddr))
+        testSteps[testAddr].forEach { testStep in
             var actualData: Int
-            
+            print(" Test " + String(testStep.testStepId))
             switch(testStep.testRegister) {
                 case .A:
                     actualData = machine.a
