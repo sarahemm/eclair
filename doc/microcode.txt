@@ -47,6 +47,7 @@ field op_16bit      45    1
 field branch_cond   46    3
 field xy_imm_lsb    49    2
 field xy_nibble_sel 51    1
+field reg_byte      52    1
 
 # enums - names for values that go into bit positions
 enum  src_mar     z       0
@@ -82,6 +83,8 @@ enum  branch_cond z       1
 enum  branch_cond co      2
 enum  mdr_byte    low     0
 enum  mdr_byte    high    1
+enum  reg_byte    low     0
+enum  reg_byte    high    1
 enum  carry_in    0       0
 enum  carry_in    1       1
 enum  xy_nibble_sel imm   0
@@ -107,6 +110,11 @@ location    ldi8.bl     73    # load immediate 8 bits into low byte of b
 location    ldi8.cl     137   # load immediate 8 bits into low byte of c
 location    ldi8.dl     201   # load immediate 8 bits into low byte of d
 location    ldi8.?l     204   # load immediate 8 bits into register from IR
+location    ldi8.ah     11    # load immediate 8 bits into high byte of a
+location    ldi8.bh     75    # load immediate 8 bits into high byte of b
+location    ldi8.ch     139   # load immediate 8 bits into high byte of c
+location    ldi8.dh     203   # load immediate 8 bits into high byte of d
+location    ldi8.?h     205   # load immediate 8 bits into register from IR
 location    ldi16.a     10    # load immediate 16 bits into a
 location    ldi16.b     74    # load immediate 16 bits into b
 location    ldi16.c     138   # load immediate 16 bits into c
@@ -114,7 +122,7 @@ location    ldi16.d     202   # load immediate 16 bits into d
 location    ldi16.sp    39    # load immediate 16 bits into sp
 location    ldi16.?     207   # load immediate 16 bits into register from IR
 location    ldi8.ptb    65    # load immediate 8 bits into PTB register
-location    add16.ab    11    # add a and b registers, result goes into a
+location    add16.ab    66    # add a and b registers, result goes into a
 location    jmp         14    # unconditional immediate jump
 location    wrpte       18    # write page table entry using data in a and address in d
 location    ldi8.flags  21    # load immediate 8 bits into system flags
@@ -155,6 +163,12 @@ instruction ldi8.bl     next_addr(ldi8.?l)
 instruction ldi8.cl     next_addr(ldi8.?l)
 instruction ldi8.dl     next_addr(ldi8.?l)
 
+# load immediate 8 bits into high byte of supplied register
+instruction ldi8.ah     next_addr(ldi8.?h)
+instruction ldi8.bh     next_addr(ldi8.?h)
+instruction ldi8.ch     next_addr(ldi8.?h)
+instruction ldi8.dh     next_addr(ldi8.?h)
+
 # load immediate 16 bits into supplied register
 instruction ldi16.a     next_addr(ldi16.?)
 instruction ldi16.b     next_addr(ldi16.?)
@@ -175,7 +189,10 @@ instruction ldi16.sp                  src_mar(pc)   src_mdr(data)   src_xy(mdr) 
 instruction ldi16.sp    next_addr(fetch)
 
 # load immediate 8 bits into low byte of register selected by IR[6..7]
-instruction ldi8.?l     inc_pc        src_mar(pc)     load_mar        mem_read    src_mdr(data)   mdr_byte(low)   load_mdr      src_xy(mdr)   load_x    load_reg(via_ir)    load_status next_addr(fetch)
+instruction ldi8.?l     inc_pc        src_mar(pc)     load_mar        mem_read    src_mdr(data)   mdr_byte(low)   load_mdr      src_xy(mdr)   reg_byte(low) load_x    load_reg(via_ir)    load_status next_addr(fetch)
+
+# load immediate 8 bits into high byte of register selected by IR[6..7]
+instruction ldi8.?h     inc_pc        src_mar(pc)     load_mar        mem_read    src_mdr(data)   mdr_byte(high)   load_mdr      src_xy(mdr)   reg_byte(high) load_x    load_reg(via_ir)    load_status next_addr(fetch)
 
 # load immediate 8 bits into register selected by IR[6..7]
 instruction ldi16.?     inc_pc        src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(low)     load_mdr

@@ -45,6 +45,7 @@ module ECLair(int);
   wire          mux_mar_src;      // 0 = MAR sources from Z, 1 = MAR sources from PC
   wire          mux_mdr_src;      // 0 = MDR sources from Z, 1 = MDR sources from data bus
   wire          mdr_byte;         // which byte of MDR to use for 8-bit ops (0=low byte, 1=high byte)
+  wire          reg_byte;         // which byte of registers to use for 8-bit ops (0=low byte, 1=high byte)
   wire  [15:0]  pc;               // program counter
   wire  [2:0]   load_reg;         // load general register
   wire  [7:0]   reg_load;         // load signals (latch clocks) for registers
@@ -138,14 +139,14 @@ module ECLair(int);
   main_ram        #(.TYPE("Main"))              ram_main(._cs(1'b0), ._oe(~(~ram_write & ~addr_ram)), ._w(~(ram_write & ~addr_ram)), .addr(bus_addr[19:0]), .data_in(reg_mdr_8bit), .data_out(bus_data));
   main_eprom      #(.ROM_FILE("sysrom.bin"))    rom_boot(1'b0, addr_rom, bus_addr[19:0], bus_data);
   counter         #(.WIDTH(16))                 ctr_pc(.clk(inc_pc), .ce(1'b1), .reset(~_reset), .out(pc), .load(really_load_pc), .preset(bus_z));
-  latch           #(.WIDTH(8))                  lat_reg_a_h(.clk(reg_a_load | ~op_16bit), .reset(1'b0), .in(bus_z[15:8]), .out(reg_a[15:8]));
-  latch           #(.WIDTH(8))                  lat_reg_b_h(.clk(reg_b_load | ~op_16bit), .reset(1'b0), .in(bus_z[15:8]), .out(reg_b[15:8]));
-  latch           #(.WIDTH(8))                  lat_reg_c_h(.clk(reg_c_load | ~op_16bit), .reset(1'b0), .in(bus_z[15:8]), .out(reg_c[15:8]));
-  latch           #(.WIDTH(8))                  lat_reg_d_h(.clk(reg_d_load | ~op_16bit), .reset(1'b0), .in(bus_z[15:8]), .out(reg_d[15:8]));
-  latch           #(.WIDTH(8))                  lat_reg_a_l(.clk(reg_a_load), .reset(1'b0), .in(bus_z[7:0]), .out(reg_a[7:0]));
-  latch           #(.WIDTH(8))                  lat_reg_b_l(.clk(reg_b_load), .reset(1'b0), .in(bus_z[7:0]), .out(reg_b[7:0]));
-  latch           #(.WIDTH(8))                  lat_reg_c_l(.clk(reg_c_load), .reset(1'b0), .in(bus_z[7:0]), .out(reg_c[7:0]));
-  latch           #(.WIDTH(8))                  lat_reg_d_l(.clk(reg_d_load), .reset(1'b0), .in(bus_z[7:0]), .out(reg_d[7:0]));
+  latch           #(.WIDTH(8))                  lat_reg_a_h(.clk(reg_a_load | ~op_16bit & ~reg_byte), .reset(1'b0), .in(bus_z[15:8]), .out(reg_a[15:8]));
+  latch           #(.WIDTH(8))                  lat_reg_b_h(.clk(reg_b_load | ~op_16bit & ~reg_byte), .reset(1'b0), .in(bus_z[15:8]), .out(reg_b[15:8]));
+  latch           #(.WIDTH(8))                  lat_reg_c_h(.clk(reg_c_load | ~op_16bit & ~reg_byte), .reset(1'b0), .in(bus_z[15:8]), .out(reg_c[15:8]));
+  latch           #(.WIDTH(8))                  lat_reg_d_h(.clk(reg_d_load | ~op_16bit & ~reg_byte), .reset(1'b0), .in(bus_z[15:8]), .out(reg_d[15:8]));
+  latch           #(.WIDTH(8))                  lat_reg_a_l(.clk(reg_a_load | ~op_16bit & reg_byte), .reset(1'b0), .in(bus_z[7:0]), .out(reg_a[7:0]));
+  latch           #(.WIDTH(8))                  lat_reg_b_l(.clk(reg_b_load | ~op_16bit & reg_byte), .reset(1'b0), .in(bus_z[7:0]), .out(reg_b[7:0]));
+  latch           #(.WIDTH(8))                  lat_reg_c_l(.clk(reg_c_load | ~op_16bit & reg_byte), .reset(1'b0), .in(bus_z[7:0]), .out(reg_c[7:0]));
+  latch           #(.WIDTH(8))                  lat_reg_d_l(.clk(reg_d_load | ~op_16bit & reg_byte), .reset(1'b0), .in(bus_z[7:0]), .out(reg_d[7:0]));
   latch           #(.WIDTH(16))                 lat_reg_sp(.clk(reg_sp_load), .reset(1'b0), .in(bus_z), .out(reg_sp));
   latch           #(.WIDTH(16))                 lat_reg_x(.clk(reg_x_load), .reset(1'b0), .in(lat_xy), .out(reg_x));
   latch           #(.WIDTH(16))                 lat_reg_y(.clk(reg_y_load), .reset(1'b0), .in(lat_xy), .out(reg_y));
@@ -219,6 +220,7 @@ module ECLair(int);
   assign branch_cond = cs_data[48:46];
   assign xy_imm_lsb = cs_data[50:49];
   assign reg_xy_nibble_sel = cs_data[51];
+  assign reg_byte = cs_data[52];
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
