@@ -80,6 +80,28 @@ module ECLair(int);
   wire  [15:0]  lat_mdr;
   wire  [15:0]  lat_xy;
   wire  [15:0]  bus_z;
+
+  // outputs from the XY driver latches
+  wire  [15:0]  reg_nib_xy;
+  wire  [15:0]  reg_a_xy;
+  wire  [15:0]  reg_b_xy;
+  wire  [15:0]  reg_c_xy;
+  wire  [15:0]  reg_d_xy;
+  wire  [15:0]  reg_sp_xy;
+  wire  [15:0]  reg_mar_xy;
+  wire  [15:0]  reg_mdr_xy;
+
+  // XY driver latch resets
+  wire  [7:0]   xy_reset;
+  wire          xy_reset_nib;
+  wire          xy_reset_a;
+  wire          xy_reset_b;
+  wire          xy_reset_c;
+  wire          xy_reset_d;
+  wire          xy_reset_sp;
+  wire          xy_reset_mar;
+  wire          xy_reset_mdr;
+
   wire          alu_cout8;
   wire          alu_cout16;
   wire  [11:0]  pagetable_addr; // currently selected address in the pagetable
@@ -157,8 +179,6 @@ module ECLair(int);
   latch           #(.WIDTH(8))                  lat_reg_mdr_h(.clk(~(reg_mdr_load & mdr_byte)), .reset(1'b0), .in(lat_mdr[15:8]), .out(reg_mdr[15:8]));
   demux_38                                      dmx_reg_load(load_reg, reg_load);
   demux_38                                      dmx_reg_load_ir(reg_x_load_ir_src, reg_load_via_ir);
-  mux_88                                        mux_xy_src_l(.sel(reg_xy_src), .a(xy_nibble_padded), .b(reg_a[7:0]), .c(reg_b[7:0]), .d(reg_c[7:0]), .e(reg_d[7:0]), .f(reg_sp[7:0]), .g(reg_mar[7:0]), .h(reg_mdr[7:0]),  .y(lat_xy[7:0]));
-  mux_88                                        mux_xy_src_h(.sel(reg_xy_src), .a(8'b00000000), .b(reg_a[15:8]), .c(reg_b[15:8]), .d(reg_c[15:8]), .e(reg_d[15:8]), .f(reg_sp[15:8]), .g(reg_mar[15:8]), .h(reg_mdr[15:8]), .y(lat_xy[15:8]));
   mux_2x          #(.WIDTH(4))                  mux_xy_nibble(.sel(reg_xy_nibble_sel), .a(xy_imm_val), .b(intvect), .y(xy_nibble));
   mux_2x                                        mux_mar_l(.sel(mux_mar_src), .a(bus_z[7:0]),  .b(pc[7:0]),  .y(lat_mar[7:0]));
   mux_2x                                        mux_mar_h(.sel(mux_mar_src), .a(bus_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
@@ -185,6 +205,16 @@ module ECLair(int);
   latch         #(.WIDTH(1))                    lat_int_5(.clk(int[5]), .reset(intclr[5]), .in(1'b1), .out(intflg[5]));
   latch         #(.WIDTH(1))                    lat_int_6(.clk(int[6]), .reset(intclr[6]), .in(1'b1), .out(intflg[6]));
   latch         #(.WIDTH(1))                    lat_int_7(.clk(int[7]), .reset(intclr[7]), .in(1'b1), .out(intflg[7]));
+
+  latch         #(.WIDTH(16))                   lat_nib_xy(.clk(1'b0), .reset(xy_reset_nib), .in(xy_nibble), .out(reg_nib_xy));
+  latch         #(.WIDTH(16))                   lat_a_xy(.clk(1'b0), .reset(xy_reset_a), .in(reg_a), .out(reg_a_xy));
+  latch         #(.WIDTH(16))                   lat_b_xy(.clk(1'b0), .reset(xy_reset_b), .in(reg_b), .out(reg_b_xy));
+  latch         #(.WIDTH(16))                   lat_c_xy(.clk(1'b0), .reset(xy_reset_c), .in(reg_c), .out(reg_c_xy));
+  latch         #(.WIDTH(16))                   lat_d_xy(.clk(1'b0), .reset(xy_reset_d), .in(reg_d), .out(reg_d_xy));
+  latch         #(.WIDTH(16))                   lat_sp_xy(.clk(1'b0), .reset(xy_reset_sp), .in(reg_sp), .out(reg_sp_xy));
+  latch         #(.WIDTH(16))                   lat_mar_xy(.clk(1'b0), .reset(xy_reset_mar), .in(reg_mar), .out(reg_mar_xy));
+  latch         #(.WIDTH(16))                   lat_mdr_xy(.clk(1'b0), .reset(xy_reset_mdr), .in(reg_mdr), .out(reg_mdr_xy));
+  decoder_8                                     dcd_xy(.in(reg_xy_src), .out(xy_reset), .enable(2'b00));
   
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
@@ -272,6 +302,18 @@ module ECLair(int);
   assign intclr[6] = ~_por_reset;
   assign intclr[7] = ~_por_reset;
 
+  // driver reset signals that control which register is driving XY
+  assign xy_reset_a = xy_reset[1];
+  assign xy_reset_b = xy_reset[2];
+  assign xy_reset_c = xy_reset[3];
+  assign xy_reset_d = xy_reset[4];
+  assign xy_reset_sp = xy_reset[5];
+  assign xy_reset_mar = xy_reset[6];
+  assign xy_reset_mdr = xy_reset[7];
+  
+  // this is a wired-OR in the actual hardware
+  assign lat_xy = reg_nib_xy | reg_a_xy | reg_b_xy | reg_c_xy | reg_d_xy | reg_sp_xy | reg_mar_xy | reg_mdr_xy;
+  
   always begin
     #40 clk_main = ~clk_main; // 25MHz main clock
   end
