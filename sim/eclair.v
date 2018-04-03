@@ -214,13 +214,13 @@ module ECLair(int);
   assign alu_mode = cs_data[35];
   assign alu_op = cs_data[39:36];
   assign reg_xy_src = cs_data[42:40];
-  assign ram_read = cs_data[43];
   assign carry_in = cs_data[44];
   assign op_16bit = cs_data[45];
   assign branch_cond = cs_data[48:46];
   assign xy_imm_lsb = cs_data[50:49];
   assign reg_xy_nibble_sel = cs_data[51];
   assign reg_byte = cs_data[52];
+  assign ram_read = cs_data[53];
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];

@@ -40,14 +40,14 @@ field src_mar       33    1
 field src_mdr       34    1
 field alu_mode      35    1
 field alu_op        36    4
-field src_xy        40    3
-field mem_read      43    1
+field src_xy        40    4
 field carry_in      44    1
 field op_16bit      45    1
 field branch_cond   46    3
 field xy_imm_lsb    49    2
 field xy_nibble_sel 51    1
 field reg_byte      52    1
+field mem_read      53    1
 
 # enums - names for values that go into bit positions
 enum  src_mar     z       0

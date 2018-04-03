@@ -229,10 +229,6 @@ class ControlWord {
         return XYSource.allValues[controlWord.bitField(startBit: 40, length: 3)]
     }
     
-    var memRead: Bool {
-        return controlWord.isBitSet(43)
-    }
-    
     var carryIn: Bool {
         return controlWord.isBitSet(44)
     }
@@ -250,9 +246,13 @@ class ControlWord {
     }
 
     var xyNibble: XYNibble {
-        return XYNibble.allValues[controlWord.bitField(startBit: 45, length: 1)]
+        return XYNibble.allValues[controlWord.bitField(startBit: 51, length: 1)]
     }
     
+    var memRead: Bool {
+        return controlWord.isBitSet(53)
+    }
+
     init(_ word: Int) {
         controlWord = word
     }
