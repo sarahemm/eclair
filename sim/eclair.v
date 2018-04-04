@@ -50,9 +50,9 @@ module ECLair(int);
   wire  [2:0]   load_reg;         // load general register
   wire  [7:0]   reg_load;         // load signals (latch clocks) for registers
   wire  [7:0]   reg_load_via_ir;  // load signals (latch clocks) for registers (when loading via IR)
-  wire  [1:0]   xy_imm_lsb;       // least significant immediate bits (used when reg_xy_src = 3'b000)
-  wire  [15:0]  xy_imm_val;       // xy immediate value (used when reg_xy_src = 3'b000)
-  wire  [2:0]   reg_xy_src;       // load source for X and Y registers
+  wire  [1:0]   xy_imm_lsb;       // least significant immediate bits (used when reg_xy_src = 3'b0000)
+  wire  [15:0]  xy_imm_val;       // xy immediate value (used when reg_xy_src = 3'b0000)
+  wire  [3:0]   reg_xy_src;       // load source for X and Y registers
   wire  [2:0]   reg_x_load_ir_src;  // bits from IR to determine which register to load
   wire          reg_x_load_ir;    // load a register, getting the reg to load from IR[7..6]
   wire          reg_a_load;       
@@ -82,7 +82,7 @@ module ECLair(int);
   wire  [15:0]  bus_z;
 
   // outputs from the XY driver latches
-  wire  [15:0]  reg_nib_xy;
+  wire  [15:0]  reg_imm_xy;
   wire  [15:0]  reg_a_xy;
   wire  [15:0]  reg_b_xy;
   wire  [15:0]  reg_c_xy;
@@ -90,10 +90,11 @@ module ECLair(int);
   wire  [15:0]  reg_sp_xy;
   wire  [15:0]  reg_mar_xy;
   wire  [15:0]  reg_mdr_xy;
+  wire  [15:0]  reg_intvect_xy;
 
   // XY driver latch resets
-  wire  [7:0]   xy_reset;
-  wire          xy_reset_nib;
+  wire  [15:0]  xy_reset;
+  wire          xy_reset_imm;
   wire          xy_reset_a;
   wire          xy_reset_b;
   wire          xy_reset_c;
@@ -101,6 +102,7 @@ module ECLair(int);
   wire          xy_reset_sp;
   wire          xy_reset_mar;
   wire          xy_reset_mdr;
+  wire          xy_reset_intvect;
 
   wire          alu_cout8;
   wire          alu_cout16;
@@ -129,14 +131,11 @@ module ECLair(int);
   wire          really_load_pc;   // request to load pc and branch condition is met
   wire  [2:0]   branch_cond;    // which branch condition to use
   wire          carry_in;       // carry input to the ALU, from a microcode bit
-  wire  [3:0]   xy_nibble;      // XY nibble input (A input to the XY mux)
-  wire  [7:0]   xy_nibble_padded; // XY nibble padded to 8 bits with 0s
   wire  [3:0]   intvect;        // highest-priority interrupt flag currently active
   wire  [7:0]   intflg;         // interrupt flags
   wire  [7:0]   intclr;         // clear interrupt flag
   wire          int_jmp;        // jump to IRQ area of microcode on next fetch/execute
   wire          int_pending;    // at least one interrupt is waiting to be serviced
-  wire          reg_xy_nibble_sel;  // which nibble we want to access via the XY mux (imm or intvect)
 
   initial begin
     clk_main = 1'b0;
@@ -179,7 +178,6 @@ module ECLair(int);
   latch           #(.WIDTH(8))                  lat_reg_mdr_h(.clk(~(reg_mdr_load & mdr_byte)), .reset(1'b0), .in(lat_mdr[15:8]), .out(reg_mdr[15:8]));
   demux_38                                      dmx_reg_load(load_reg, reg_load);
   demux_38                                      dmx_reg_load_ir(reg_x_load_ir_src, reg_load_via_ir);
-  mux_2x          #(.WIDTH(4))                  mux_xy_nibble(.sel(reg_xy_nibble_sel), .a(xy_imm_val), .b(intvect), .y(xy_nibble));
   mux_2x                                        mux_mar_l(.sel(mux_mar_src), .a(bus_z[7:0]),  .b(pc[7:0]),  .y(lat_mar[7:0]));
   mux_2x                                        mux_mar_h(.sel(mux_mar_src), .a(bus_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
   mux_2x                                        mux_mdr_l(.sel(mux_mdr_src), .a(bus_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
@@ -206,7 +204,7 @@ module ECLair(int);
   latch         #(.WIDTH(1))                    lat_int_6(.clk(int[6]), .reset(intclr[6]), .in(1'b1), .out(intflg[6]));
   latch         #(.WIDTH(1))                    lat_int_7(.clk(int[7]), .reset(intclr[7]), .in(1'b1), .out(intflg[7]));
 
-  latch         #(.WIDTH(16))                   lat_nib_xy(.clk(1'b0), .reset(xy_reset_nib), .in(xy_nibble), .out(reg_nib_xy));
+  latch         #(.WIDTH(16))                   lat_imm_xy(.clk(1'b0), .reset(xy_reset_imm), .in(xy_imm_val), .out(reg_imm_xy));
   latch         #(.WIDTH(16))                   lat_a_xy(.clk(1'b0), .reset(xy_reset_a), .in(reg_a), .out(reg_a_xy));
   latch         #(.WIDTH(16))                   lat_b_xy(.clk(1'b0), .reset(xy_reset_b), .in(reg_b), .out(reg_b_xy));
   latch         #(.WIDTH(16))                   lat_c_xy(.clk(1'b0), .reset(xy_reset_c), .in(reg_c), .out(reg_c_xy));
@@ -214,7 +212,9 @@ module ECLair(int);
   latch         #(.WIDTH(16))                   lat_sp_xy(.clk(1'b0), .reset(xy_reset_sp), .in(reg_sp), .out(reg_sp_xy));
   latch         #(.WIDTH(16))                   lat_mar_xy(.clk(1'b0), .reset(xy_reset_mar), .in(reg_mar), .out(reg_mar_xy));
   latch         #(.WIDTH(16))                   lat_mdr_xy(.clk(1'b0), .reset(xy_reset_mdr), .in(reg_mdr), .out(reg_mdr_xy));
-  decoder_8                                     dcd_xy(.in(reg_xy_src), .out(xy_reset), .enable(2'b00));
+  latch         #(.WIDTH(16))                   lat_intvect_xy(.clk(1'b0), .reset(xy_reset_intvect), .in(intvect), .out(reg_intvect_xy));
+  decoder_8                                     dcd_xy_a(.in(reg_xy_src[2:0]), .out(xy_reset[7:0]), .enable(reg_xy_src[3]));
+  decoder_8                                     dcd_xy_b(.in(reg_xy_src[2:0]), .out(xy_reset[15:8]), .enable(~reg_xy_src[3]));
   
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
@@ -243,12 +243,11 @@ module ECLair(int);
   assign mux_mdr_src = cs_data[34];
   assign alu_mode = cs_data[35];
   assign alu_op = cs_data[39:36];
-  assign reg_xy_src = cs_data[42:40];
+  assign reg_xy_src = cs_data[43:40];
   assign carry_in = cs_data[44];
   assign op_16bit = cs_data[45];
   assign branch_cond = cs_data[48:46];
   assign xy_imm_lsb = cs_data[50:49];
-  assign reg_xy_nibble_sel = cs_data[51];
   assign reg_byte = cs_data[52];
   assign ram_read = cs_data[53];
   
@@ -287,9 +286,7 @@ module ECLair(int);
   assign status_16[1] = alu_cout16;
   assign really_load_pc = load_pc & branch_cond_met;
   assign xy_imm_val[1:0] = xy_imm_lsb;
-  assign xy_imm_val[7:2] = 6'b000000;
-  assign xy_nibble_padded[3:0] = xy_nibble;
-  assign xy_nibble_padded[7:4] = 4'b0000;
+  assign xy_imm_val[15:2] = 14'b00_0000_0000_0000;
   assign int_pending = ~(intvect[3:0] == 4'b0000);
   assign int_jmp = int_pending & flag_ie;
   // FIXME: temporary until proper clear/reset logic is worked out
@@ -303,6 +300,7 @@ module ECLair(int);
   assign intclr[7] = ~_por_reset;
 
   // driver reset signals that control which register is driving XY
+  assign xy_reset_imm = xy_reset[0];
   assign xy_reset_a = xy_reset[1];
   assign xy_reset_b = xy_reset[2];
   assign xy_reset_c = xy_reset[3];
@@ -310,9 +308,10 @@ module ECLair(int);
   assign xy_reset_sp = xy_reset[5];
   assign xy_reset_mar = xy_reset[6];
   assign xy_reset_mdr = xy_reset[7];
+  assign xy_reset_mdr = xy_reset[8];
   
   // this is a wired-OR in the actual hardware
-  assign lat_xy = reg_nib_xy | reg_a_xy | reg_b_xy | reg_c_xy | reg_d_xy | reg_sp_xy | reg_mar_xy | reg_mdr_xy;
+  assign lat_xy = reg_imm_xy | reg_a_xy | reg_b_xy | reg_c_xy | reg_d_xy | reg_sp_xy | reg_mar_xy | reg_mdr_xy | reg_intvect_xy;
   
   always begin
     #40 clk_main = ~clk_main; // 25MHz main clock
@@ -341,7 +340,7 @@ module ECLair(int);
       $display("reg_y:    %08b_%08b (0x%0h)", reg_y[15:8],  reg_y[7:0],  reg_y);
       $display("bus_z:    %08b_%08b (0x%0h)", bus_z[15:8],  bus_z[7:0],  bus_z);
       $display("lat_xy:   %0b (0x%0h)", lat_xy, lat_xy);
-      $display("xy_src:   %0b", cs_data[28:26]);
+      $display("xy_src:   %04b", reg_xy_src);
       $display("reg_x_load: %0b", reg_x_load);
       $display("selected: rom: %0b dev: %0b ram: %0b\n", addr_rom, addr_device, addr_ram);
       if(^cs_data == 1'b1 || ^cs_data == 1'b0) begin
