@@ -30,8 +30,9 @@ class ControlWord {
         case SP
         case MAR
         case MDR
+        case IntVect
         
-        static let allValues = [Immediate, A, B, C, D, SP, MAR, MDR]
+        static let allValues = [Immediate, A, B, C, D, SP, MAR, MDR, IntVect]
     }
     
     enum DestRegister: Int {
@@ -226,7 +227,7 @@ class ControlWord {
     }
     
     var xySource: XYSource {
-        return XYSource.allValues[controlWord.bitField(startBit: 40, length: 3)]
+        return XYSource.allValues[controlWord.bitField(startBit: 40, length: 4)]
     }
     
     var carryIn: Bool {
@@ -243,10 +244,6 @@ class ControlWord {
     
     var immediateValue: Int {
         return controlWord.bitField(startBit: 49, length: 2)
-    }
-
-    var xyNibble: XYNibble {
-        return XYNibble.allValues[controlWord.bitField(startBit: 51, length: 1)]
     }
     
     var memRead: Bool {

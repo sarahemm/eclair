@@ -446,6 +446,9 @@ class Machine {
                     x = mar
                 case .MDR:
                     x = mdr
+                case .IntVect:
+                    // TODO: Implement interrupts
+                    x = 0xC0FFEE
             }
         }
         if(controlWord.loadY) {
@@ -467,6 +470,10 @@ class Machine {
                     y = mar
                 case .MDR:
                     y = mdr
+                case .IntVect:
+                    // TODO: Implement interrupts
+                    y = 0xC0FFEE
+
             }
         }
         if(controlWord.loadReg != .None) {
