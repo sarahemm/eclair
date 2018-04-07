@@ -37,6 +37,8 @@ module ECLair(int);
   wire  [7:0]   next_addr;        // next microcode address to visit, either the above bits or IR if above is 8'b0
   wire          inc_pc;           // increment PC
   wire          load_pc;          // load PC from Z
+  wire          rpt_mode;         // RPT mode (0=load, 1=decrement)
+  wire          rpt_exec;         // execute RPT operation specified in rpt_mode
   wire          alu_mode;         // ALU mode (0=arithmetic, 1=logic)
   wire  [3:0]   alu_op;           // ALU operation
   wire          ram_read;         // RAM read operation
@@ -80,6 +82,7 @@ module ECLair(int);
   wire  [15:0]  lat_mdr;
   wire  [15:0]  lat_xy;
   wire  [15:0]  bus_z;
+  wire  [7:0]   rpt;
 
   // outputs from the XY driver latches
   wire  [15:0]  reg_imm_xy;
@@ -215,6 +218,7 @@ module ECLair(int);
   latch         #(.WIDTH(16))                   lat_intvect_xy(.clk(1'b0), .reset(xy_reset_intvect), .in(intvect), .out(reg_intvect_xy));
   decoder_8                                     dcd_xy_a(.in(reg_xy_src[2:0]), .out(xy_reset[7:0]), .enable(reg_xy_src[3]));
   decoder_8                                     dcd_xy_b(.in(reg_xy_src[2:0]), .out(xy_reset[15:8]), .enable(~reg_xy_src[3]));
+  updowncounter #(.WIDTH(8))                    ctr_rpt(.clk(rpt_exec), .reset(~_reset), .out(rpt), .mode(rpt_mode ? 2'b01 : 2'b00), .preset(reg_mdr[7:0]));
   
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
@@ -227,9 +231,9 @@ module ECLair(int);
   assign load_reg = cs_data[9:7];
   assign reg_x_load = ~cs_data[10];
   assign reg_y_load = ~cs_data[11];
-  // bit 12 is currently available
+  assign rpt_mode = cs_data[12];
   assign load_ptb = ~cs_data[13];
-  // bit 14 is currently available
+  assign rpt_exec = cs_data[14];
   assign load_status = ~cs_data[15];
   assign ram_write = cs_data[17];
   assign load_flag_pe = ~cs_data[18];
@@ -336,6 +340,7 @@ module ECLair(int);
       $display("reg_c:    %08b_%08b (0x%0h)", reg_c[15:8],  reg_c[7:0],  reg_c);
       $display("reg_d:    %08b_%08b (0x%0h)", reg_d[15:8],  reg_d[7:0],  reg_d);
       $display("reg_sp:   %08b_%08b (0x%0h)", reg_sp[15:8], reg_sp[7:0], reg_sp);
+      $display("reg_rpt:  %08b (0x%0h)", rpt, rpt);
       $display("reg_x:    %08b_%08b (0x%0h)", reg_x[15:8],  reg_x[7:0],  reg_x);
       $display("reg_y:    %08b_%08b (0x%0h)", reg_y[15:8],  reg_y[7:0],  reg_y);
       $display("bus_z:    %08b_%08b (0x%0h)", bus_z[15:8],  bus_z[7:0],  bus_z);
