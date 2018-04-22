@@ -54,7 +54,8 @@ File.open(ARGV[1], "r") do |asmfile|
         operand = operand_raw.to_i
       end
       operand_hex = sprintf("0x%02X", operand)
-      if(/16/.match(opcode) or operand_16bit) then
+      # TODO: come up with a better way to do this
+      if((/16/.match(opcode) and not /^sh/.match(opcode)) or operand_16bit) then
         # operand(s) are 16 bits
         operand_l = operand & 0x00FF
         operand_h = (operand & 0xFF00) >> 8
