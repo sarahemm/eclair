@@ -84,6 +84,20 @@ def gen_mc_word(instruction, addr, ins_fields, next_addr_override = nil)
         desc = "next: ir #{desc}"
         next_addr = 0
         next
+      elsif(enum_name == "self") then
+        desc = "next: self #{desc}"
+        next_addr = addr
+        next
+      elsif(enum_name[0] == "-")
+        nbr = enum_name[1..-1].to_i
+        desc = "next: -nbr #{desc}"
+        next_addr = addr - nbr
+        next
+      elsif(enum_name[0] == "+")
+        nbr = enum_name[1..-1].to_i
+        desc = "next: +nbr #{desc}"
+        next_addr = addr + nbr
+        next
       end
       loc_addr = @locations.find_index(enum_name)
       next_addr = loc_addr
@@ -250,6 +264,12 @@ graphfiles.each do |file_info|
         next_instruction = next_addr_match[1]
         if(next_instruction == "ir") then
           next_addr = "ir"
+        elsif(next_instruction == "self") then
+          next_addr = addr
+        elsif(next_instruction[0] == "-") then
+          next_addr = addr - next_instruction[0][1..-1]
+        elsif(next_instruction[0] == "+") then
+          next_addr = addr + next_instruction[0][1..-1]
         else
           next_addr = @locations.find_index(next_instruction)
         end
