@@ -109,6 +109,8 @@ def gen_mc_word(instruction, addr, ins_fields, next_addr_override = nil)
       # rptz_next_addr can only jump within the same 16-instruction block
       if(rptz_next_addr.to_s(2)[0..-5] != next_addr.to_s(2)[0..-5]) then
         raise "RPTZ Next Addr can only jump within the same 16-instruction block, realignment required in instruction #{instruction}"
+      elsif(rptz_next_addr == next_addr) then
+        raise("RPTZ Next Addr does not allow jumping to self in #{instruction}")
       end
       desc = "rptz_next: 0x#{rptz_next_addr.to_s(16)}(#{enum_name}) #{desc}"
       rptz_next_addr &= 0xF
