@@ -32,8 +32,11 @@ module ECLair(int);
   wire  [63:0]  cs_data;          // RAM control store latch output, used to actually run the machine
   reg   [63:0]  cs_data_in;
   wire          cs_ram__w;        // RAM control store write signal
-  wire  [7:0]   cs_next_addr;     // control store next microcode address bits
-  wire  [7:0]   cs_next_addr_alt; // control store next microcode address bits from alternate source
+  wire  [7:0]   cs_next_addr;         // control store next microcode address bits
+  wire  [7:0]   cs_next_addr_alt;     // control store next microcode address bits from alternate source
+  wire  [7:0]   cs_next_addr_normal;  // control store next microcode address bits from non-alternate source
+  wire  [7:0]   cs_next_addr_rptz;    // control store next microcode address bits from rptz jump bits
+  wire  [3:0]   rptz_next_nibble;       // 4 low bits to use for next CS addr if RPT=z
   wire  [7:0]   next_addr;        // next microcode address to visit, either the above bits or IR if above is 8'b0
   wire          inc_pc;           // increment PC
   wire          load_pc;          // load PC from Z
@@ -139,7 +142,8 @@ module ECLair(int);
   wire  [7:0]   intclr;         // clear interrupt flag
   wire          int_jmp;        // jump to IRQ area of microcode on next fetch/execute
   wire          int_pending;    // at least one interrupt is waiting to be serviced
-
+  wire          rpt_zero;       // RPT register is zero
+  
   initial begin
     clk_main = 1'b0;
     _ext_reset = 1'b1;
@@ -152,7 +156,8 @@ module ECLair(int);
   flipflop_jk                                   flp_cs_ready(.clk(top_of_cs), .j(1'b1), .k(1'b0), .q(cs_ready));
   mux_21                                        mux_cs_clk_selector(cs_ready, clk_quarter, clk_main, clk_cs);
   mux_2x                                        mux_cs_addr(.sel(cs_ready), .a(cs_addr_init), .b(cs_addr_run), .y(cs_addr));
-  mux_2x                                        mux_cs_next_addr(.sel(cs_next_addr == 8'b00000000), .a(cs_next_addr), .b(cs_next_addr_alt), .y(next_addr));
+  mux_2x                                        mux_cs_next_addr_rptz(.sel(rptz_next_nibble != 4'b0000 && rpt_zero), .a(cs_next_addr), .b(cs_next_addr_rptz), .y(cs_next_addr_normal));
+  mux_2x                                        mux_cs_next_addr(.sel(cs_next_addr == 8'b00000000), .a(cs_next_addr_normal), .b(cs_next_addr_alt), .y(next_addr));
   mux_2x                                        mux_cs_next_addr_alt(.sel(int_jmp), .a(reg_ir), .b(intvect), .y(cs_next_addr_alt));
   counter         #(.WIDTH(8))                  ctr_cs_seq(.clk(clk_cs), .ce(~cs_ready), .reset(~_por_reset), .out(cs_addr_init), .load(1'b0), .preset(8'b00000000));
   flipflop_d      #(.WIDTH(8))                  flp_cs_addr(.clk(clk_cs), .reset(~cs_ready), .in(next_addr), .out(cs_addr_run));
@@ -218,7 +223,7 @@ module ECLair(int);
   latch         #(.WIDTH(16))                   lat_intvect_xy(.clk(1'b0), .reset(xy_reset_intvect), .in(intvect), .out(reg_intvect_xy));
   decoder_8                                     dcd_xy_a(.in(reg_xy_src[2:0]), .out(xy_reset[7:0]), .enable(reg_xy_src[3]));
   decoder_8                                     dcd_xy_b(.in(reg_xy_src[2:0]), .out(xy_reset[15:8]), .enable(~reg_xy_src[3]));
-  updowncounter #(.WIDTH(8))                    ctr_rpt(.clk(rpt_exec), .reset(~_reset), .out(rpt), .mode(rpt_mode ? 2'b01 : 2'b00), .preset(reg_mdr[7:0]));
+  updowncounter #(.WIDTH(8))                    ctr_rpt(.clk(rpt_exec), .reset(~_reset), .out(rpt), .mode(rpt_mode ? 2'b01 : 2'b00), .preset(reg_mdr[7:0]), .cout(rpt_zero));
   
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
@@ -231,7 +236,6 @@ module ECLair(int);
   assign load_reg = cs_data[9:7];
   assign reg_x_load = ~cs_data[10];
   assign reg_y_load = ~cs_data[11];
-  assign rpt_mode = cs_data[12];
   assign load_ptb = ~cs_data[13];
   assign rpt_exec = cs_data[14];
   assign load_status = ~cs_data[15];
@@ -252,8 +256,10 @@ module ECLair(int);
   assign op_16bit = cs_data[45];
   assign branch_cond = cs_data[48:46];
   assign xy_imm_lsb = cs_data[50:49];
+  assign rpt_mode = cs_data[51];
   assign reg_byte = cs_data[52];
   assign ram_read = cs_data[53];
+  assign rptz_next_nibble = cs_data[57:54];
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
@@ -293,6 +299,8 @@ module ECLair(int);
   assign xy_imm_val[15:2] = 14'b00_0000_0000_0000;
   assign int_pending = ~(intvect[3:0] == 4'b0000);
   assign int_jmp = int_pending & flag_ie;
+  assign cs_next_addr_rptz[7:4] = cs_next_addr;
+  assign cs_next_addr_rptz[3:0] = rptz_next_nibble;
   // FIXME: temporary until proper clear/reset logic is worked out
   assign intclr[0] = ~_por_reset;
   assign intclr[1] = ~_por_reset;
@@ -332,6 +340,7 @@ module ECLair(int);
       $display("ptb:      %06b", ptb);
       $display("bus_addr: %08b_%08b_%08b", bus_addr[23:16], bus_addr[15:8], bus_addr[7:0]);
       $display("bus_data: %0b (0x%0h)", bus_data, bus_data);
+      $display("rpt:      %08b (0x%0h)", rpt, rpt);
       $display("reg_ir:   %0b", reg_ir);
       $display("reg_mar:  %08b_%08b (0x%0h)", reg_mar[15:8], reg_mar[7:0], reg_mar);
       $display("reg_mdr:  %08b_%08b (0x%0h)", reg_mdr[15:8], reg_mdr[7:0], reg_mdr);
@@ -340,7 +349,6 @@ module ECLair(int);
       $display("reg_c:    %08b_%08b (0x%0h)", reg_c[15:8],  reg_c[7:0],  reg_c);
       $display("reg_d:    %08b_%08b (0x%0h)", reg_d[15:8],  reg_d[7:0],  reg_d);
       $display("reg_sp:   %08b_%08b (0x%0h)", reg_sp[15:8], reg_sp[7:0], reg_sp);
-      $display("reg_rpt:  %08b (0x%0h)", rpt, rpt);
       $display("reg_x:    %08b_%08b (0x%0h)", reg_x[15:8],  reg_x[7:0],  reg_x);
       $display("reg_y:    %08b_%08b (0x%0h)", reg_y[15:8],  reg_y[7:0],  reg_y);
       $display("bus_z:    %08b_%08b (0x%0h)", bus_z[15:8],  bus_z[7:0],  bus_z);

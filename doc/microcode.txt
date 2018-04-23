@@ -14,40 +14,41 @@ mapfile microcode_map.txt
 
 # fields - names for bit positions
 # edge-sensitive signals
-field write_pte     0     1
-field load_mdr      1     1
+field write_pte       0     1
+field load_mdr        1     1
 # bit 2 is currently available
-field load_mar      3     1
-field load_ir       4     1
-field inc_pc        5     1
-field load_pc       6     1
-field load_reg      7     3
-field load_x        10    1
-field load_y        11    1
+field load_mar        3     1
+field load_ir         4     1
+field inc_pc          5     1
+field load_pc         6     1
+field load_reg        7     3
+field load_x          10    1
+field load_y          11    1
 # bit 12 is currently available
-field load_ptb      13    1
-# bit 14 is currently available
-field load_status   15    1
-field clr_intflg    16    1
-field mem_write     17    1
-field load_flag_pe  18    1
-field load_flag_m   19    1
-field load_flag_ie  20    1
+field load_ptb        13    1
+field rpt_exec        14    1
+field load_status     15    1
+field clr_intflg      16    1
+field mem_write       17    1
+field load_flag_pe    18    1
+field load_flag_m     19    1
+field load_flag_ie    20    1
 # level-sensitive signals
-field mdr_byte      24    1
-field next_addr     25    8
-field src_mar       33    1
-field src_mdr       34    1
-field alu_mode      35    1
-field alu_op        36    4
-field src_xy        40    4
-field carry_in      44    1
-field op_16bit      45    1
-field branch_cond   46    3
-field xy_imm_lsb    49    2
-# bit 51 is currently available
-field reg_byte      52    1
-field mem_read      53    1
+field mdr_byte        24    1
+field next_addr       25    8
+field src_mar         33    1
+field src_mdr         34    1
+field alu_mode        35    1
+field alu_op          36    4
+field src_xy          40    4
+field carry_in        44    1
+field op_16bit        45    1
+field branch_cond     46    3
+field xy_imm_lsb      49    2
+field rpt_mode        51    1
+field reg_byte        52    1
+field mem_read        53    1
+field rptz_next_addr  54    4
 
 # enums - names for values that go into bit positions
 enum  src_mar     z       0
@@ -63,6 +64,7 @@ enum  load_reg    via_ir  7
 enum  alu_mode    arith   0
 enum  alu_mode    logic   1
 enum  alu_op      x       0
+enum  alu_op      x+x     3
 enum  alu_op      add     6
 enum  alu_op      sub     9
 enum  alu_op      x-1     15
@@ -88,6 +90,8 @@ enum  reg_byte    low     0
 enum  reg_byte    high    1
 enum  carry_in    0       0
 enum  carry_in    1       1
+enum  rpt_mode    load    0
+enum  rpt_mode    dec     1
 
 # locations - start addresses of instructions
 location    init        0
@@ -122,6 +126,9 @@ location    ldi16.sp    39    # load immediate 16 bits into sp
 location    ldi16.?     207   # load immediate 16 bits into register from IR
 location    ldi8.ptb    65    # load immediate 8 bits into PTB register
 location    add16.ab    66    # add a and b registers, result goes into a
+location    shl16.a     12    # shift register a left
+location    shl16.?       100 # shift 16 bits left
+location    shl16.?-done  104 # shift 16 bits left (finalization step)
 location    jmp         14    # unconditional immediate jump
 location    wrpte       18    # write page table entry using data in a and address in d
 location    ldi8.flags  21    # load immediate 8 bits into system flags
@@ -212,6 +219,20 @@ instruction add8.ab     alu_mode(arith) alu_op(add)                 load_reg(a) 
 instruction sub8.ab     src_xy(a)     load_x
 instruction sub8.ab     src_xy(b)     load_y
 instruction sub8.ab     alu_mode(arith) alu_op(sub)   carry_in(1)     load_reg(a)     next_addr(fetch)  load_status
+
+# shift supplied 16-bit register left
+instruction shl16.a     op_16bit        src_xy(a)         load_x        inc_pc  next_addr(shl16.?)
+
+# shift 16-bit register selected by IR[6..7] left
+# load RPT from immediate
+instruction shl16.?      mem_read        src_mar(pc)       load_mar      src_mdr(data)     load_mdr
+instruction shl16.?     rpt_mode(load)  rpt_exec
+# shift left by one bit
+instruction shl16.?     op_16bit        alu_op(x+x)       src_mar(z)    load_mar    rpt_mode(dec)     rpt_exec  
+instruction shl16.?     op_16bit        src_xy(mar)       load_x        next_addr(-1) rptz_next_addr(shl16.?-done)
+
+# put the result back into the register it came from
+instruction shl16.?-done     op_16bit        src_xy(mar)       alu_op(x)     load_x      load_reg(via_ir)  load_status   next_addr(fetch)
 
 # immediate jump to the address specified
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
