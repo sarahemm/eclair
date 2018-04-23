@@ -74,6 +74,7 @@ end
 # returns a two element array with the word and a text description of the contents
 def gen_mc_word(instruction, addr, ins_fields, next_addr_override = nil)
   next_addr = nil;
+  rptz_next_addr = nil;
   desc = "";
   bits = 0
   ins_fields.each do |ins_field|
@@ -135,7 +136,9 @@ def gen_mc_word(instruction, addr, ins_fields, next_addr_override = nil)
   else
     next_addr = addr + 1 if next_addr == nil
   end
+  rptz_next_addr = 0 if !rptz_next_addr
   bits |= next_addr << @fields["next_addr"].begin
+  bits |= rptz_next_addr << @fields["rptz_next_addr"].begin
   return [bits, desc]
 end
 
