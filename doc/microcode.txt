@@ -127,6 +127,9 @@ location    ldi16.?     207   # load immediate 16 bits into register from IR
 location    ldi8.ptb    65    # load immediate 8 bits into PTB register
 location    add16.ab    66    # add a and b registers, result goes into a
 location    shl16.a     12    # shift register a left
+location    shl16.b     76    # shift register b left
+location    shl16.c     140   # shift register c left
+location    shl16.d     206   # shift register d left
 location    shl16.?       100 # shift 16 bits left
 location    shl16.?-done  104 # shift 16 bits left (finalization step)
 location    jmp         14    # unconditional immediate jump
@@ -222,6 +225,9 @@ instruction sub8.ab     alu_mode(arith) alu_op(sub)   carry_in(1)     load_reg(a
 
 # shift supplied 16-bit register left
 instruction shl16.a     op_16bit        src_xy(a)         load_x        inc_pc  next_addr(shl16.?)
+instruction shl16.b     op_16bit        src_xy(b)         load_x        inc_pc  next_addr(shl16.?)
+instruction shl16.c     op_16bit        src_xy(c)         load_x        inc_pc  next_addr(shl16.?)
+instruction shl16.d     op_16bit        src_xy(d)         load_x        inc_pc  next_addr(shl16.?)
 
 # shift 16-bit register selected by IR[6..7] left
 # load RPT from immediate
