@@ -231,7 +231,7 @@ instruction shl16.d     op_16bit        src_xy(d)         load_x        inc_pc  
 
 # shift 16-bit register selected by IR[6..7] left
 # load RPT from immediate
-instruction shl16.?      mem_read        src_mar(pc)       load_mar      src_mdr(data)     load_mdr
+instruction shl16.?     mem_read        src_mar(pc)       load_mar      src_mdr(data)     load_mdr
 instruction shl16.?     rpt_mode(load)  rpt_exec
 # shift left by one bit
 instruction shl16.?     op_16bit        alu_op(x+x)       src_mar(z)    load_mar    rpt_mode(dec)     rpt_exec  
