@@ -85,7 +85,8 @@ module ECLair(int);
   wire  [15:0]  lat_mdr;
   wire  [15:0]  lat_xy;
   wire  [15:0]  bus_z;
-  wire  [7:0]   rpt;
+  wire  [11:0]  rpt;
+  wire  [11:0]  rpt_mdr_source;
 
   // outputs from the XY driver latches
   wire  [15:0]  reg_imm_xy;
@@ -223,7 +224,7 @@ module ECLair(int);
   latch         #(.WIDTH(16))                   lat_intvect_xy(.clk(1'b0), .reset(xy_reset_intvect), .in(intvect), .out(reg_intvect_xy));
   decoder_8                                     dcd_xy_a(.in(reg_xy_src[2:0]), .out(xy_reset[7:0]), .enable(reg_xy_src[3]));
   decoder_8                                     dcd_xy_b(.in(reg_xy_src[2:0]), .out(xy_reset[15:8]), .enable(~reg_xy_src[3]));
-  updowncounter #(.WIDTH(8))                    ctr_rpt(.clk(rpt_exec), .reset(~_reset), .out(rpt), .mode(rpt_mode ? 2'b01 : 2'b00), .preset(reg_mdr[7:0]), .cout(rpt_zero));
+  updowncounter #(.WIDTH(12))                   ctr_rpt(.clk(rpt_exec), .reset(~_reset), .out(rpt), .mode(rpt_mode ? 2'b01 : 2'b00), .preset(rpt_mdr_source), .cout(rpt_zero));
   
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
@@ -301,6 +302,8 @@ module ECLair(int);
   assign int_jmp = int_pending & flag_ie;
   assign cs_next_addr_rptz[7:4] = cs_next_addr;
   assign cs_next_addr_rptz[3:0] = rptz_next_nibble;
+  assign rpt_mdr_source[11:8] = op_16bit ? reg_mdr[11:8] : 4'b0000;
+  assign rpt_mdr_source[7:0] = reg_mdr[7:0];
   // FIXME: temporary until proper clear/reset logic is worked out
   assign intclr[0] = ~_por_reset;
   assign intclr[1] = ~_por_reset;
@@ -340,7 +343,7 @@ module ECLair(int);
       $display("ptb:      %06b", ptb);
       $display("bus_addr: %08b_%08b_%08b", bus_addr[23:16], bus_addr[15:8], bus_addr[7:0]);
       $display("bus_data: %0b (0x%0h)", bus_data, bus_data);
-      $display("rpt:      %08b (0x%0h)", rpt, rpt);
+      $display("rpt:      %04b_%08b (0x%0h)", rpt[11:8], rpt[7:0], rpt);
       $display("reg_ir:   %0b", reg_ir);
       $display("reg_mar:  %08b_%08b (0x%0h)", reg_mar[15:8], reg_mar[7:0], reg_mar);
       $display("reg_mdr:  %08b_%08b (0x%0h)", reg_mdr[15:8], reg_mdr[7:0], reg_mdr);
