@@ -300,7 +300,7 @@ module ECLair(int);
   assign xy_imm_val[15:2] = 14'b00_0000_0000_0000;
   assign int_pending = ~(intvect[3:0] == 4'b0000);
   assign int_jmp = int_pending & flag_ie;
-  assign cs_next_addr_rptz[7:4] = cs_next_addr;
+  assign cs_next_addr_rptz[7:4] = cs_next_addr[7:4];
   assign cs_next_addr_rptz[3:0] = rptz_next_nibble;
   assign rpt_mdr_source[11:8] = op_16bit ? reg_mdr[11:8] : 4'b0000;
   assign rpt_mdr_source[7:0] = reg_mdr[7:0];
