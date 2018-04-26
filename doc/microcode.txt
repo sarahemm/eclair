@@ -132,6 +132,12 @@ location    shl16.c     140   # shift register c left
 location    shl16.d     206   # shift register d left
 location    shl16.?       100 # shift 16 bits left
 location    shl16.?-done  104 # shift 16 bits left (finalization step)
+location    shl8.al     13    # shift low byte of register a left
+location    shl8.bl     77    # shift low byte of register b left
+location    shl8.cl     141   # shift low byte of register c left
+location    shl8.dl     210   # shift low byte of register d left
+location    shl8.?l     112   # shift low byte of register left
+location    shl8.?l-done  116 # shift low byte of register left (finalization step)
 location    jmp         14    # unconditional immediate jump
 location    wrpte       18    # write page table entry using data in a and address in d
 location    ldi8.flags  21    # load immediate 8 bits into system flags
@@ -236,9 +242,24 @@ instruction shl16.?     rpt_mode(load)  rpt_exec
 # shift left by one bit
 instruction shl16.?     op_16bit        alu_op(x+x)       src_mar(z)    load_mar    rpt_mode(dec)     rpt_exec  
 instruction shl16.?     op_16bit        src_xy(mar)       load_x        next_addr(-1) rptz_next_addr(shl16.?-done)
-
 # put the result back into the register it came from
 instruction shl16.?-done     op_16bit        src_xy(mar)       alu_op(x)     load_x      load_reg(via_ir)  load_status   next_addr(fetch)
+
+# shift low byte of supplied 8-bit register left
+instruction shl8.al     mdr_byte(low)   src_xy(a)         load_x        inc_pc  next_addr(shl8.?l)
+instruction shl8.bl     mdr_byte(low)   src_xy(b)         load_x        inc_pc  next_addr(shl8.?l)
+instruction shl8.cl     mdr_byte(low)   src_xy(c)         load_x        inc_pc  next_addr(shl8.?l)
+instruction shl8.dl     mdr_byte(low)   src_xy(d)         load_x        inc_pc  next_addr(shl8.?l)
+
+# shift low byte of register selected by IR[6..7] left
+# load RPT from immediate
+instruction shl8.?l     mem_read        src_mar(pc)       load_mar      src_mdr(data)     load_mdr
+instruction shl8.?l     rpt_mode(load)  rpt_exec
+# shift left by one bit
+instruction shl8.?l     mdr_byte(low)   alu_op(x+x)       src_mar(z)    load_mar    rpt_mode(dec)     rpt_exec  
+instruction shl8.?l     mdr_byte(low)   src_xy(mar)       load_x        next_addr(-1) rptz_next_addr(shl8.?l-done)
+# put the result back into the register it came from
+instruction shl8.?l-done                src_xy(mar)       alu_op(x)     load_x      load_reg(via_ir)  load_status   next_addr(fetch)
 
 # immediate jump to the address specified
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
