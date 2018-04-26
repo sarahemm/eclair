@@ -109,7 +109,7 @@ def gen_mc_word(instruction, addr, ins_fields, next_addr_override = nil)
       rptz_next_addr = @locations.find_index(enum_name)
       # rptz_next_addr can only jump within the same 16-instruction block
       if(rptz_next_addr.to_s(2)[0..-5] != next_addr.to_s(2)[0..-5]) then
-        raise "RPTZ Next Addr can only jump within the same 16-instruction block, realignment required in instruction #{instruction}"
+        raise "RPTZ Next Addr can only jump within the same 16-instruction block, realignment required in instruction #{instruction} (#{rptz_next_addr.to_s(2)} vs #{next_addr.to_s(2)})"
       elsif(rptz_next_addr == next_addr) then
         raise("RPTZ Next Addr does not allow jumping to self in #{instruction}")
       end
