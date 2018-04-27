@@ -4,11 +4,11 @@
 
 module decoder_8(in, out, enable);
   input   [2:0] in;
-  input   [1:0] enable;
+  input         enable;
   output  [7:0] out;
   wire          master_enable;
 
-  assign #0.5 master_enable = enable[0] | enable[1];
+  assign #0.5 master_enable = enable;
   assign #1.25 out = (master_enable == 1'b1) ? 8'b1111_1111:
                (in == 3'b000) ? 8'b1111_1110:
                (in == 3'b001) ? 8'b1111_1101:
