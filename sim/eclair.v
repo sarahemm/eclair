@@ -100,6 +100,8 @@ module ECLair(int);
   wire  [15:0]  reg_intvect_xy;
 
   // XY driver latch resets
+  wire  [15:0]  xy_reset_normal;
+  wire  [4:1]   xy_reset_from_ir;
   wire  [15:0]  xy_reset;
   wire          xy_reset_imm;
   wire          xy_reset_a;
@@ -222,8 +224,9 @@ module ECLair(int);
   latch         #(.WIDTH(16))                   lat_mar_xy(.clk(1'b0), .reset(xy_reset_mar), .in(reg_mar), .out(reg_mar_xy));
   latch         #(.WIDTH(16))                   lat_mdr_xy(.clk(1'b0), .reset(xy_reset_mdr), .in(reg_mdr), .out(reg_mdr_xy));
   latch         #(.WIDTH(16))                   lat_intvect_xy(.clk(1'b0), .reset(xy_reset_intvect), .in(intvect), .out(reg_intvect_xy));
-  decoder_8                                     dcd_xy_a(.in(reg_xy_src[2:0]), .out(xy_reset[7:0]), .enable(reg_xy_src[3]));
-  decoder_8                                     dcd_xy_b(.in(reg_xy_src[2:0]), .out(xy_reset[15:8]), .enable(~reg_xy_src[3]));
+  decoder_8                                     dcd_xy_a(.in(reg_xy_src[2:0]), .out(xy_reset_normal[7:0]), .enable(reg_xy_src[3]));
+  decoder_8                                     dcd_xy_b(.in(reg_xy_src[2:0]), .out(xy_reset_normal[15:8]), .enable(~reg_xy_src[3]));
+  decoder_8                                     dcd_xy_from_ir(.in(3'b000 | reg_ir[7:6]), .out(xy_reset_from_ir[4:1]), .enable(reg_xy_src != 4'b1111));
   updowncounter #(.WIDTH(12))                   ctr_rpt(.clk(rpt_exec), .reset(~_reset), .out(rpt), .mode(rpt_mode ? 2'b01 : 2'b00), .preset(rpt_mdr_source), .cout(rpt_zero));
   
   // edge-sensitive microcode signals
@@ -315,6 +318,9 @@ module ECLair(int);
   assign intclr[7] = ~_por_reset;
 
   // driver reset signals that control which register is driving XY
+  assign xy_reset[15:5] = xy_reset_normal[15:5];
+  assign xy_reset[4:1] = xy_reset_normal[4:1] & xy_reset_from_ir[4:1];
+  assign xy_reset[0] = xy_reset_normal[0];
   assign xy_reset_imm = xy_reset[0];
   assign xy_reset_a = xy_reset[1];
   assign xy_reset_b = xy_reset[2];
@@ -323,7 +329,7 @@ module ECLair(int);
   assign xy_reset_sp = xy_reset[5];
   assign xy_reset_mar = xy_reset[6];
   assign xy_reset_mdr = xy_reset[7];
-  assign xy_reset_mdr = xy_reset[8];
+  assign xy_reset_intvect = xy_reset[8];
   
   // this is a wired-OR in the actual hardware
   assign lat_xy = reg_imm_xy | reg_a_xy | reg_b_xy | reg_c_xy | reg_d_xy | reg_sp_xy | reg_mar_xy | reg_mdr_xy | reg_intvect_xy;

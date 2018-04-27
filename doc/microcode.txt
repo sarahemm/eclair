@@ -81,6 +81,7 @@ enum  src_xy      sp      5
 enum  src_xy      mar     6
 enum  src_xy      mdr     7
 enum  src_xy      intvect 8
+enum  src_xy      from_ir 15
 enum  branch_cond always  0
 enum  branch_cond z       1
 enum  branch_cond co      2
@@ -138,6 +139,12 @@ location    shl8.cl     141   # shift low byte of register c left
 location    shl8.dl     210   # shift low byte of register d left
 location    shl8.?l     112   # shift low byte of register left
 location    shl8.?l-done  116 # shift low byte of register left (finalization step)
+location    shl8.ah     32    # shift high byte of register a left
+location    shl8.bh     78    # shift high byte of register b left
+location    shl8.ch     142   # shift high byte of register c left
+location    shl8.dh     222   # shift high byte of register d left
+location    shl8.?h     105   # shift high byte of register left
+location    shl8.?h-done  110 # shift high byte of register left (finalization step)
 location    jmp         14    # unconditional immediate jump
 location    wrpte       18    # write page table entry using data in a and address in d
 location    ldi8.flags  21    # load immediate 8 bits into system flags
@@ -260,6 +267,26 @@ instruction shl8.?l     mdr_byte(low)   alu_op(x+x)       src_mar(z)    load_mar
 instruction shl8.?l     mdr_byte(low)   src_xy(mar)       load_x        next_addr(-1) rptz_next_addr(shl8.?l-done)
 # put the result back into the register it came from
 instruction shl8.?l-done                src_xy(mar)       alu_op(x)     load_x      load_reg(via_ir)  load_status   next_addr(fetch)
+
+# shift low byte of supplied 8-bit register left
+instruction shl8.ah     inc_pc  next_addr(shl8.?h)
+instruction shl8.bh     inc_pc  next_addr(shl8.?h)
+instruction shl8.ch     inc_pc  next_addr(shl8.?h)
+instruction shl8.dh     inc_pc  next_addr(shl8.?h)
+
+# shift high byte of register selected by IR[6..7] left
+# TODO: this can almost certainly be optimized
+# load RPT from immediate and zero out low byte of MDR so we can later use the high byte alone
+instruction shl8.?h     mem_read        src_mar(pc)     load_mar      src_mdr(data)     load_mdr
+instruction shl8.?h     xy_imm_lsb(0)   src_xy(imm)     load_x        src_mdr(z) load_mdr  rpt_mode(load)  rpt_exec
+# move value from register into MDR (our temp register)
+# we can't work in-place as the low byte of the register will get shifted into the high byte
+instruction shl8.?h     mdr_byte(high)  src_xy(from_ir) load_x        src_mdr(z) load_mdr
+# shift left by one bit
+instruction shl8.?h     src_xy(mdr)     load_x          rpt_mode(dec)     rpt_exec  
+instruction shl8.?h     alu_op(x+x)     reg_byte(high) load_reg(via_ir)  src_mdr(z) mdr_byte(high) load_mdr load_status  next_addr(-1) rptz_next_addr(shl8.?h-done)
+# this is really just here because we can't do long jumps based on rptz
+instruction shl8.?h-done    next_addr(fetch)
 
 # immediate jump to the address specified
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
