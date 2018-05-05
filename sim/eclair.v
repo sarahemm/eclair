@@ -157,7 +157,7 @@ module ECLair(int);
   
   counter         #(.WIDTH(3))                  ctr_clk_divider(.clk(clk_main), .ce(1'b1), .reset(1'b0), .out(clk_divided), .load(1'b0), .preset(3'b000));
   flipflop_jk                                   flp_cs_ready(.clk(top_of_cs), .j(1'b1), .k(1'b0), .q(cs_ready));
-  mux_21                                        mux_cs_clk_selector(cs_ready, clk_quarter, clk_main, clk_cs);
+  mux_21                                        mux_cs_clk_selector(.sel(cs_ready), .a(clk_quarter), .b(clk_main), .y(clk_cs));
   mux_2x                                        mux_cs_addr(.sel(cs_ready), .a(cs_addr_init), .b(cs_addr_run), .y(cs_addr));
   mux_2x                                        mux_cs_next_addr_rptz(.sel(rptz_next_nibble != 4'b0000 && rpt_zero), .a(cs_next_addr), .b(cs_next_addr_rptz), .y(cs_next_addr_normal));
   mux_2x                                        mux_cs_next_addr(.sel(cs_next_addr == 8'b00000000), .a(cs_next_addr_normal), .b(cs_next_addr_alt), .y(next_addr));
@@ -169,7 +169,7 @@ module ECLair(int);
   flipflop_d      #(.WIDTH(24))                 flp_ram_cs_e(.clk(clk_cs_dly2), .reset(~(clk_cs && clk_cs_dly2)), .in(cs_data_prelatch[23:0]),  .out(cs_data[23:0]));
   flipflop_d      #(.WIDTH(40))                 flp_ram_cs_l(.clk(clk_cs_dly), .reset(1'b0), .in(cs_data_prelatch[63:24]), .out(cs_data[63:24]));
   main_ram        #(.TYPE("Main"))              ram_main(._cs(1'b0), ._oe(~(~ram_write & ~addr_ram)), ._w(~(ram_write & ~addr_ram)), .addr(bus_addr[19:0]), .data_in(reg_mdr_8bit), .data_out(bus_data));
-  main_eprom      #(.ROM_FILE("sysrom.bin"))    rom_boot(1'b0, addr_rom, bus_addr[19:0], bus_data);
+  main_eprom      #(.ROM_FILE("sysrom.bin"))    rom_boot(._cs(1'b0), ._oe(addr_rom), .addr(bus_addr[19:0]), .data(bus_data));
   counter         #(.WIDTH(16))                 ctr_pc(.clk(inc_pc), .ce(1'b1), .reset(~_reset), .out(pc), .load(really_load_pc), .preset(bus_z));
   latch           #(.WIDTH(8))                  lat_reg_a_h(.clk(reg_a_load | ~op_16bit & ~reg_byte), .reset(1'b0), .in(bus_z[15:8]), .out(reg_a[15:8]));
   latch           #(.WIDTH(8))                  lat_reg_b_h(.clk(reg_b_load | ~op_16bit & ~reg_byte), .reset(1'b0), .in(bus_z[15:8]), .out(reg_b[15:8]));
