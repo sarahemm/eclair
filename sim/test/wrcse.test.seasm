@@ -12,3 +12,4 @@ halt
 // expect: reg_b=01010101_01010101
 // expect: reg_c=00010010_00110100
 // expect: reg_d=01000011_00100001
+// expect: cs[0x78]=0x432112345555aaaa

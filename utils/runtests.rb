@@ -55,7 +55,9 @@ def run_test(filename)
   # RAM changes are output as they happen
   results = Hash.new
   last_pc = 0
+  cs_loaded = false
   ram_contents = Hash.new;
+  cs_contents = Hash.new;
   stdout.each_line do |out_line|
     #if(out_line =~ /^\s*$/) then
     #  puts "Cycle at PC #{last_pc} is complete."
@@ -68,17 +70,33 @@ def run_test(filename)
         ram_contents.each do |addr, data|
           results[last_pc]["ram[0x#{addr.to_s(16)}]"] = "0x#{data.to_s(16)}"
         end
+        cs_contents.each do |addr, data|
+          results[last_pc]["cs[0x#{addr.to_s(16)}]"] = "0x#{data.to_s(16)}"
+        end
       end
       results[last_pc] = Hash.new if !results[last_pc]
       results[last_pc][reg_val[1]] = reg_val[2]
-    elsif(reg_val = out_line.match(/Main RAM wrote data [01XZxz]+ \((\S+)\) to address [01XZxz]+ \((\S+)\)/)) then
-      data = reg_val[1].to_i(16)
-      addr = reg_val[2].to_i(16) + 0x100000;  # ram starts at 0x100000, writes are reported as offset into ram
-      ram_contents[addr] = data
-      results[last_pc] = Hash.new if !results[last_pc]
-      results[last_pc]["ram[0x#{addr.to_s(16)}]"] = "0x#{data.to_s(16)}"
+    elsif(reg_val = out_line.match(/(Main|Control store) RAM wrote data [01XZxz]+ \((\S+)\) to address [01XZxz]+ \((\S+)\)/)) then
+      ram_type = reg_val[1]
+      data = reg_val[2].to_i(16)
+      addr = reg_val[3].to_i(16)
+      case ram_type
+        when "Main"
+          # ram starts at 0x100000, writes are reported as offset into ram
+          addr += 0x100000
+          ram_contents[addr] = data
+          results[last_pc] = Hash.new if !results[last_pc]
+          results[last_pc]["ram[0x#{addr.to_s(16)}]"] = "0x#{data.to_s(16)}"
+        when "Control store"
+          next if !cs_loaded  # only save control store state once we've completed the power-on load
+          cs_contents[addr] = data
+          results[last_pc] = Hash.new if !results[last_pc]
+          results[last_pc]["cs[0x#{addr.to_s(16)}]"] = "0x#{data.to_s(16)}"
+      end
       #puts "results[0x#{last_pc.to_s(16)}][ram[0x#{addr.to_s(16)}]]"
-      #puts "Found a RAM write of data #{reg_val[1]} to address #{reg_val[2]} at pc #{last_pc}"
+      #puts "Found a #{ram_type} RAM write of data 0x#{data.to_s(16)} to address 0x#{addr.to_s(16)} at pc #{last_pc}"
+    elsif(out_line.match(/^Microcode loaded from ROM to RAM/)) then
+      cs_loaded = true
     end
   end
   
