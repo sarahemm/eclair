@@ -150,7 +150,7 @@ module ECLair(int);
   wire          int_pending;    // at least one interrupt is waiting to be serviced
   wire          rpt_zero;       // RPT register is zero
   wire          write_cse;      // microcode bit to activate CS write logic
-  wire  [5:0]   cs_write_seq;           // steps of the control store write sequencer, controlled by a counter
+  wire  [7:0]   cs_write_seq;           // steps of the control store write sequencer, controlled by a shift register
   wire          cs_write_in_progress;   // write sequencer has control of the CPU
   wire          cs_addr_from_sp;        // drive cs_addr from SP instead of the microcode sequencer
   wire          cs_write_seq_reset;     // reset the write sequencer to the idle state
@@ -242,8 +242,7 @@ module ECLair(int);
   decoder_8                                     dcd_xy_b(.in(reg_xy_src[2:0]), .out(xy_reset_normal[15:8]), .enable(~reg_xy_src[3]));
   decoder_8                                     dcd_xy_from_ir(.in(3'b000 | reg_ir[7:6]), .out(xy_reset_from_ir[4:1]), .enable(reg_xy_src != 4'b1111));
   updowncounter #(.WIDTH(12))                   ctr_rpt(.clk(rpt_exec), .reset(~_reset), .out(rpt), .mode(rpt_mode ? 2'b01 : 2'b00), .preset(rpt_mdr_source), .cout(rpt_zero));
-  
-  counter       #(.WIDTH(6))                    ctr_cswrite(.clk(clk_main), .ce(write_cse), .reset(~_por_reset || cs_write_seq_reset), .out(cs_write_seq), .load(1'b0), .preset(6'b000000));
+  shiftreg      #(.WIDTH(8))                    shr_cswrite(.clk(clk_main), .in(write_cse & ~cs_write_in_progress), .out(cs_write_seq));
   
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
@@ -280,7 +279,7 @@ module ECLair(int);
   assign reg_byte = cs_data[52];
   assign ram_read = cs_data[53];
   assign rptz_next_nibble = cs_data[57:54];
-  assign write_cse = cs_data[58];
+  assign write_cse = cs_data[58] & cs_ready;
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
@@ -362,7 +361,7 @@ module ECLair(int);
   // control store write sequencer, this takes over the CPU briefly when doing a control store write
   assign cs_write_in_progress = (cs_write_seq[0] | cs_write_seq[1] | cs_write_seq[2] | cs_write_seq[3]);
   assign cs_addr_from_sp = (cs_write_seq[1] || cs_write_seq[2] || cs_write_seq[3]);
-  assign cs_write = (cs_write_seq[2] & ~cs_write_seq[3]);
+  assign cs_write = cs_write_seq[2];
   assign cs_write_seq_reset = cs_write_seq[4];
   
   always begin
