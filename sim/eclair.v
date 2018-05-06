@@ -29,10 +29,9 @@ module ECLair(int);
   wire  [7:0]   cs_addr_init;     // output of control store counter, used during the initial copy
   wire  [7:0]   cs_addr_run;      // output of control store sequencer latch, used during runtime
   wire  [7:0]   cs_addr_normal;   // output of the mux for cs_addr_init/run, fed to the write-or-not mux to generate cs_addr
-  wire  [63:0]  cs_rom_data;      // ROM control store, used to load into RAM at startup
   wire  [63:0]  cs_data_prelatch; // RAM control store output
   wire  [63:0]  cs_data;          // RAM control store latch output, used to actually run the machine
-  reg   [63:0]  cs_data_in;
+  wire  [63:0]  cs_ram_data_in;   // input data to the control store RAM
   wire          cs_ram__w;        // RAM control store write signal
   wire  [7:0]   cs_next_addr;         // control store next microcode address bits
   wire  [7:0]   cs_next_addr_alt;     // control store next microcode address bits from alternate source
@@ -173,8 +172,8 @@ module ECLair(int);
   mux_2x                                        mux_cs_next_addr_alt(.sel(int_jmp), .a(reg_ir), .b(intvect), .y(cs_next_addr_alt));
   counter         #(.WIDTH(8))                  ctr_cs_seq(.clk(clk_cs), .ce(~cs_ready), .reset(~_por_reset), .out(cs_addr_init), .load(1'b0), .preset(8'b00000000));
   flipflop_d      #(.WIDTH(8))                  flp_cs_addr(.clk(clk_cs), .reset(~cs_ready), .in(next_addr), .out(cs_addr_run));
-  microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(1'b0, 1'b0, cs_addr, cs_rom_data);
-  microcode_ram                                 ram_cs(._cs(1'b0), ._oe(1'b0), ._w(cs_ram__w), .addr(cs_addr), .data_in(cs_data_in), .data_out(cs_data_prelatch));
+  microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(1'b0, 1'b0, cs_addr, cs_ram_data_in);
+  microcode_ram                                 ram_cs(._cs(1'b0), ._oe(1'b0), ._w(cs_ram__w), .addr(cs_addr), .data_in(cs_ram_data_in), .data_out(cs_data_prelatch));
   flipflop_d      #(.WIDTH(24))                 flp_ram_cs_e(.clk(clk_cs_dly2), .reset(~(clk_cs && clk_cs_dly2)), .in(cs_data_prelatch[23:0]),  .out(cs_data[23:0]));
   flipflop_d      #(.WIDTH(40))                 flp_ram_cs_l(.clk(clk_cs_dly), .reset(1'b0), .in(cs_data_prelatch[63:24]), .out(cs_data[63:24]));
   main_ram        #(.TYPE("Main"))              ram_main(._cs(1'b0), ._oe(~(~ram_write & ~addr_ram)), ._w(~(ram_write & ~addr_ram)), .addr(bus_addr[19:0]), .data_in(reg_mdr_8bit), .data_out(bus_data));
@@ -384,14 +383,6 @@ module ECLair(int);
           $finish;
         end
       end
-    end
-  end
-  
-  // control store copier
-  always @ (clk_main) begin
-    if(!cs_ready && cs_ram__w == 1 && _por_reset == 1'b1) begin
-      //$display("Copying control store word%d:     (%b)", cs_addr, cs_rom_data);
-      cs_data_in <= cs_rom_data;
     end
   end
   
