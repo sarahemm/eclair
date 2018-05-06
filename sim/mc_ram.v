@@ -17,6 +17,6 @@ module microcode_ram(_cs, _oe, _w, addr, data_in, data_out);
   
   always @ (negedge _w) begin
     ram[addr] <= #5 data_in;
-    $display("RAM control store wrote word %d to %b", addr, data_in);
+    $display("Control store RAM wrote data %b (0x%0h) to address %b (0x%0h)", data_in, data_in, addr, addr);
   end
 endmodule
