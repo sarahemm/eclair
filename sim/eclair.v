@@ -150,7 +150,11 @@ module ECLair(int);
   wire          int_pending;    // at least one interrupt is waiting to be serviced
   wire          rpt_zero;       // RPT register is zero
   wire          write_cse;      // microcode bit to activate CS write logic
-  wire  [5:0]   cswrite_step;  // steps of the control store write procedure, controlled by a counter
+  wire  [5:0]   cs_write_seq;           // steps of the control store write sequencer, controlled by a counter
+  wire          cs_write_in_progress;   // write sequencer has control of the CPU
+  wire          cs_addr_from_sp;        // drive cs_addr from SP instead of the microcode sequencer
+  wire          cs_write_seq_reset;     // reset the write sequencer to the idle state
+  wire          cs_write;               // write a control store word
   
   initial begin
     clk_main = 1'b0;
@@ -164,11 +168,11 @@ module ECLair(int);
   flipflop_jk                                   flp_cs_ready(.clk(top_of_cs), .j(1'b1), .k(1'b0), .q(cs_ready));
   // controls whether the clock is directed to the control store (normal) or the control store writing counter (only when writing CS)
   // TODO: figure out the logic in real life with real prop delays
-  andgate         #(.WIDTH(1))                  and_clk_cs(.a(clk_cs_mid), .b(cswrite_step == 0), .y(clk_cs));
+  andgate         #(.WIDTH(1))                  and_clk_cs(.a(clk_cs_mid), .b(~cs_write_in_progress), .y(clk_cs));
   mux_21                                        mux_cs_clk_selector(.sel(cs_ready), .a(clk_quarter), .b(clk_main), .y(clk_cs_mid));
   mux_2x                                        mux_cs_addr(.sel(cs_ready), .a(cs_addr_init), .b(cs_addr_run), .y(cs_addr_normal));
   // TODO: clean up the two chained muxes. we also had to bump the _dly clock delays from 8ns to 10ns to make this work, fix that when this is fixed.
-  mux_2x                                        mux_cs_addr_write(.sel(cswrite_step[1] || cswrite_step[2] || cswrite_step[3]), .a(cs_addr_normal), .b(reg_sp[7:0]), .y(cs_addr));
+  mux_2x                                        mux_cs_addr_write(.sel(cs_addr_from_sp), .a(cs_addr_normal), .b(reg_sp[7:0]), .y(cs_addr));
   mux_2x                                        mux_cs_next_addr_rptz(.sel(rptz_next_nibble != 4'b0000 && rpt_zero), .a(cs_next_addr), .b(cs_next_addr_rptz), .y(cs_next_addr_normal));
   mux_2x                                        mux_cs_next_addr(.sel(cs_next_addr == 8'b00000000), .a(cs_next_addr_normal), .b(cs_next_addr_alt), .y(next_addr));
   mux_2x                                        mux_cs_next_addr_alt(.sel(int_jmp), .a(reg_ir), .b(intvect), .y(cs_next_addr_alt));
@@ -239,7 +243,7 @@ module ECLair(int);
   decoder_8                                     dcd_xy_from_ir(.in(3'b000 | reg_ir[7:6]), .out(xy_reset_from_ir[4:1]), .enable(reg_xy_src != 4'b1111));
   updowncounter #(.WIDTH(12))                   ctr_rpt(.clk(rpt_exec), .reset(~_reset), .out(rpt), .mode(rpt_mode ? 2'b01 : 2'b00), .preset(rpt_mdr_source), .cout(rpt_zero));
   
-  counter       #(.WIDTH(6))                    ctr_cswrite(.clk(clk_main), .ce(write_cse), .reset(~_por_reset || cswrite_step[4]), .out(cswrite_step), .load(1'b0), .preset(6'b000000));
+  counter       #(.WIDTH(6))                    ctr_cswrite(.clk(clk_main), .ce(write_cse), .reset(~_por_reset || cs_write_seq_reset), .out(cs_write_seq), .load(1'b0), .preset(6'b000000));
   
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
@@ -285,7 +289,7 @@ module ECLair(int);
   assign top_of_cs = cs_addr == 8'b11111111;
   assign processor_halted = cs_ready & cs_addr == 8'hFE;
   assign _reset = _ext_reset & _por_reset & cs_ready;
-  assign cs_ram__w = (cs_ready ~| clk_cs) | (cswrite_step[2] & ~cswrite_step[3]);
+  assign cs_ram__w = (cs_ready ~| clk_cs) | cs_write;
   assign reg_abcd[15:0]  = reg_a;
   assign reg_abcd[31:16] = reg_b;
   assign reg_abcd[47:32] = reg_c;
@@ -354,6 +358,12 @@ module ECLair(int);
   
   // this is a wired-OR in the actual hardware
   assign lat_xy = reg_imm_xy | reg_a_xy | reg_b_xy | reg_c_xy | reg_d_xy | reg_sp_xy | reg_mar_xy | reg_mdr_xy | reg_intvect_xy;
+  
+  // control store write sequencer, this takes over the CPU briefly when doing a control store write
+  assign cs_write_in_progress = (cs_write_seq[0] | cs_write_seq[1] | cs_write_seq[2] | cs_write_seq[3]);
+  assign cs_addr_from_sp = (cs_write_seq[1] || cs_write_seq[2] || cs_write_seq[3]);
+  assign cs_write = (cs_write_seq[2] & ~cs_write_seq[3]);
+  assign cs_write_seq_reset = cs_write_seq[4];
   
   always begin
     #40 clk_main = ~clk_main; // 25MHz main clock
