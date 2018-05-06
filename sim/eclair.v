@@ -32,6 +32,7 @@ module ECLair(int);
   wire  [63:0]  cs_data_prelatch; // RAM control store output
   wire  [63:0]  cs_data;          // RAM control store latch output, used to actually run the machine
   wire  [63:0]  cs_ram_data_in;   // input data to the control store RAM
+  wire  [63:0]  cs_rom_data;      // output of the control store ROM data
   wire          cs_ram__w;        // RAM control store write signal
   wire  [7:0]   cs_next_addr;         // control store next microcode address bits
   wire  [7:0]   cs_next_addr_alt;     // control store next microcode address bits from alternate source
@@ -77,6 +78,7 @@ module ECLair(int);
   wire  [15:0]  reg_b;
   wire  [15:0]  reg_c;
   wire  [15:0]  reg_d;
+  wire  [63:0]  reg_abcd;       // all gen purpose registers together, used for cs writing
   wire  [15:0]  reg_sp;
   wire  [7:0]   reg_ir;
   wire  [15:0]  reg_mar;
@@ -172,7 +174,7 @@ module ECLair(int);
   mux_2x                                        mux_cs_next_addr_alt(.sel(int_jmp), .a(reg_ir), .b(intvect), .y(cs_next_addr_alt));
   counter         #(.WIDTH(8))                  ctr_cs_seq(.clk(clk_cs), .ce(~cs_ready), .reset(~_por_reset), .out(cs_addr_init), .load(1'b0), .preset(8'b00000000));
   flipflop_d      #(.WIDTH(8))                  flp_cs_addr(.clk(clk_cs), .reset(~cs_ready), .in(next_addr), .out(cs_addr_run));
-  microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(1'b0, 1'b0, cs_addr, cs_ram_data_in);
+  microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(1'b0, 1'b0, cs_addr_init, cs_rom_data);
   microcode_ram                                 ram_cs(._cs(1'b0), ._oe(1'b0), ._w(cs_ram__w), .addr(cs_addr), .data_in(cs_ram_data_in), .data_out(cs_data_prelatch));
   flipflop_d      #(.WIDTH(24))                 flp_ram_cs_e(.clk(clk_cs_dly2), .reset(~(clk_cs && clk_cs_dly2)), .in(cs_data_prelatch[23:0]),  .out(cs_data[23:0]));
   flipflop_d      #(.WIDTH(40))                 flp_ram_cs_l(.clk(clk_cs_dly), .reset(1'b0), .in(cs_data_prelatch[63:24]), .out(cs_data[63:24]));
@@ -283,7 +285,15 @@ module ECLair(int);
   assign top_of_cs = cs_addr == 8'b11111111;
   assign processor_halted = cs_ready & cs_addr == 8'hFE;
   assign _reset = _ext_reset & _por_reset & cs_ready;
-  assign cs_ram__w = (cs_ready ~| clk_cs) | cswrite_step[2];
+  assign cs_ram__w = (cs_ready ~| clk_cs) | (cswrite_step[2] & ~cswrite_step[3]);
+  assign reg_abcd[15:0]  = reg_a;
+  assign reg_abcd[31:16] = reg_b;
+  assign reg_abcd[47:32] = reg_c;
+  assign reg_abcd[63:48] = reg_d;
+  // this changes the arrangement of the control store data input after startup
+  // won't be required in real life, this is just needed so the registers stay all x until set
+  // as required by the unit testing framework
+  assign cs_ram_data_in = (cs_ready ? cs_rom_data | reg_abcd : cs_rom_data);
   assign reg_a_load = reg_load[1] & reg_load_via_ir[1];
   assign reg_b_load = reg_load[2] & reg_load_via_ir[3];
   assign reg_c_load = reg_load[3] & reg_load_via_ir[5];

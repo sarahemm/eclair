@@ -160,6 +160,7 @@ location    push16.?    47    # common latter half of push16.*
 location    pop16.pc    55    # pop 16 bits from address pointed to by SP-- into PC
 location    call        211   # push PC to stack then jump immediate
 location    halt        254
+location    lz          255   # landing zone, required to be all zeroes for control store writer
 
 # aliases - other names for instructions
 alias       ret         pop16.pc
@@ -370,3 +371,10 @@ instruction call        include(jmp)
 
 # halt forever
 instruction halt        next_addr(halt)
+
+# landing zone - the control store copier 'lands' here at the end and sits forever
+# this is required for the control store writer to work, as the data output of that is ORed with
+# the control store EPROM to generate the control store RAM data input.
+# this must be all zeroes!
+instruction lz  next_addr(init)
+
