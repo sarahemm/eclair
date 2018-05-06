@@ -24,7 +24,6 @@ field load_pc         6     1
 field load_reg        7     3
 field load_x          10    1
 field load_y          11    1
-# bit 12 is currently available
 field load_ptb        13    1
 field rpt_exec        14    1
 field load_status     15    1
@@ -49,6 +48,7 @@ field rpt_mode        51    1
 field reg_byte        52    1
 field mem_read        53    1
 field rptz_next_addr  54    4
+field write_cse       58    1
 
 # enums - names for values that go into bit positions
 enum  src_mar     z       0
@@ -147,6 +147,7 @@ location    shl8.?h     105   # shift high byte of register left
 location    shl8.?h-done  110 # shift high byte of register left (finalization step)
 location    jmp         14    # unconditional immediate jump
 location    wrpte       18    # write page table entry using data in a and address in d
+location    wrcse       90    # write control store entry using data in A-D and address in SP
 location    ldi8.flags  21    # load immediate 8 bits into system flags
 location    add8.ab     24    # add lower 8 bits of a and b registers, result goes into a
 location    sub8.ab     62    # subtract lower 8 bits of a and b registers, result goes into a
@@ -304,6 +305,14 @@ instruction jmpz        branch_cond(z)                load_pc         next_addr(
 instruction wrpte       alu_op(x)     src_xy(d)       load_x          src_mar(z)      load_mar
 instruction wrpte       alu_op(x)     src_xy(a)       load_x          load_status
 instruction wrpte       write_pte     next_addr(fetch)
+
+# write control store entry, get data from A-D and write to control store address specific in SP
+# due to the need to jump the control store to write to it, this is actually implemented in hardware
+# so all we have to do is trigger the write_cse line, which then lets the control store write hardware
+# take over execution for a few cycles.
+instruction wrcse       write_cse
+# this is effectively a noop, just need an extra clock cycle to handle wrcse properly
+instruction wrcse       alu_op(x)     next_addr(fetch)
 
 # load immediate 8 bits into MDR
 instruction push8.imm   inc_pc        src_mar(pc)   load_mar        src_mdr(data)   mem_read      mdr_byte(low) load_mdr next_addr(push8.?)

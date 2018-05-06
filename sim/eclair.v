@@ -10,6 +10,7 @@ module ECLair(int);
   wire          clk_cs;       // control store clock (driven from clk_main or clk_half_a)
   wire          clk_cs_dly;   // control store clock, delayed a slight amount (used to latch microcode signals)
   wire          clk_cs_dly2;  // control store clock, delayed more (used for edge-sensitive signals)
+  wire          clk_cs_mid;   // control store clock between the quarter/full selector and the writecse logic
   reg           _ext_reset;   // external reset, when this is high we're forced into reset
   reg           _por_reset;   // power-on reset, goes high briefly when powered on
   wire          _reset;       // master reset, when this is high we're good to run
@@ -27,6 +28,7 @@ module ECLair(int);
   wire  [7:0]   cs_addr;          // output of control store sequencer
   wire  [7:0]   cs_addr_init;     // output of control store counter, used during the initial copy
   wire  [7:0]   cs_addr_run;      // output of control store sequencer latch, used during runtime
+  wire  [7:0]   cs_addr_normal;   // output of the mux for cs_addr_init/run, fed to the write-or-not mux to generate cs_addr
   wire  [63:0]  cs_rom_data;      // ROM control store, used to load into RAM at startup
   wire  [63:0]  cs_data_prelatch; // RAM control store output
   wire  [63:0]  cs_data;          // RAM control store latch output, used to actually run the machine
@@ -146,6 +148,8 @@ module ECLair(int);
   wire          int_jmp;        // jump to IRQ area of microcode on next fetch/execute
   wire          int_pending;    // at least one interrupt is waiting to be serviced
   wire          rpt_zero;       // RPT register is zero
+  wire          write_cse;      // microcode bit to activate CS write logic
+  wire  [5:0]   cswrite_step;  // steps of the control store write procedure, controlled by a counter
   
   initial begin
     clk_main = 1'b0;
@@ -157,8 +161,13 @@ module ECLair(int);
   
   counter         #(.WIDTH(3))                  ctr_clk_divider(.clk(clk_main), .ce(1'b1), .reset(1'b0), .out(clk_divided), .load(1'b0), .preset(3'b000));
   flipflop_jk                                   flp_cs_ready(.clk(top_of_cs), .j(1'b1), .k(1'b0), .q(cs_ready));
-  mux_21                                        mux_cs_clk_selector(.sel(cs_ready), .a(clk_quarter), .b(clk_main), .y(clk_cs));
-  mux_2x                                        mux_cs_addr(.sel(cs_ready), .a(cs_addr_init), .b(cs_addr_run), .y(cs_addr));
+  // controls whether the clock is directed to the control store (normal) or the control store writing counter (only when writing CS)
+  // TODO: figure out the logic in real life with real prop delays
+  andgate         #(.WIDTH(1))                  and_clk_cs(.a(clk_cs_mid), .b(cswrite_step == 0), .y(clk_cs));
+  mux_21                                        mux_cs_clk_selector(.sel(cs_ready), .a(clk_quarter), .b(clk_main), .y(clk_cs_mid));
+  mux_2x                                        mux_cs_addr(.sel(cs_ready), .a(cs_addr_init), .b(cs_addr_run), .y(cs_addr_normal));
+  // TODO: clean up the two chained muxes. we also had to bump the _dly clock delays from 8ns to 10ns to make this work, fix that when this is fixed.
+  mux_2x                                        mux_cs_addr_write(.sel(cswrite_step[1] || cswrite_step[2] || cswrite_step[3]), .a(cs_addr_normal), .b(reg_sp[7:0]), .y(cs_addr));
   mux_2x                                        mux_cs_next_addr_rptz(.sel(rptz_next_nibble != 4'b0000 && rpt_zero), .a(cs_next_addr), .b(cs_next_addr_rptz), .y(cs_next_addr_normal));
   mux_2x                                        mux_cs_next_addr(.sel(cs_next_addr == 8'b00000000), .a(cs_next_addr_normal), .b(cs_next_addr_alt), .y(next_addr));
   mux_2x                                        mux_cs_next_addr_alt(.sel(int_jmp), .a(reg_ir), .b(intvect), .y(cs_next_addr_alt));
@@ -229,6 +238,8 @@ module ECLair(int);
   decoder_8                                     dcd_xy_from_ir(.in(3'b000 | reg_ir[7:6]), .out(xy_reset_from_ir[4:1]), .enable(reg_xy_src != 4'b1111));
   updowncounter #(.WIDTH(12))                   ctr_rpt(.clk(rpt_exec), .reset(~_reset), .out(rpt), .mode(rpt_mode ? 2'b01 : 2'b00), .preset(rpt_mdr_source), .cout(rpt_zero));
   
+  counter       #(.WIDTH(6))                    ctr_cswrite(.clk(clk_main), .ce(write_cse), .reset(~_por_reset || cswrite_step[4]), .out(cswrite_step), .load(1'b0), .preset(6'b000000));
+  
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
   assign reg_mdr_load = cs_data[1];
@@ -264,15 +275,16 @@ module ECLair(int);
   assign reg_byte = cs_data[52];
   assign ram_read = cs_data[53];
   assign rptz_next_nibble = cs_data[57:54];
+  assign write_cse = cs_data[58];
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
-  assign #8 clk_cs_dly = clk_cs;
-  assign #8 clk_cs_dly2 = clk_cs_dly;
+  assign #10 clk_cs_dly = clk_cs;
+  assign #10 clk_cs_dly2 = clk_cs_dly;
   assign top_of_cs = cs_addr == 8'b11111111;
   assign processor_halted = cs_ready & cs_addr == 8'hFE;
   assign _reset = _ext_reset & _por_reset & cs_ready;
-  assign cs_ram__w = cs_ready ~| clk_cs;
+  assign cs_ram__w = (cs_ready ~| clk_cs) | cswrite_step[2];
   assign reg_a_load = reg_load[1] & reg_load_via_ir[1];
   assign reg_b_load = reg_load[2] & reg_load_via_ir[3];
   assign reg_c_load = reg_load[3] & reg_load_via_ir[5];
