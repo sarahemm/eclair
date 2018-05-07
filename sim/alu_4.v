@@ -19,8 +19,6 @@ module alu_4(s, a, b, cn, m, f, gg, pg, cn4);
   wire            gate_fb8, gate_fb9, gate_fb11, gate_fb12, gate_fb13, gate_fb14, gate_fb15; 
   wire            gate_fc0, gate_fc1, gate_fc2, gate_fc3;
   
-  // TODO: realistic propagation delays
-  
   // bit 0
   assign gate_0l  = ~b[0];
   assign gate_0m0 = ~(s[3] | b[0] | a[0]);
