@@ -81,6 +81,7 @@ enum  src_xy      sp      5
 enum  src_xy      mar     6
 enum  src_xy      mdr     7
 enum  src_xy      intvect 8
+enum  src_xy      mar-shr 9
 enum  src_xy      from_ir 15
 enum  branch_cond always  0
 enum  branch_cond z       1
@@ -145,6 +146,12 @@ location    shl8.ch     142   # shift high byte of register c left
 location    shl8.dh     222   # shift high byte of register d left
 location    shl8.?h     105   # shift high byte of register left
 location    shl8.?h-done  110 # shift high byte of register left (finalization step)
+location    shr16.a     37    # shift register a right
+location    shr16.b     79    # shift register b right
+location    shr16.c     143   # shift register c right
+location    shr16.d     200   # shift register d right
+location    shr16.?     123   # shift 16 bits right
+location    shr16.?-done  127 # shift 16 bits right (finalization step)
 location    jmp         14    # unconditional immediate jump
 location    wrpte       18    # write page table entry using data in a and address in d
 location    wrcse       90    # write control store entry using data in A-D and address in SP
@@ -289,6 +296,24 @@ instruction shl8.?h     src_xy(mdr)     load_x          rpt_mode(dec)     rpt_ex
 instruction shl8.?h     alu_op(x+x)     reg_byte(high) load_reg(via_ir)  src_mdr(z) mdr_byte(high) load_mdr load_status  next_addr(-1) rptz_next_addr(shl8.?h-done)
 # this is really just here because we can't do long jumps based on rptz
 instruction shl8.?h-done    next_addr(fetch)
+
+# shift supplied 16-bit register left
+instruction shr16.a     op_16bit        src_xy(a)         load_x        inc_pc  next_addr(shr16.?)
+instruction shr16.b     op_16bit        src_xy(b)         load_x        inc_pc  next_addr(shr16.?)
+instruction shr16.c     op_16bit        src_xy(c)         load_x        inc_pc  next_addr(shr16.?)
+instruction shr16.d     op_16bit        src_xy(d)         load_x        inc_pc  next_addr(shr16.?)
+
+# shift 16-bit register selected by IR[6..7] right
+# load RPT from immediate
+instruction shr16.?     mem_read        src_mar(pc)       load_mar      src_mdr(data)     load_mdr
+# after loading RPT, we start at the 'end' of the loop, since we have to initialize MAR from Z
+# before we start shifting
+instruction shr16.?     rpt_mode(load)  rpt_exec          next_addr(+2)
+# shift right by one bit
+instruction shr16.?     op_16bit        src_xy(mar-shr)   load_x        rpt_mode(dec)     rpt_exec
+instruction shr16.?     op_16bit        src_mar(z)        load_mar      next_addr(-1)     rptz_next_addr(shr16.?-done)
+# put the result back into the register it came from
+instruction shr16.?-done     op_16bit        src_xy(mar)       alu_op(x)     load_x      load_reg(via_ir)  load_status   next_addr(fetch)
 
 # immediate jump to the address specified
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
