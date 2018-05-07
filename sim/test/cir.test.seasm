@@ -1,0 +1,16 @@
+@000
+ldi16.a   0xAAAA
+ldi16.b   0xBBBB
+ldi16.c   0xCCCC
+ldi16.d   0xDDDD
+shl16.a   0x02
+add16.ab
+cir
+// expect: pc=0x00000f
+// expect: reg_x=00000000_00000000
+// expect: reg_y=00000000_00000000
+// expect: reg_mar=00000000_00000000
+// expect: reg_mdr=00000000_00000000
+// expect: rpt=0000_00000000
+halt
+// expect: pc=0x000010
