@@ -21,11 +21,13 @@ module updowncounter(clk, reset, out, preset, mode, cout, clout);
     if (reset) begin
       // reset
       out <= #1.25 0;
-      cout <= 0;
-      clout <= 1;
+      cout <= #1.25 0;
+      clout <= #1.25 0;
     end else if(mode == 2'b00) begin
       // load
       out <= #1.25 preset;
+      cout <= #1.25 0;
+      clout <= #1.25 0;
     end else if(mode == 2'b01) begin
       // decrement
       clout <= #1.25 out == 2;
