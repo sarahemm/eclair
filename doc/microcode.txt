@@ -152,18 +152,18 @@ location    shr16.c     143   # shift register c right
 location    shr16.d     200   # shift register d right
 location    shr16.?     123   # shift 16 bits right
 location    shr16.?-done  127 # shift 16 bits right (finalization step)
-#location    shr8.al     43    # shift low byte of register a right
-#location    shr8.bl     80    # shift low byte of register b right
-#location    shr8.cl     144   # shift low byte of register c right
-#location    shr8.dl     199   # shift low byte of register d right
-#location    shr8.?l     160   # shift low byte of register left
-#location    shr8.?l-done 164  # shift low byte of register left (finalization step)
+location    shr8.al     43    # shift low byte of register a right
+location    shr8.bl     80    # shift low byte of register b right
+location    shr8.cl     144   # shift low byte of register c right
+location    shr8.dl     199   # shift low byte of register d right
+location    shr8.?l     150   # shift low byte of register left
+location    shr8.?l-done 157  # shift low byte of register left (finalization step)
 location    shr8.ah     46    # shift high byte of register a right
 location    shr8.bh     81    # shift high byte of register b right
 location    shr8.ch     145   # shift high byte of register c right
 location    shr8.dh     198   # shift high byte of register d right
 location    shr8.?h     166   # shift low byte of register left
-location    shr8.?h-done 170  # shift low byte of register left (finalization step)
+location    shr8.?h-done 171  # shift low byte of register left (finalization step)
 location    jmp         14    # unconditional immediate jump
 location    wrpte       18    # write page table entry using data in a and address in d
 location    wrcse       90    # write control store entry using data in A-D and address in SP
@@ -336,14 +336,39 @@ instruction shr8.dh     inc_pc  next_addr(shr8.?h)
 # shift high byte of register selected by IR[6..7] right
 # load RPT from immediate
 instruction shr8.?h     mem_read        src_mar(pc)       load_mar      src_mdr(data)     load_mdr
-# after loading RPT, we start at the 'end' of the loop, since we have to initialize MAR from Z
-# before we start shifting
-instruction shr8.?h     rpt_mode(load)  rpt_exec          next_addr(+2)
+instruction shr8.?h     rpt_mode(load)  rpt_exec
+# move value from register into MDR (our temp register)
+# we can't work in-place as the low byte of the register will get shifted into the high byte
+instruction shr8.?h     mdr_byte(high)  src_xy(from_ir)   load_x        src_mdr(z)        load_mdr  next_addr(+2)
 # shift left by one bit
 instruction shr8.?h     mdr_byte(low)   src_xy(mar-shr)   load_x        rpt_mode(dec)     rpt_exec
 instruction shr8.?h     mdr_byte(low)   src_mar(z)        load_mar      next_addr(-1) rptz_next_addr(shr8.?h-done)
 # put the result back into the register it came from
 instruction shr8.?h-done reg_byte(high) src_xy(mar)       alu_op(x)     load_x      load_reg(via_ir)  load_status   next_addr(fetch)
+
+# shift low byte of supplied 8-bit register right
+instruction shr8.al     inc_pc  next_addr(shr8.?l)
+instruction shr8.bl     inc_pc  next_addr(shr8.?l)
+instruction shr8.cl     inc_pc  next_addr(shr8.?l)
+instruction shr8.dl     inc_pc  next_addr(shr8.?l)
+
+# shift low byte of register selected by IR[6..7] right
+# TODO: wow, this is kind of a mess and hopefully can be cleaned up once I'm less bored of working on shifts
+# load RPT from immediate
+instruction shr8.?l     mem_read        src_mar(pc)       load_mar      src_mdr(data)     load_mdr
+instruction shr8.?l     rpt_mode(load)  rpt_exec
+# move value from low byte of our register into the high byte of MAR
+# we can't work in-place as the high byte of the register will get shifted into the low byte
+# but we can only shift right using MAR, not MDR, so we have to go reg->MDR->MAR
+instruction shr8.?l     mdr_byte(low)   src_xy(from_ir)   load_x        src_mdr(z)        load_mdr
+instruction shr8.?l     mdr_byte(high)  xy_imm_lsb(0)     src_xy(imm)   load_x            src_mdr(z)        load_mdr
+instruction shr8.?l     src_xy(mdr)     load_x            src_mar(z)    load_mar          next_addr(+2)
+# shift left by one bit
+instruction shr8.?l     mdr_byte(low)   src_xy(mar-shr)   load_x        rpt_mode(dec)     rpt_exec
+instruction shr8.?l     mdr_byte(low)   src_mar(z)        load_mar      next_addr(-1) rptz_next_addr(shr8.?l-done)
+# put the result back into the register it came from via MAR->MDR->reg
+instruction shr8.?l-done src_xy(mar)    load_x            mdr_byte(low) src_mdr(z)  load_mdr
+instruction shr8.?l-done reg_byte(low)  src_xy(mdr)       alu_op(x)     load_x      load_reg(via_ir)  load_status   next_addr(fetch)
 
 # immediate jump to the address specified
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
