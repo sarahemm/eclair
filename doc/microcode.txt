@@ -367,9 +367,8 @@ instruction shr8.?l     src_xy(mdr)     load_x            src_mar(z)    load_mar
 # shift left by one bit
 instruction shr8.?l     mdr_byte(low)   src_xy(mar-shr)   load_x        rpt_mode(dec)     rpt_exec
 instruction shr8.?l     mdr_byte(low)   src_mar(z)        load_mar      next_addr(-1) rptz_next_addr(shr8.?l-done)
-# put the result back into the register it came from via MAR->MDR->reg
-instruction shr8.?l-done src_xy(mar)    load_x            mdr_byte(low) src_mdr(z)  load_mdr
-instruction shr8.?l-done reg_byte(low)  src_xy(mdr)       alu_op(x)     load_x      load_reg(via_ir)  load_status   next_addr(fetch)
+# put the result from MAR back into the register it came from
+instruction shr8.?l-done src_xy(mar)    load_x            reg_byte(low) load_reg(via_ir)  load_status   next_addr(fetch)
 
 # immediate jump to the address specified
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
