@@ -64,6 +64,7 @@ enum  load_reg    via_ir  7
 enum  alu_mode    arith   0
 enum  alu_mode    logic   1
 enum  alu_op      x       0
+enum  alu_op      not_x   0
 enum  alu_op      x+x     3
 enum  alu_op      add     6
 enum  alu_op      sub     9
@@ -176,6 +177,11 @@ location    sex.b       82    # sign extend register b 8->16 bits
 location    sex.c       146   # sign extend register c 8->16 bits
 location    sex.d       197   # sign extend register d 8->16 bits
 location    sex.?       177   # sign extend 8->16 bits
+location    inv.a       54    # invert 16-bit register a
+location    inv.b       83    # invert 16-bit register b
+location    inv.c       147   # invert 16-bit register c
+location    inv.d       196   # invert 16-bit register d
+location    inv.?       178   # invert 16-bit register
 location    jmpz        27    # jump if Z
 location    push8.imm   31    # push immediate 8 bits to address pointed to by SP++
 location    push8.?     33    # common latter half of push8.*
@@ -382,6 +388,13 @@ instruction sex.b       src_xy(from_ir)   load_x            src_mar(z)      load
 instruction sex.c       src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(sex.?)
 instruction sex.d       src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(sex.?)
 instruction sex.?       op_16bit          src_xy(mar-sex)   load_x          load_reg(via_ir)  next_addr(fetch)
+
+# invert (not) 16-bit register
+instruction inv.a       src_xy(from_ir)   load_x            next_addr(inv.?)
+instruction inv.b       src_xy(from_ir)   load_x            next_addr(inv.?)
+instruction inv.c       src_xy(from_ir)   load_x            next_addr(inv.?)
+instruction inv.d       src_xy(from_ir)   load_x            next_addr(inv.?)
+instruction inv.?       op_16bit          alu_mode(logic)   alu_op(not_x)     load_reg(via_ir)    next_addr(fetch)
 
 # immediate jump to the address specified
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
