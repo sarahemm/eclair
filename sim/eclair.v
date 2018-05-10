@@ -83,6 +83,7 @@ module ECLair(int);
   wire  [7:0]   reg_ir;
   wire  [15:0]  reg_mar;
   wire  [15:0]  reg_mar_shr;    // reg_mar shifted one bit right, used in the shift right microcode
+  wire  [15:0]  reg_mar_sex;    // reg_mar sign extended, high 8 bits are a copy of mar[7]
   wire  [15:0]  lat_mar;
   wire  [15:0]  reg_mdr;
   wire  [7:0]   reg_mdr_8bit;
@@ -103,6 +104,7 @@ module ECLair(int);
   wire  [15:0]  reg_mdr_xy;
   wire  [15:0]  reg_intvect_xy;
   wire  [15:0]  reg_mar_shr_xy;
+  wire  [15:0]  reg_mar_sex_xy;
   
   // XY driver latch resets
   wire  [15:0]  xy_reset_normal;
@@ -118,7 +120,8 @@ module ECLair(int);
   wire          xy_reset_mdr;
   wire          xy_reset_intvect;
   wire          xy_reset_mar_shr;
-
+  wire          xy_reset_mar_sex;
+  
   wire          alu_cout8;
   wire          alu_cout16;
   wire  [11:0]  pagetable_addr; // currently selected address in the pagetable
@@ -242,6 +245,7 @@ module ECLair(int);
   latch         #(.WIDTH(16))                   lat_mdr_xy(.clk(1'b0), .reset(xy_reset_mdr), .in(reg_mdr), .out(reg_mdr_xy));
   latch         #(.WIDTH(16))                   lat_intvect_xy(.clk(1'b0), .reset(xy_reset_intvect), .in(intvect), .out(reg_intvect_xy));
   latch         #(.WIDTH(16))                   lat_mar_shr_xy(.clk(1'b0), .reset(xy_reset_mar_shr), .in(reg_mar_shr), .out(reg_mar_shr_xy));
+  latch         #(.WIDTH(16))                   lat_mar_sex_xy(.clk(1'b0), .reset(xy_reset_mar_sex), .in(reg_mar_sex), .out(reg_mar_sex_xy));
   decoder_8                                     dcd_xy_a(.in(reg_xy_src[2:0]), .out(xy_reset_normal[7:0]), .enable(reg_xy_src[3]));
   decoder_8                                     dcd_xy_b(.in(reg_xy_src[2:0]), .out(xy_reset_normal[15:8]), .enable(~reg_xy_src[3]));
   decoder_8                                     dcd_xy_from_ir(.in(3'b000 | reg_ir[7:6]), .out(xy_reset_from_ir[4:1]), .enable(reg_xy_src != 4'b1111));
@@ -336,7 +340,11 @@ module ECLair(int);
   assign rpt_mdr_source[11:8] = op_16bit ? reg_mdr[11:8] : 4'b0000;
   assign rpt_mdr_source[7:0] = reg_mdr[7:0];
   assign reg_mar_shr = reg_mar >> 1;
-  
+  assign reg_mar_sex[7:0] = reg_mar[7:0];
+  assign reg_mar_sex[8]  = reg_mar[7]; assign reg_mar_sex[9]  = reg_mar[7]; assign reg_mar_sex[10] = reg_mar[7];
+  assign reg_mar_sex[11] = reg_mar[7]; assign reg_mar_sex[12] = reg_mar[7]; assign reg_mar_sex[13] = reg_mar[7];
+  assign reg_mar_sex[14] = reg_mar[7]; assign reg_mar_sex[15] = reg_mar[7];
+
   // FIXME: temporary until proper clear/reset logic is worked out
   assign intclr[0] = ~_por_reset;
   assign intclr[1] = ~_por_reset;
@@ -361,9 +369,10 @@ module ECLair(int);
   assign xy_reset_mdr = xy_reset[7];
   assign xy_reset_intvect = xy_reset[8];
   assign xy_reset_mar_shr = xy_reset[9];
+  assign xy_reset_mar_sex = xy_reset[10];
   
   // this is a wired-OR in the actual hardware
-  assign lat_xy = reg_imm_xy | reg_a_xy | reg_b_xy | reg_c_xy | reg_d_xy | reg_sp_xy | reg_mar_xy | reg_mdr_xy | reg_intvect_xy | reg_mar_shr_xy;
+  assign lat_xy = reg_imm_xy | reg_a_xy | reg_b_xy | reg_c_xy | reg_d_xy | reg_sp_xy | reg_mar_xy | reg_mdr_xy | reg_intvect_xy | reg_mar_shr_xy | reg_mar_sex_xy;
   
   // control store write sequencer, this takes over the CPU briefly when doing a control store write
   assign cs_write_in_progress = (cs_write_seq[0] | cs_write_seq[1] | cs_write_seq[2] | cs_write_seq[3]);

@@ -82,6 +82,7 @@ enum  src_xy      mar     6
 enum  src_xy      mdr     7
 enum  src_xy      intvect 8
 enum  src_xy      mar-shr 9
+enum  src_xy      mar-sex 10
 enum  src_xy      from_ir 15
 enum  branch_cond always  0
 enum  branch_cond z       1
@@ -170,6 +171,11 @@ location    wrcse       90    # write control store entry using data in A-D and 
 location    ldi8.flags  21    # load immediate 8 bits into system flags
 location    add8.ab     24    # add lower 8 bits of a and b registers, result goes into a
 location    sub8.ab     62    # subtract lower 8 bits of a and b registers, result goes into a
+location    sex.a       51    # sign extend register a 8->16 bits
+location    sex.b       82    # sign extend register b 8->16 bits
+location    sex.c       146   # sign extend register c 8->16 bits
+location    sex.d       197   # sign extend register d 8->16 bits
+location    sex.?       177   # sign extend 8->16 bits
 location    jmpz        27    # jump if Z
 location    push8.imm   31    # push immediate 8 bits to address pointed to by SP++
 location    push8.?     33    # common latter half of push8.*
@@ -369,6 +375,13 @@ instruction shr8.?l     mdr_byte(low)   src_xy(mar-shr)   load_x        rpt_mode
 instruction shr8.?l     mdr_byte(low)   src_mar(z)        load_mar      next_addr(-1) rptz_next_addr(shr8.?l-done)
 # put the result from MAR back into the register it came from
 instruction shr8.?l-done src_xy(mar)    load_x            reg_byte(low) load_reg(via_ir)  load_status   next_addr(fetch)
+
+# sign extend
+instruction sex.a       src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(sex.?)
+instruction sex.b       src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(sex.?)
+instruction sex.c       src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(sex.?)
+instruction sex.d       src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(sex.?)
+instruction sex.?       op_16bit          src_xy(mar-sex)   load_x          load_reg(via_ir)  next_addr(fetch)
 
 # immediate jump to the address specified
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
