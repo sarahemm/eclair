@@ -73,18 +73,19 @@ enum  xy_imm_lsb  0       0
 enum  xy_imm_lsb  1       1
 enum  xy_imm_lsb  2       2
 enum  xy_imm_lsb  3       3
-enum  src_xy      imm     0
-enum  src_xy      a       1
-enum  src_xy      b       2
-enum  src_xy      c       3
-enum  src_xy      d       4
-enum  src_xy      sp      5
-enum  src_xy      mar     6
-enum  src_xy      mdr     7
-enum  src_xy      intvect 8
-enum  src_xy      mar-shr 9
-enum  src_xy      mar-sex 10
-enum  src_xy      from_ir 15
+enum  src_xy      imm      0
+enum  src_xy      a        1
+enum  src_xy      b        2
+enum  src_xy      c        3
+enum  src_xy      d        4
+enum  src_xy      sp       5
+enum  src_xy      mar      6
+enum  src_xy      mdr      7
+enum  src_xy      intvect  8
+enum  src_xy      mar-shr  9
+enum  src_xy      mar-sex  10
+enum  src_xy      mar-swab 11
+enum  src_xy      from_ir  15
 enum  branch_cond always  0
 enum  branch_cond z       1
 enum  branch_cond co      2
@@ -177,6 +178,11 @@ location    sex.b       82    # sign extend register b 8->16 bits
 location    sex.c       146   # sign extend register c 8->16 bits
 location    sex.d       197   # sign extend register d 8->16 bits
 location    sex.?       177   # sign extend 8->16 bits
+location    swab.a      57    # swap bytes in register a
+location    swab.b      86    # swap bytes in register b
+location    swab.c      136   # swap bytes in register c
+location    swab.d      193   # swap bytes in register d
+location    swab.?      181   # swap bytes in register
 location    inv.a       54    # invert 16-bit register a
 location    inv.b       83    # invert 16-bit register b
 location    inv.c       147   # invert 16-bit register c
@@ -398,6 +404,13 @@ instruction sex.b       src_xy(from_ir)   load_x            src_mar(z)      load
 instruction sex.c       src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(sex.?)
 instruction sex.d       src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(sex.?)
 instruction sex.?       op_16bit          src_xy(mar-sex)   load_x          load_reg(via_ir)  next_addr(fetch)
+
+# sign extend
+instruction swab.a      src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(swab.?)
+instruction swab.b      src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(swab.?)
+instruction swab.c      src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(swab.?)
+instruction swab.d      src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(swab.?)
+instruction swab.?      op_16bit          src_xy(mar-swab)  load_x          load_reg(via_ir)  next_addr(fetch)
 
 # invert (not) 16-bit register
 instruction inv.a       src_xy(from_ir)   load_x            next_addr(inv.?)
