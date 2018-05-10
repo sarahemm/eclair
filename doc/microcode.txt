@@ -182,13 +182,23 @@ location    inv.b       83    # invert 16-bit register b
 location    inv.c       147   # invert 16-bit register c
 location    inv.d       196   # invert 16-bit register d
 location    inv.?       178   # invert 16-bit register
+location    inv.al      55    # invert low byte of register a
+location    inv.bl      84    # invert low byte of register b
+location    inv.cl      148   # invert low byte of register c
+location    inv.dl      195   # invert low byte of register d
+location    inv.?l      179   # invert low byte of register
+location    inv.ah      56    # invert high byte of register a
+location    inv.bh      85    # invert high byte of register b
+location    inv.ch      149   # invert high byte of register c
+location    inv.dh      194   # invert high byte of register d
+location    inv.?h      180   # invert high byte of register
 location    jmpz        27    # jump if Z
 location    push8.imm   31    # push immediate 8 bits to address pointed to by SP++
 location    push8.?     33    # common latter half of push8.*
 location    push16.imm  44    # push immediate 16 bits to address pointed to by SP++
 location    push16.pc   52    # push PC to address pointed to by SP++
 location    push16.?    47    # common latter half of push16.*
-location    pop16.pc    55    # pop 16 bits from address pointed to by SP-- into PC
+location    pop16.pc    92    # pop 16 bits from address pointed to by SP-- into PC
 location    cir         175   # clear internal registers (instruction used for testing only)
 location    call        211   # push PC to stack then jump immediate
 location    halt        254
@@ -396,6 +406,20 @@ instruction inv.c       src_xy(from_ir)   load_x            next_addr(inv.?)
 instruction inv.d       src_xy(from_ir)   load_x            next_addr(inv.?)
 instruction inv.?       op_16bit          alu_mode(logic)   alu_op(not_x)     load_reg(via_ir)    next_addr(fetch)
 
+# invert (not) low byte of register
+instruction inv.al      src_xy(from_ir)   load_x            next_addr(inv.?l)
+instruction inv.bl      src_xy(from_ir)   load_x            next_addr(inv.?l)
+instruction inv.cl      src_xy(from_ir)   load_x            next_addr(inv.?l)
+instruction inv.dl      src_xy(from_ir)   load_x            next_addr(inv.?l)
+instruction inv.?l      alu_mode(logic)   alu_op(not_x)     load_reg(via_ir)    next_addr(fetch)
+
+# invert (not) high byte of register
+instruction inv.ah      src_xy(from_ir)   load_x            next_addr(inv.?h)
+instruction inv.bh      src_xy(from_ir)   load_x            next_addr(inv.?h)
+instruction inv.ch      src_xy(from_ir)   load_x            next_addr(inv.?h)
+instruction inv.dh      src_xy(from_ir)   load_x            next_addr(inv.?h)
+instruction inv.?h      reg_byte(high)    alu_mode(logic)   alu_op(not_x)     load_reg(via_ir)    next_addr(fetch)
+
 # immediate jump to the address specified
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
 instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
@@ -419,6 +443,7 @@ instruction wrpte       write_pte     next_addr(fetch)
 # take over execution for a few cycles.
 instruction wrcse       write_cse
 # this is effectively a noop, just need an extra clock cycle to handle wrcse properly
+# TODO: verify this is actually true
 instruction wrcse       alu_op(x)     next_addr(fetch)
 
 # load immediate 8 bits into MDR
