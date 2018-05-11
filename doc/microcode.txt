@@ -19,8 +19,8 @@ field load_mdr        1     1
 # bit 2 is currently available
 field load_mar        3     1
 field load_ir         4     1
-field inc_pc          5     1
-field load_pc         6     1
+# bit 5 is currently available
+# bit 6 is currently available
 field load_reg        7     3
 field load_x          10    1
 field load_y          11    1
@@ -49,6 +49,8 @@ field reg_byte        52    1
 field mem_read        53    1
 field rptz_next_addr  54    4
 field write_cse       58    1
+field inc_pc          59    1
+field load_pc         60    1
 
 # enums - names for values that go into bit positions
 enum  src_mar     z       0

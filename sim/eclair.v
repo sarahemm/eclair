@@ -197,7 +197,7 @@ module ECLair(int);
   flipflop_d      #(.WIDTH(40))                 flp_ram_cs_l(.clk(clk_cs_dly), .reset(1'b0), .in(cs_data_prelatch[63:24]), .out(cs_data[63:24]));
   main_ram        #(.TYPE("Main"))              ram_main(._cs(1'b0), ._oe(~(~ram_write & ~addr_ram)), ._w(~(ram_write & ~addr_ram)), .addr(bus_addr[19:0]), .data_in(reg_mdr_8bit), .data_out(bus_data));
   main_eprom      #(.ROM_FILE("sysrom.bin"))    rom_boot(._cs(1'b0), ._oe(addr_rom), .addr(bus_addr[19:0]), .data(bus_data));
-  counter         #(.WIDTH(16))                 ctr_pc(.clk(cs && (inc_pc || really_load_pc)), .ce(1'b1), .reset(~_reset), .out(pc), .load(really_load_pc), .preset(bus_z));
+  counter         #(.WIDTH(16))                 ctr_pc(.clk(clk_cs_dly2), .ce(inc_pc), .reset(~_reset), .out(pc), .load(really_load_pc), .preset(bus_z));
   latch           #(.WIDTH(8))                  lat_reg_a_h(.clk(reg_a_load | ~op_16bit & ~reg_byte), .reset(1'b0), .in(bus_z[15:8]), .out(reg_a[15:8]));
   latch           #(.WIDTH(8))                  lat_reg_b_h(.clk(reg_b_load | ~op_16bit & ~reg_byte), .reset(1'b0), .in(bus_z[15:8]), .out(reg_b[15:8]));
   latch           #(.WIDTH(8))                  lat_reg_c_h(.clk(reg_c_load | ~op_16bit & ~reg_byte), .reset(1'b0), .in(bus_z[15:8]), .out(reg_c[15:8]));
@@ -268,8 +268,7 @@ module ECLair(int);
   // bit 2 is currently available
   assign reg_mar_load = ~cs_data[3];
   assign reg_ir_load = ~cs_data[4];
-  assign inc_pc = cs_data[5];
-  assign load_pc = cs_data[6];
+  // bits 5 and 6 are currentl available
   assign load_reg = cs_data[9:7];
   assign reg_x_load = ~cs_data[10];
   assign reg_y_load = ~cs_data[11];
@@ -298,6 +297,8 @@ module ECLair(int);
   assign ram_read = cs_data[53];
   assign rptz_next_nibble = cs_data[57:54];
   assign write_cse = cs_data[58] & cs_ready;
+  assign inc_pc = cs_data[59];
+  assign load_pc = cs_data[60];
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
