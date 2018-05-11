@@ -133,6 +133,11 @@ location    ldi16.?     207   # load immediate 16 bits into register from IR
 location    ldi16.sp    39    # load immediate 16 bits into sp
 location    ldi16.dp    117   # load immediate 16 bits into dp
 location    ldi8.ptb    65    # load immediate 8 bits into PTB register
+location    ld16.a      58    # load 16-bit value from memory to register a
+location    ld16.b      87    # load 16-bit value from memory to register b
+location    ld16.c      182   # load 16-bit value from memory to register c
+location    ld16.d      192   # load 16-bit value from memory to register d
+location    ld16.?      183   # load 16-bit value from memory to register
 location    add16.ab    66    # add a and b registers, result goes into a
 location    shl16.a     12    # shift register a left
 location    shl16.b     76    # shift register b left
@@ -264,6 +269,7 @@ instruction ldi16.sp                  src_mar(pc)   src_mdr(data)   src_xy(mdr) 
 instruction ldi16.sp    next_addr(fetch)
 
 # load immediate 16 bit into the data pointer
+# TODO: look at optimizing this and the SP version, step 2 and 3 should be able to be combined?
 instruction ldi16.dp    inc_pc        src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(low)   load_mdr
 instruction ldi16.dp                  src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    inc_pc          op_16bit
 instruction ldi16.dp                  src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(high)  load_mdr      load_x  load_reg(dp)  op_16bit  load_status next_addr(fetch)
@@ -278,6 +284,22 @@ instruction ldi8.?h     inc_pc        src_mar(pc)     load_mar        mem_read  
 instruction ldi16.?     inc_pc        src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(low)     load_mdr
 instruction ldi16.?                   inc_pc
 instruction ldi16.?                   src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(high)    load_mdr      load_y    load_x  load_reg(via_ir)  op_16bit  load_status next_addr(fetch)
+
+# load 16-bit value from memory to register
+# get the supplied memory address into MDR
+instruction ld16.a  next_addr(ld16.?)
+instruction ld16.b  next_addr(ld16.?)
+instruction ld16.c  next_addr(ld16.?)
+instruction ld16.d  next_addr(ld16.?)
+instruction ld16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low)  load_mdr
+instruction ld16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high) load_mdr op_16bit load_x
+# add the supplied address and DP and put that into MAR
+instruction ld16.?  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
+# load the value from RAM into the register
+instruction ld16.?  mem_read  src_mdr(data) mdr_byte(low)  load_mdr xy_imm_lsb(1) src_xy(imm) load_y
+instruction ld16.?  src_xy(mar) load_x
+instruction ld16.?  alu_op(add) src_mar(z) load_mar
+instruction ld16.?  mem_read  src_mdr(data) mdr_byte(high) load_mdr op_16bit src_xy(mdr) load_x load_reg(via_ir) next_addr(fetch)
 
 # add 16 bits from registers A and B, result goes into A
 instruction add16.ab    src_xy(a)     load_x
