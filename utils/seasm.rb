@@ -34,7 +34,24 @@ File.open(ARGV[1], "r") do |asmfile|
       puts line
       next
     end
-    if(!instructions[opcode]) then
+    if(opcode == "data") then
+      # data bytes are just included as-is
+      # TODO: DRY this out, it's similar to code below
+      operand_raw = operands[0]
+      operand = 0
+      if(/^0x/.match(operand_raw)) then
+        operand = operand_raw.to_i 16
+        operand_16bit = true if operand_raw.length == 6
+      elsif(/^0b/.match(operand_raw)) then
+        operand = operand_raw.to_i 2
+      else
+        operand = operand_raw.to_i
+      end
+      operand_hex = sprintf("0x%02X", operand)
+      operand_bin = operand.to_s(2).rjust(8, '0')
+      puts "#{operand_bin}\t// data byte #{operand_hex} / #{operand}"
+      next
+    elsif(!instructions[opcode]) then
       $stderr.puts "\nERROR: No such instruction '#{opcode}'."
       Kernel.exit 1
     end
