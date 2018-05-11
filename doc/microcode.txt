@@ -288,11 +288,12 @@ instruction ldi16.?                   inc_pc
 instruction ldi16.?                   src_mar(pc)   src_mdr(data)   src_xy(mdr)     mem_read    load_mar        mdr_byte(high)    load_mdr      load_y    load_x  load_reg(via_ir)  op_16bit  load_status next_addr(fetch)
 
 # load 16-bit value from memory to register
-# get the supplied memory address into MDR
 instruction ld16.a  next_addr(ld16.?)
 instruction ld16.b  next_addr(ld16.?)
 instruction ld16.c  next_addr(ld16.?)
 instruction ld16.d  next_addr(ld16.?)
+# TODO: optimize this, 8 clocks to do a load is way too high on a load/store architecture
+# get the supplied memory address into MDR
 instruction ld16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low)  load_mdr
 instruction ld16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high) load_mdr op_16bit load_x
 # add the supplied address and DP and put that into MAR
