@@ -140,6 +140,11 @@ location    ld16.b      87    # load 16-bit value from memory to register b
 location    ld16.c      182   # load 16-bit value from memory to register c
 location    ld16.d      192   # load 16-bit value from memory to register d
 location    ld16.?      183   # load 16-bit value from memory to register
+location    st16.a      59    # load 16-bit value from register a to memory
+location    st16.b      88    # load 16-bit value from register b to memory
+location    st16.c      135   # load 16-bit value from register c to memory
+location    st16.d      226   # load 16-bit value from register d to memory
+location    st16.?      227   # load 16-bit value from register to memory
 location    add16.ab    66    # add a and b registers, result goes into a
 location    shl16.a     12    # shift register a left
 location    shl16.b     76    # shift register b left
@@ -303,6 +308,24 @@ instruction ld16.?  mem_read  src_mdr(data) mdr_byte(low)  load_mdr xy_imm_lsb(1
 instruction ld16.?  src_xy(mar) load_x
 instruction ld16.?  alu_op(add) src_mar(z) load_mar
 instruction ld16.?  mem_read  src_mdr(data) mdr_byte(high) load_mdr op_16bit src_xy(mdr) load_x load_reg(via_ir) next_addr(fetch)
+
+# store 16-bit value from register to memory
+instruction st16.a  next_addr(st16.?)
+instruction st16.b  next_addr(st16.?)
+instruction st16.c  next_addr(st16.?)
+instruction st16.d  next_addr(st16.?)
+# TODO: optimize this, 9 clocks to do a store is way too high on a load/store architecture
+# get the supplied memory address into MDR
+instruction st16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low)  load_mdr
+instruction st16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high) load_mdr op_16bit load_x
+# add the supplied address and DP and put that into MAR
+instruction st16.?  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
+# store the value from the register into RAM
+instruction st16.?  mdr_byte(low) src_mdr(z)  src_xy(from_ir) op_16bit load_x  load_mdr
+instruction st16.?  mem_write xy_imm_lsb(1) src_xy(imm) load_y
+instruction st16.?  src_xy(mar)   load_x
+instruction st16.?  alu_op(add) src_mar(z) load_mar
+instruction st16.?  mem_write next_addr(fetch)
 
 # add 16 bits from registers A and B, result goes into A
 instruction add16.ab    src_xy(a)     load_x
