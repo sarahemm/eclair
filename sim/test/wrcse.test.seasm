@@ -3,7 +3,7 @@ ldi16.a   0xAAAA
 ldi16.b   0x5555
 ldi16.c   0x1234
 ldi16.d   0x4321
-ldi16.sp  0x0078
+ldi16.dp  0x0078
 wrcse
 halt
 
@@ -12,4 +12,5 @@ halt
 // expect: reg_b=01010101_01010101
 // expect: reg_c=00010010_00110100
 // expect: reg_d=01000011_00100001
+// expect: reg_dp=00000000_01111000
 // expect: cs[0x78]=0x432112345555aaaa

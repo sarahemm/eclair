@@ -165,7 +165,7 @@ module ECLair(int);
   wire          write_cse;      // microcode bit to activate CS write logic
   wire  [7:0]   cs_write_seq;           // steps of the control store write sequencer, controlled by a shift register
   wire          cs_write_in_progress;   // write sequencer has control of the CPU
-  wire          cs_addr_from_sp;        // drive cs_addr from SP instead of the microcode sequencer
+  wire          cs_addr_from_dp;        // drive cs_addr from DP instead of the microcode sequencer
   wire          cs_write_seq_reset;     // reset the write sequencer to the idle state
   wire          cs_write;               // write a control store word
   
@@ -185,7 +185,7 @@ module ECLair(int);
   mux_21                                        mux_cs_clk_selector(.sel(cs_ready), .a(clk_quarter), .b(clk_main), .y(clk_cs_mid));
   mux_2x                                        mux_cs_addr(.sel(cs_ready), .a(cs_addr_init), .b(cs_addr_run), .y(cs_addr_normal));
   // TODO: clean up the two chained muxes. we also had to bump the _dly clock delays from 8ns to 10ns to make this work, fix that when this is fixed.
-  mux_2x                                        mux_cs_addr_write(.sel(cs_addr_from_sp), .a(cs_addr_normal), .b(reg_sp[7:0]), .y(cs_addr));
+  mux_2x                                        mux_cs_addr_write(.sel(cs_addr_from_dp), .a(cs_addr_normal), .b(reg_dp[7:0]), .y(cs_addr));
   mux_2x                                        mux_cs_next_addr_rptz(.sel(rptz_next_nibble != 4'b0000 && rpt_zero), .a(cs_next_addr), .b(cs_next_addr_rptz), .y(cs_next_addr_normal));
   mux_2x                                        mux_cs_next_addr(.sel(cs_next_addr == 8'b00000000), .a(cs_next_addr_normal), .b(cs_next_addr_alt), .y(next_addr));
   mux_2x                                        mux_cs_next_addr_alt(.sel(int_jmp), .a(reg_ir), .b(intvect), .y(cs_next_addr_alt));
@@ -391,7 +391,7 @@ module ECLair(int);
   
   // control store write sequencer, this takes over the CPU briefly when doing a control store write
   assign cs_write_in_progress = (cs_write_seq[0] | cs_write_seq[1] | cs_write_seq[2] | cs_write_seq[3]);
-  assign cs_addr_from_sp = (cs_write_seq[1] || cs_write_seq[2] || cs_write_seq[3]);
+  assign cs_addr_from_dp = (cs_write_seq[1] || cs_write_seq[2] || cs_write_seq[3]);
   assign cs_write = cs_write_seq[2];
   assign cs_write_seq_reset = cs_write_seq[4];
   
