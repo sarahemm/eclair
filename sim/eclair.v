@@ -67,6 +67,7 @@ module ECLair(int);
   wire          reg_c_load;
   wire          reg_d_load;
   wire          reg_sp_load;
+  wire          reg_dp_load;
   wire          reg_ir_load;
   wire          reg_mar_load;
   wire          reg_mdr_load;
@@ -80,6 +81,7 @@ module ECLair(int);
   wire  [15:0]  reg_d;
   wire  [63:0]  reg_abcd;       // all gen purpose registers together, used for cs writing
   wire  [15:0]  reg_sp;
+  wire  [15:0]  reg_dp;
   wire  [7:0]   reg_ir;
   wire  [15:0]  reg_mar;
   wire  [15:0]  reg_mar_shr;    // reg_mar shifted one bit right, used in the shift right microcode
@@ -107,6 +109,7 @@ module ECLair(int);
   wire  [15:0]  reg_mar_shr_xy;
   wire  [15:0]  reg_mar_sex_xy;
   wire  [15:0]  reg_mar_swab_xy;
+  wire  [15:0]  reg_dp_xy;
   
   // XY driver latch resets
   wire  [15:0]  xy_reset_normal;
@@ -124,6 +127,7 @@ module ECLair(int);
   wire          xy_reset_mar_shr;
   wire          xy_reset_mar_sex;
   wire          xy_reset_mar_swab;
+  wire          xy_reset_dp;
   
   wire          alu_cout8;
   wire          alu_cout16;
@@ -203,6 +207,7 @@ module ECLair(int);
   latch           #(.WIDTH(8))                  lat_reg_c_l(.clk(reg_c_load | ~op_16bit & reg_byte), .reset(1'b0), .in(bus_z[7:0]), .out(reg_c[7:0]));
   latch           #(.WIDTH(8))                  lat_reg_d_l(.clk(reg_d_load | ~op_16bit & reg_byte), .reset(1'b0), .in(bus_z[7:0]), .out(reg_d[7:0]));
   latch           #(.WIDTH(16))                 lat_reg_sp(.clk(reg_sp_load), .reset(1'b0), .in(bus_z), .out(reg_sp));
+  latch           #(.WIDTH(16))                 lat_reg_dp(.clk(reg_dp_load), .reset(1'b0), .in(bus_z), .out(reg_dp));
   latch           #(.WIDTH(16))                 lat_reg_x(.clk(reg_x_load), .reset(1'b0), .in(lat_xy), .out(reg_x));
   latch           #(.WIDTH(16))                 lat_reg_y(.clk(reg_y_load), .reset(1'b0), .in(lat_xy), .out(reg_y));
   latch                                         lat_reg_ir(.clk(reg_ir_load), .reset(1'b0), .in(bus_data), .out(reg_ir));
@@ -250,6 +255,7 @@ module ECLair(int);
   latch         #(.WIDTH(16))                   lat_mar_shr_xy(.clk(1'b0), .reset(xy_reset_mar_shr), .in(reg_mar_shr), .out(reg_mar_shr_xy));
   latch         #(.WIDTH(16))                   lat_mar_sex_xy(.clk(1'b0), .reset(xy_reset_mar_sex), .in(reg_mar_sex), .out(reg_mar_sex_xy));
   latch         #(.WIDTH(16))                   lat_mar_swab_xy(.clk(1'b0), .reset(xy_reset_mar_swab), .in(reg_mar_swab), .out(reg_mar_swab_xy));
+  latch         #(.WIDTH(16))                   lat_dp_xy(.clk(1'b0), .reset(xy_reset_dp), .in(reg_dp), .out(reg_dp_xy));
   decoder_8                                     dcd_xy_a(.in(reg_xy_src[2:0]), .out(xy_reset_normal[7:0]), .enable(reg_xy_src[3]));
   decoder_8                                     dcd_xy_b(.in(reg_xy_src[2:0]), .out(xy_reset_normal[15:8]), .enable(~reg_xy_src[3]));
   decoder_8                                     dcd_xy_from_ir(.in(3'b000 | reg_ir[7:6]), .out(xy_reset_from_ir[4:1]), .enable(reg_xy_src != 4'b1111));
@@ -314,6 +320,7 @@ module ECLair(int);
   assign reg_c_load = reg_load[3] & reg_load_via_ir[5];
   assign reg_d_load = reg_load[4] & reg_load_via_ir[7];
   assign reg_sp_load = reg_load[5];
+  assign reg_dp_load = reg_load[6];
   assign reg_x_load_ir = ~reg_load[7];
   assign addr_rom = ~(bus_addr[23:20] == 4'b0000);
   assign addr_device = ~(bus_addr[23:20] == 4'b0111);
@@ -377,9 +384,10 @@ module ECLair(int);
   assign xy_reset_mar_shr = xy_reset[9];
   assign xy_reset_mar_sex = xy_reset[10];
   assign xy_reset_mar_swab = xy_reset[11];
+  assign xy_reset_dp = xy_reset[12];
   
   // this is a wired-OR in the actual hardware
-  assign lat_xy = reg_imm_xy | reg_a_xy | reg_b_xy | reg_c_xy | reg_d_xy | reg_sp_xy | reg_mar_xy | reg_mdr_xy | reg_intvect_xy | reg_mar_shr_xy | reg_mar_sex_xy | reg_mar_swab_xy;
+  assign lat_xy = reg_imm_xy | reg_a_xy | reg_b_xy | reg_c_xy | reg_d_xy | reg_sp_xy | reg_mar_xy | reg_mdr_xy | reg_intvect_xy | reg_mar_shr_xy | reg_mar_sex_xy | reg_mar_swab_xy | reg_dp_xy;
   
   // control store write sequencer, this takes over the CPU briefly when doing a control store write
   assign cs_write_in_progress = (cs_write_seq[0] | cs_write_seq[1] | cs_write_seq[2] | cs_write_seq[3]);
@@ -411,6 +419,7 @@ module ECLair(int);
       $display("reg_c:    %08b_%08b (0x%0h)", reg_c[15:8],  reg_c[7:0],  reg_c);
       $display("reg_d:    %08b_%08b (0x%0h)", reg_d[15:8],  reg_d[7:0],  reg_d);
       $display("reg_sp:   %08b_%08b (0x%0h)", reg_sp[15:8], reg_sp[7:0], reg_sp);
+      $display("reg_dp:   %08b_%08b (0x%0h)", reg_dp[15:8], reg_dp[7:0], reg_dp);
       $display("reg_x:    %08b_%08b (0x%0h)", reg_x[15:8],  reg_x[7:0],  reg_x);
       $display("reg_y:    %08b_%08b (0x%0h)", reg_y[15:8],  reg_y[7:0],  reg_y);
       $display("bus_z:    %08b_%08b (0x%0h)", bus_z[15:8],  bus_z[7:0],  bus_z);
