@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-// simple async-load async-reset up-counter
+// sync-load async-reset up-counter (modelled after MC10E016)
 module counter(clk, reset, out, load, preset, ce);
   parameter WIDTH=8;
   output  reg [WIDTH-1:0] out;
@@ -14,7 +14,7 @@ module counter(clk, reset, out, load, preset, ce);
     out = 8'b0;
   end
   
-  always @(posedge clk or posedge reset or posedge load) begin
+  always @(posedge clk or posedge reset) begin
     //$display("counter: c%0b r%0b l%0b", clk, reset, load);
     if (reset) begin
       out <= #1 0;
