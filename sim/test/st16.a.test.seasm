@@ -1,19 +1,4 @@
-@000
-ldi8.flags  0x02  // switches to user mode but leaves paging off
-// set up page table block 0
-ldi8.ptb    0x00
-ldi16.d     0x0000
-ldi16.a     0x0000
-wrpte
-ldi16.d     0x0400
-ldi16.a     0x0400
-wrpte
-ldi16.d     0x0800
-ldi16.a     0x3c00
-wrpte
-ldi8.flags  0x06  // enables paging, code continues running normally since 0x0000 is still ROM
-jmp         0x0040
-// gap so we can add more pages later if needed
+#include "std_paging.testfrag"
 @040
 ldi16.dp    0x0000
 ldi16.a     0xa5a5
