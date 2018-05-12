@@ -1,8 +1,8 @@
 #include "std_paging.testfrag"
 @040
 ldi16.dp    0x0000
-ldi16.a     0xa5a5
-st16.a      0x0400
+ldi16.c     0xa5a5
+st16.c      0x0400
 halt
 
 // expect: ram[0x100000]=0xa5
