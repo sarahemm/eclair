@@ -155,11 +155,11 @@ location    st16.b      88    # load 16-bit value from register b to memory
 location    st16.c      135   # load 16-bit value from register c to memory
 location    st16.d      226   # load 16-bit value from register d to memory
 location    st16.?      227   # load 16-bit value from register to memory
-#location    st8.al      14    # load 8-bit value from high byte of register a to memory
-#location    st8.bl      105   # load 8-bit value from high byte of register b to memory
-#location    st8.cl      130   # load 8-bit value from high byte of register c to memory
-#location    st8.dl      237   # load 8-bit value from high byte of register d to memory
-#location    st8.?l         # load 8-bit value from high byte of register to memory
+location    st8.al      14    # load 8-bit value from high byte of register a to memory
+location    st8.bl      121   # load 8-bit value from high byte of register b to memory
+location    st8.cl      130   # load 8-bit value from high byte of register c to memory
+location    st8.dl      237   # load 8-bit value from high byte of register d to memory
+location    st8.?l      247   # load 8-bit value from high byte of register to memory
 #location    st8.ah      15    # load 8-bit value from low byte of register a to memory
 #location    st8.bh      111   # load 8-bit value from low byte of register b to memory
 #location    st8.ch      131   # load 8-bit value from low byte of register c to memory
@@ -373,6 +373,20 @@ instruction st16.?  mem_write xy_imm_lsb(1) src_xy(imm) load_y
 instruction st16.?  src_xy(mar)   load_x
 instruction st16.?  alu_op(add) src_mar(z) load_mar
 instruction st16.?  mem_write next_addr(fetch)
+
+# load 8-bit value from high byte of register to memory
+instruction st8.al  next_addr(st8.?l)
+instruction st8.bl  next_addr(st8.?l)
+instruction st8.cl  next_addr(st8.?l)
+instruction st8.dl  next_addr(st8.?l)
+# get the supplied memory address into MDR
+instruction st8.?l  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low)  load_mdr
+instruction st8.?l  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high) load_mdr op_16bit load_x
+# add the supplied address and DP and put that into MAR
+instruction st8.?l  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
+# store the value from the register into RAM
+instruction st8.?l  mdr_byte(low) src_mdr(z)  src_xy(from_ir) op_16bit load_x  load_mdr
+instruction st8.?l  mem_write next_addr(fetch)
 
 # add 16 bits from registers A and B, result goes into A
 instruction add16.ab    src_xy(a)     load_x
