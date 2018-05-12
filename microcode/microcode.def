@@ -1,0 +1,120 @@
+# ECLair Microcode
+
+# files - output binary-text files with which bit positions go in each one
+file    microcode.bin  0   64
+
+# images - output true binary image files with which bit positions go in each one
+image   microcode.img  0   64
+
+# mapfile - output a map of addresses to instructions for gtkwave to use
+mapfile microcode_map.txt
+
+# graphfile - output a digraph of the microcode flow
+#graphfile microcode_graph.pdf
+
+# completefile - output the complete merged microcode definition including all the include files
+# this is used by the assembler, among other things
+completefile complete_microcode.def
+
+# fields - names for bit positions
+# edge-sensitive signals
+field write_pte       0     1
+field load_mdr        1     1
+# bit 2 is currently available
+field load_mar        3     1
+field load_ir         4     1
+# bit 5 is currently available
+# bit 6 is currently available
+field load_reg        7     3
+field load_x          10    1
+field load_y          11    1
+field load_ptb        13    1
+field rpt_exec        14    1
+field load_status     15    1
+field clr_intflg      16    1
+field mem_write       17    1
+field load_flag_pe    18    1
+field load_flag_m     19    1
+field load_flag_ie    20    1
+# level-sensitive signals
+field mdr_byte        24    1
+field next_addr       25    8
+field src_mar         33    1
+field src_mdr         34    1
+field alu_mode        35    1
+field alu_op          36    4
+field src_xy          40    4
+field carry_in        44    1
+field op_16bit        45    1
+field branch_cond     46    3
+field xy_imm_lsb      49    2
+field rpt_mode        51    1
+field reg_byte        52    1
+field mem_read        53    1
+field rptz_next_addr  54    4
+field write_cse       58    1
+field inc_pc          59    1
+field load_pc         60    1
+
+# enums - names for values that go into bit positions
+enum  src_mar     z       0
+enum  src_mar     pc      1
+enum  src_mdr     z       0
+enum  src_mdr     data    1
+enum  load_reg    a       1
+enum  load_reg    b       2
+enum  load_reg    c       3
+enum  load_reg    d       4
+enum  load_reg    sp      5
+enum  load_reg    dp      6
+enum  load_reg    via_ir  7
+enum  alu_mode    arith   0
+enum  alu_mode    logic   1
+enum  alu_op      x       0
+enum  alu_op      not_x   0
+enum  alu_op      x+x     3
+enum  alu_op      add     6
+enum  alu_op      sub     9
+enum  alu_op      x-1     15
+enum  xy_imm_lsb  0       0
+enum  xy_imm_lsb  1       1
+enum  xy_imm_lsb  2       2
+enum  xy_imm_lsb  3       3
+enum  src_xy      imm      0
+enum  src_xy      a        1
+enum  src_xy      b        2
+enum  src_xy      c        3
+enum  src_xy      d        4
+enum  src_xy      sp       5
+enum  src_xy      mar      6
+enum  src_xy      mdr      7
+enum  src_xy      intvect  8
+enum  src_xy      mar-shr  9
+enum  src_xy      mar-sex  10
+enum  src_xy      mar-swab 11
+enum  src_xy      dp       12
+enum  src_xy      from_ir  15
+enum  branch_cond always  0
+enum  branch_cond z       1
+enum  branch_cond co      2
+enum  mdr_byte    low     0
+enum  mdr_byte    high    1
+enum  reg_byte    low     0
+enum  reg_byte    high    1
+enum  carry_in    0       0
+enum  carry_in    1       1
+enum  rpt_mode    load    0
+enum  rpt_mode    dec     1
+
+# include all the definition files that contain 'location' and 'instruction' lines
+include internal.def
+include system.def
+include load_immediate.def
+include load_store.def
+include bit_shuffling.def
+include flow.def
+include logic_ops.def
+include math.def
+include paging.def
+include shift.def
+include stack.def

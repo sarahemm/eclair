@@ -1,0 +1,22 @@
+# locations - start addresses of instructions
+location    add8.ab     24    # add lower 8 bits of a and b registers, result goes into a
+location    sub8.ab     62    # subtract lower 8 bits of a and b registers, result goes into a
+location    add16.ab    66    # add a and b registers, result goes into a
+
+# instructions - actual implementation microcode
+
+# add 16 bits from registers A and B, result goes into A
+instruction add16.ab    src_xy(a)     load_x
+instruction add16.ab    src_xy(b)     load_y
+instruction add16.ab    alu_mode(arith) alu_op(add)   op_16bit      load_reg(a)     next_addr(fetch)  load_status
+
+# add 8 bits from low bytes of registers A and B, result goes into A
+instruction add8.ab     src_xy(a)     load_x
+instruction add8.ab     src_xy(b)     load_y
+instruction add8.ab     alu_mode(arith) alu_op(add)                 load_reg(a)     next_addr(fetch)  load_status
+
+# subtract 8 bits from low bytes of registers A and B, result goes into A
+instruction sub8.ab     src_xy(a)     load_x
+instruction sub8.ab     src_xy(b)     load_y
+instruction sub8.ab     alu_mode(arith) alu_op(sub)   carry_in(1)     load_reg(a)     next_addr(fetch)  load_status
+

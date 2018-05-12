@@ -1,0 +1,32 @@
+# locations - start addresses of instructions
+location    ei          23
+location    di          38
+location    wrcse       90    # write control store entry using data in A-D and address in SP
+location    ldi8.flags  21    # load immediate 8 bits into system flags
+location    cir         175   # clear internal registers (instruction used for testing only)
+location    halt        254
+
+# instructions - actual implementation microcode
+
+# enable interrupts
+instruction ei          src_xy(imm)   alu_mode(arith)   alu_op(x) xy_imm_lsb(1)   load_x  load_y  load_flag_ie  next_addr(fetch)
+
+# disable interrupts
+instruction di          src_xy(imm)   alu_mode(arith)   alu_op(x) xy_imm_lsb(0)   load_x  load_y  load_flag_ie  next_addr(fetch)
+
+# write control store entry, get data from A-D and write to control store address specific in SP
+# due to the need to jump the control store to write to it, this is actually implemented in hardware
+# so all we have to do is trigger the write_cse line, which then lets the control store write hardware
+# take over execution for a few cycles.
+instruction wrcse       write_cse
+# this is effectively a noop, just need an extra clock cycle to handle wrcse properly
+# TODO: verify this is actually true
+instruction wrcse       alu_op(x)     next_addr(fetch)
+
+# clear internal registers
+instruction cir         op_16bit xy_imm_lsb(0) src_xy(imm) load_x load_y src_mar(z) src_mdr(z) load_mar load_mdr
+instruction cir         mdr_byte(high) load_mdr rpt_mode(load) rpt_exec next_addr(fetch)
+
+# halt forever
+instruction halt        next_addr(halt)
+

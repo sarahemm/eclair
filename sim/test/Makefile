@@ -7,7 +7,7 @@ clean:
 	rm -f $(ASMTEST_FILES) $(ASMTEST_ROMFILES)
 
 %.test: %.test.seasm
-	../../utils/seasm.rb ../../doc/microcode.txt $< > $@
+	../../utils/seasm.rb ../complete_microcode.def $< > $@
 
 %.test.rom: %.test
 	../../utils/asciitobin.rb $<

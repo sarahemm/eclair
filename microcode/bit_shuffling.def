@@ -1,0 +1,27 @@
+# locations - start addresses of instructions
+location    sex.a       51    # sign extend register a 8->16 bits
+location    sex.b       82    # sign extend register b 8->16 bits
+location    sex.c       146   # sign extend register c 8->16 bits
+location    sex.d       197   # sign extend register d 8->16 bits
+location    sex.?       177   # sign extend 8->16 bits
+location    swab.a      57    # swap bytes in register a
+location    swab.b      86    # swap bytes in register b
+location    swab.c      136   # swap bytes in register c
+location    swab.d      193   # swap bytes in register d
+location    swab.?      181   # swap bytes in register
+
+# instructions - actual implementation microcode
+
+# sign extend
+instruction sex.a       src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(sex.?)
+instruction sex.b       src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(sex.?)
+instruction sex.c       src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(sex.?)
+instruction sex.d       src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(sex.?)
+instruction sex.?       op_16bit          src_xy(mar-sex)   load_x          load_reg(via_ir)  next_addr(fetch)
+
+# sign extend
+instruction swab.a      src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(swab.?)
+instruction swab.b      src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(swab.?)
+instruction swab.c      src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(swab.?)
+instruction swab.d      src_xy(from_ir)   load_x            src_mar(z)      load_mar          next_addr(swab.?)
+instruction swab.?      op_16bit          src_xy(mar-swab)  load_x          load_reg(via_ir)  next_addr(fetch)

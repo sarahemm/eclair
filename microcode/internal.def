@@ -1,0 +1,31 @@
+# locations - start addresses of instructions
+location    init        0
+#location    irq1        1
+#location    irq2        2
+#location    irq3        3
+#location    irq4        4
+#location    irq5        5
+#location    irq6        6
+#location    irq7        7
+#location    irq8        8
+location    init2       223
+location    fetch       224
+location    fetch2      225
+location    lz          255   # landing zone, required to be all zeroes for control store writer
+
+# instructions - actual implementation microcode
+
+# initialize the cpu when first starting up
+instruction init        src_xy(imm)   alu_mode(arith)   alu_op(x) load_x      load_y  next_addr(init2)
+instruction init2       load_pc       next_addr(fetch2)
+
+# increment PC to get ready for the next instruction fetch
+instruction fetch       inc_pc
+# fetch the next instruction and start executing it
+instruction fetch2      src_mar(pc)   load_mar          mem_read  load_ir     next_addr(ir)
+
+# landing zone - the control store copier 'lands' here at the end and sits forever
+# this is required for the control store writer to work, as the data output of that is ORed with
+# the control store EPROM to generate the control store RAM data input.
+# this must be all zeroes!
+instruction lz  next_addr(init)

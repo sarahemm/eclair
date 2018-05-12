@@ -1,0 +1,42 @@
+# locations - start addresses of instructions
+location    jmp         69    # unconditional immediate jump
+location    jmpz        27    # jump if Z
+location    call        211   # push PC to stack then jump immediate
+location    pop16.pc    92    # pop 16 bits from address pointed to by SP-- into PC
+
+# aliases - other names for instructions
+alias       ret         pop16.pc
+
+# instructions - actual implementation microcode
+
+# immediate jump to the address specified
+instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
+instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
+instruction jmp         src_xy(mdr)   alu_op(x)       load_x
+instruction jmp         branch_cond(always)           load_pc         next_addr(fetch2)
+
+# immediate jump to the address specified if Z(ero) is true
+instruction jmpz        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
+instruction jmpz        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
+instruction jmpz        inc_pc        src_xy(mdr)     alu_op(x)       load_x
+instruction jmpz        branch_cond(z)                load_pc         next_addr(fetch2)
+
+# push current pc onto stack then jump to immediate location
+instruction call        include(push16.pc,no_next)
+instruction call        xy_imm_lsb(3) src_xy(imm) load_y      alu_op(add) load_mdr  
+instruction call        include(push16.?,no_next)
+instruction call        include(jmp)
+
+# pop 16 bits from address pointed to by SP-- into PC
+# load SP into MAR
+instruction pop16.pc    src_xy(sp)      load_x      alu_op(x-1)   src_mar(z)    load_mar
+# load RAM contents into high byte of MDR and load MAR back into SP
+instruction pop16.pc    mdr_byte(high)  mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_reg(sp)
+# subtract 1 from SP, put it into the MAR
+instruction pop16.pc    src_xy(sp)      alu_op(x-1) src_mar(z)    load_mar
+# load RAM contents into the low byte of MDR and push that all the way through to Z
+instruction pop16.pc    mdr_byte(low)   mem_read    src_mdr(data) load_mdr      src_xy(mdr)   load_x
+# load contents of MDR into PC
+instruction pop16.pc    src_xy(mdr)     load_x      load_pc
+# load MAR back into SP now that we're done, then fetch next instruction w/o incrementing PC
+instruction pop16.pc    src_xy(mar)     load_x      load_reg(sp)  next_addr(fetch2)

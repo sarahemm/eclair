@@ -5,4 +5,5 @@
 *.vvp
 microcode.bin
 microcode_map.txt
+complete_microcode.def
 xcuserdata/

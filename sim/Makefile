@@ -14,9 +14,9 @@ eclair.vvp: $(OBJS)
 
 microcode: microcode.bin
 
-microcode.bin: ../doc/microcode.txt ../utils/mcgen.rb
-	../utils/mcgen.rb ../doc/microcode.txt
+microcode.bin: ../microcode/microcode.def ../utils/mcgen.rb
+	../utils/mcgen.rb ../microcode/microcode.def
 
 clean:
-	rm -f *.vvp *.vcd a.out microcode*.bin microcode_map.txt microcode_graph.pdf sysrom.bin
+	rm -f *.vvp *.vcd a.out microcode*.bin microcode_map.txt microcode_graph.pdf complete_microcode.def sysrom.bin
 	make -C test clean

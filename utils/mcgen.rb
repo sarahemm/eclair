@@ -5,68 +5,91 @@ files = []
 images = []
 mapfiles = []
 graphfiles = []
+completefiles = []
 @fields = {}
 @enums = {}
 @locations = []
 instructions = {}
-# read in the microcode text file and fill a bunch of arrays with the info we'll need
+
+def_lines = Array.new
+# read in the microcode text file and put it into an array
 File.open(ARGV[0], "r") do |infile|
-  infile.each_line do |line|
-    line.gsub! /#.*/, ""
-    values = line.split(/\s+/)
-    next if values[0] == nil
-    case values.shift
-      when "file" then
-        # files specify an output binary-text file and which bits go into it
-        filename = values.shift
-        start_bit = values.shift.to_i
-        nbr_bits = values.shift.to_i
-        files.push :filename => filename, :start => start_bit, :length => nbr_bits
-      when "image" then
-        # images specify an output true-binary file and which bits go into it
-        filename = values.shift
-        start_bit = values.shift.to_i
-        nbr_bits = values.shift.to_i
-        images.push :filename => filename, :start => start_bit, :length => nbr_bits
-      when "mapfile" then
-        # mapfiles specify an output file for mapping address to instruction (for gtkwave or similar)
-        filename = values.shift
-        mapfiles.push :filename => filename
-      when "graphfile" then
-        # graphfiles specify an output file for digraph documentation
-        filename = values.shift
-        graphfiles.push :filename => filename
-      when "field" then
-        # fields specify a name for a bit or series of bits in the microcode
-        field = values.shift
-        start_addr = values.shift.to_i
-        end_addr = start_addr + values.shift.to_i - 1
-        @fields[field] = (start_addr..end_addr)
-      when "enum" then
-        # enums specify a name for a bit or combination of bits used in a field
-        field = values.shift
-        name = values.shift
-        value = values.shift.to_i
-        @enums[field] = {} if !@enums[field]
-        @enums[field][name] = value
-      when "location" then
-        # locations specify where instructions start in microcode
-        instruction = values.shift
-        start_addr = values.shift.to_i
-        if(@locations[start_addr]) then
-          raise "Location #{start_addr} already in use by '#{@locations[start_addr]}', can't use it for '#{instruction}'"
-        end
-        @locations[start_addr] = instruction
-      when "instruction" then
-        # instructions list which values need to be set for each row of an instruction
-        instruction = values.shift
-        instructions[instruction] = [] if !instructions[instruction]
-        instructions[instruction] << values
-      when "alias" then
-        # we don't do anything with aliases, other tools use them
-      else
-        raise "Unknown field type."
-    end
+  def_lines += infile.readlines
+end
+
+# go through the array and handle any includes
+basedir = File.dirname(ARGV[0])
+def_lines.each_index do |line_index|
+  line = def_lines[line_index]
+  next if !matches = /^include\s+(.*)/.match(line)
+  file = matches[1]
+  File.open("#{basedir}/#{file}", "r") do |incfile|
+    def_lines[line_index] = incfile.readlines
+  end
+end
+
+def_lines.flatten!
+
+# process the microcode definition and fill a bunch of arrays with the info we'll need
+def_lines.each do |line|
+  line.gsub! /#.*/, ""
+  values = line.split(/\s+/)
+  next if values[0] == nil
+  case values.shift
+    when "file" then
+      # files specify an output binary-text file and which bits go into it
+      filename = values.shift
+      start_bit = values.shift.to_i
+      nbr_bits = values.shift.to_i
+      files.push :filename => filename, :start => start_bit, :length => nbr_bits
+    when "image" then
+      # images specify an output true-binary file and which bits go into it
+      filename = values.shift
+      start_bit = values.shift.to_i
+      nbr_bits = values.shift.to_i
+      images.push :filename => filename, :start => start_bit, :length => nbr_bits
+    when "mapfile" then
+      # mapfiles specify an output file for mapping address to instruction (for gtkwave or similar)
+      filename = values.shift
+      mapfiles.push :filename => filename
+    when "graphfile" then
+      # graphfiles specify an output file for digraph documentation
+      filename = values.shift
+      graphfiles.push :filename => filename
+    when "completefile" then
+      # completefiles specify an output file of the entire definition including all includes
+      filename = values.shift
+      completefiles.push :filename => filename
+    when "field" then
+      # fields specify a name for a bit or series of bits in the microcode
+      field = values.shift
+      start_addr = values.shift.to_i
+      end_addr = start_addr + values.shift.to_i - 1
+      @fields[field] = (start_addr..end_addr)
+    when "enum" then
+      # enums specify a name for a bit or combination of bits used in a field
+      field = values.shift
+      name = values.shift
+      value = values.shift.to_i
+      @enums[field] = {} if !@enums[field]
+      @enums[field][name] = value
+    when "location" then
+      # locations specify where instructions start in microcode
+      instruction = values.shift
+      start_addr = values.shift.to_i
+      if(@locations[start_addr]) then
+        raise "Location #{start_addr} already in use by '#{@locations[start_addr]}', can't use it for '#{instruction}'"
+      end
+      @locations[start_addr] = instruction
+    when "instruction" then
+      # instructions list which values need to be set for each row of an instruction
+      instruction = values.shift
+      instructions[instruction] = [] if !instructions[instruction]
+      instructions[instruction] << values
+    when "alias" then
+      # we don't do anything with aliases, other tools use them
+    else
+      raise "Unknown field type."
   end
 end
 
@@ -232,6 +255,14 @@ mapfiles.each do |file_info|
       end
       mapfile.puts "#{addr.to_s(16).upcase.rjust(2, "0")} #{last_instruction}-#{addr-last_instruction_baseaddr}"
     end
+  end
+end
+
+# output any required mapping files for debugging purposes
+completefiles.each do |file_info|
+  filename = file_info[:filename]
+  File.open(filename, 'w') do |completefile|
+    completefile.write def_lines.join("")
   end
 end
 

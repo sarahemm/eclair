@@ -1,0 +1,39 @@
+# locations - start addresses of instructions
+location    inv.a       54    # invert 16-bit register a
+location    inv.b       83    # invert 16-bit register b
+location    inv.c       147   # invert 16-bit register c
+location    inv.d       196   # invert 16-bit register d
+location    inv.?       178   # invert 16-bit register
+location    inv.al      55    # invert low byte of register a
+location    inv.bl      84    # invert low byte of register b
+location    inv.cl      148   # invert low byte of register c
+location    inv.dl      195   # invert low byte of register d
+location    inv.?l      179   # invert low byte of register
+location    inv.ah      56    # invert high byte of register a
+location    inv.bh      85    # invert high byte of register b
+location    inv.ch      149   # invert high byte of register c
+location    inv.dh      194   # invert high byte of register d
+location    inv.?h      180   # invert high byte of register
+
+# instructions - actual implementation microcode
+
+# invert (not) 16-bit register
+instruction inv.a       src_xy(from_ir)   load_x            next_addr(inv.?)
+instruction inv.b       src_xy(from_ir)   load_x            next_addr(inv.?)
+instruction inv.c       src_xy(from_ir)   load_x            next_addr(inv.?)
+instruction inv.d       src_xy(from_ir)   load_x            next_addr(inv.?)
+instruction inv.?       op_16bit          alu_mode(logic)   alu_op(not_x)     load_reg(via_ir)    next_addr(fetch)
+
+# invert (not) low byte of register
+instruction inv.al      src_xy(from_ir)   load_x            next_addr(inv.?l)
+instruction inv.bl      src_xy(from_ir)   load_x            next_addr(inv.?l)
+instruction inv.cl      src_xy(from_ir)   load_x            next_addr(inv.?l)
+instruction inv.dl      src_xy(from_ir)   load_x            next_addr(inv.?l)
+instruction inv.?l      alu_mode(logic)   alu_op(not_x)     load_reg(via_ir)    next_addr(fetch)
+
+# invert (not) high byte of register
+instruction inv.ah      src_xy(from_ir)   load_x            next_addr(inv.?h)
+instruction inv.bh      src_xy(from_ir)   load_x            next_addr(inv.?h)
+instruction inv.ch      src_xy(from_ir)   load_x            next_addr(inv.?h)
+instruction inv.dh      src_xy(from_ir)   load_x            next_addr(inv.?h)
+instruction inv.?h      reg_byte(high)    alu_mode(logic)   alu_op(not_x)     load_reg(via_ir)    next_addr(fetch)

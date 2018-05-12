@@ -1,0 +1,117 @@
+# locations - start addresses of instructions
+location    ld8.al      60    # load 8-bit value from memory to low byte of register a
+location    ld8.bl      98    # load 8-bit value from memory to low byte of register b
+location    ld8.cl      128   # load 8-bit value from memory to low byte of register c
+location    ld8.dl      235   # load 8-bit value from memory to low byte of register d
+location    ld8.?l      239   # load 8-bit value from memory to low byte of register
+location    ld8.ah      61    # load 8-bit value from memory to high byte of register a
+location    ld8.bh      99    # load 8-bit value from memory to high byte of register b
+location    ld8.ch      129   # load 8-bit value from memory to high byte of register c
+location    ld8.dh      236   # load 8-bit value from memory to high byte of register d
+location    ld8.?h      243   # load 8-bit value from memory to high byte of register
+location    st16.a      59    # load 16-bit value from register a to memory
+location    st16.b      88    # load 16-bit value from register b to memory
+location    st16.c      135   # load 16-bit value from register c to memory
+location    st16.d      226   # load 16-bit value from register d to memory
+location    st16.?      227   # load 16-bit value from register to memory
+location    st8.al      14    # load 8-bit value from high byte of register a to memory
+location    st8.bl      121   # load 8-bit value from high byte of register b to memory
+location    st8.cl      130   # load 8-bit value from high byte of register c to memory
+location    st8.dl      237   # load 8-bit value from high byte of register d to memory
+location    st8.?l      247   # load 8-bit value from high byte of register to memory
+location    st8.ah      15    # load 8-bit value from low byte of register a to memory
+location    st8.bh      111   # load 8-bit value from low byte of register b to memory
+location    st8.ch      131   # load 8-bit value from low byte of register c to memory
+location    st8.dh      238   # load 8-bit value from low byte of register d to memory
+location    st8.?h      159   # load 8-bit value from low byte of register to memory
+
+# instructions - actual implementation microcode
+
+# load 16-bit value from memory to register
+instruction ld16.a  next_addr(ld16.?)
+instruction ld16.b  next_addr(ld16.?)
+instruction ld16.c  next_addr(ld16.?)
+instruction ld16.d  next_addr(ld16.?)
+# TODO: optimize this, 8 clocks to do a load is way too high on a load/store architecture
+# get the supplied memory address into MDR
+instruction ld16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low)  load_mdr
+instruction ld16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high) load_mdr op_16bit load_x
+# add the supplied address and DP and put that into MAR
+instruction ld16.?  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
+# load the value from RAM into the register
+instruction ld16.?  mem_read  src_mdr(data) mdr_byte(low)  load_mdr xy_imm_lsb(1) src_xy(imm) load_y
+instruction ld16.?  src_xy(mar) load_x
+instruction ld16.?  alu_op(add) src_mar(z) load_mar
+instruction ld16.?  mem_read  src_mdr(data) mdr_byte(high) load_mdr op_16bit src_xy(mdr) load_x load_reg(via_ir) next_addr(fetch)
+
+# load 8-bit value from memory to low byte of register
+instruction ld8.al  next_addr(ld8.?l)
+instruction ld8.bl  next_addr(ld8.?l)
+instruction ld8.cl  next_addr(ld8.?l)
+instruction ld8.dl  next_addr(ld8.?l)
+# get the supplied memory address into MDR
+instruction ld8.?l  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low)  load_mdr
+instruction ld8.?l  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high) load_mdr op_16bit load_x
+# add the supplied address and DP and put that into MAR
+instruction ld8.?l  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
+# load the value from RAM into the register
+instruction ld8.?l  mem_read  src_mdr(data) mdr_byte(low) reg_byte(low)  src_xy(mdr) load_x load_reg(via_ir) load_mdr next_addr(fetch)
+
+# load 8-bit value from memory to high byte of register
+instruction ld8.ah  next_addr(ld8.?h)
+instruction ld8.bh  next_addr(ld8.?h)
+instruction ld8.ch  next_addr(ld8.?h)
+instruction ld8.dh  next_addr(ld8.?h)
+# get the supplied memory address into MDR
+instruction ld8.?h  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low)  load_mdr
+instruction ld8.?h  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high) load_mdr op_16bit load_x
+# add the supplied address and DP and put that into MAR
+instruction ld8.?h  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
+# load the value from RAM into the register
+instruction ld8.?h  mem_read  src_mdr(data) mdr_byte(high) reg_byte(high)  src_xy(mdr) load_x load_reg(via_ir) load_mdr next_addr(fetch)
+
+# store 16-bit value from register to memory
+instruction st16.a  next_addr(st16.?)
+instruction st16.b  next_addr(st16.?)
+instruction st16.c  next_addr(st16.?)
+instruction st16.d  next_addr(st16.?)
+# TODO: optimize this, 9 clocks to do a store is way too high on a load/store architecture
+# get the supplied memory address into MDR
+instruction st16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low)  load_mdr
+instruction st16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high) load_mdr op_16bit load_x
+# add the supplied address and DP and put that into MAR
+instruction st16.?  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
+# store the value from the register into RAM
+instruction st16.?  mdr_byte(low) src_mdr(z)  src_xy(from_ir) op_16bit load_x  load_mdr
+instruction st16.?  mem_write xy_imm_lsb(1) src_xy(imm) load_y
+instruction st16.?  src_xy(mar)   load_x
+instruction st16.?  alu_op(add) src_mar(z) load_mar
+instruction st16.?  mem_write next_addr(fetch)
+
+# load 8-bit value from high byte of register to memory
+instruction st8.al  next_addr(st8.?l)
+instruction st8.bl  next_addr(st8.?l)
+instruction st8.cl  next_addr(st8.?l)
+instruction st8.dl  next_addr(st8.?l)
+# get the supplied memory address into MDR
+instruction st8.?l  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low)  load_mdr
+instruction st8.?l  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high) load_mdr op_16bit load_x
+# add the supplied address and DP and put that into MAR
+instruction st8.?l  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
+# store the value from the register into RAM
+instruction st8.?l  mdr_byte(low) src_mdr(z)  src_xy(from_ir) op_16bit load_x  load_mdr
+instruction st8.?l  mem_write next_addr(fetch)
+
+# load 8-bit value from high byte of register to memory
+instruction st8.ah  next_addr(st8.?h)
+instruction st8.bh  next_addr(st8.?h)
+instruction st8.ch  next_addr(st8.?h)
+instruction st8.dh  next_addr(st8.?h)
+# get the supplied memory address into MDR
+instruction st8.?h  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low)  load_mdr
+instruction st8.?h  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high) load_mdr op_16bit load_x
+# add the supplied address and DP and put that into MAR
+instruction st8.?h  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar    op_16bit
+# store the value from the register into RAM
+instruction st8.?h  src_xy(from_ir)   load_x    mdr_byte(high)  src_mdr(z)  load_mdr
+instruction st8.?h  mdr_byte(high)    mem_write next_addr(fetch)

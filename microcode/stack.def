@@ -1,0 +1,42 @@
+# locations - start addresses of instructions
+location    push8.imm   31    # push immediate 8 bits to address pointed to by SP++
+location    push8.?     33    # common latter half of push8.*
+location    push16.imm  44    # push immediate 16 bits to address pointed to by SP++
+location    push16.pc   52    # push PC to address pointed to by SP++
+location    push16.?    47    # common latter half of push16.*
+
+# instructions - actual implementation microcode
+
+# load immediate 8 bits into MDR
+instruction push8.imm   inc_pc        src_mar(pc)   load_mar        src_mdr(data)   mem_read      mdr_byte(low) load_mdr next_addr(push8.?)
+
+# TODO: better comment
+# load the value of SP into X/Z/MAR
+instruction push8.?     alu_op(x)     src_xy(sp)      load_x        src_mar(z)    load_mar
+# write immediate value from MDR into address pointed to by SP (now in Z)
+instruction push8.?     src_mar(z)    load_mar        mem_write
+# load 1'b1 into Y
+instruction push8.?     src_xy(imm)   xy_imm_lsb(1)   load_y    
+# add 1'b1 to X (already contains SP), then put the result back into SP, inc PC and jump back to fetching
+instruction push8.?     alu_op(add)   load_reg(sp)    next_addr(fetch)
+
+# push immediate 16 bits onto stack
+# load immediate value from address pointed to by PC into low byte of MDR
+instruction push16.imm  inc_pc        src_mar(pc)   load_mar        src_mdr(data)   mem_read    mdr_byte(low)   load_mdr
+# increment pc and load immediate value from address pointed to by PC into high byte of MDR
+instruction push16.imm  inc_pc        src_mar(pc)     load_mar        src_mdr(data)   mem_read  mdr_byte(high)  load_mdr  next_addr(push16.?)
+
+# push program counter onto stack
+# pc -> mar -> x -> z -> mdr
+instruction push16.pc   src_mar(pc)     load_mar      src_xy(mar)     load_x        alu_op(x)   src_mdr(z)  mdr_byte(low) load_mdr
+instruction push16.pc   mdr_byte(high)  src_xy(mdr)   load_mdr        load_x        next_addr(push16.?)
+
+# push 16 bits from register selected by IR[6..7]
+# write immediate value from low byte of MDR into address pointed to by SP (via SP->X->Z->MAR)
+instruction push16.?    alu_op(x)     src_xy(sp)      load_x          src_mar(z)      load_mar  mem_write
+# increment SP into Z and load that into MAR
+instruction push16.?    xy_imm_lsb(1) load_y          alu_op(add)     src_mar(z)      load_mar 
+# write immediate value from high byte of MDR into SP+1
+instruction push16.?    mdr_byte(high)  mem_write
+# add the 1'b1 already in Y to the SP+1 already in MAR, put the result (SP+2) back into SP
+instruction push16.?    src_xy(mar)   load_x          alu_op(add)     load_reg(sp)    next_addr(fetch)

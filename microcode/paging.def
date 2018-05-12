@@ -1,0 +1,13 @@
+# locations - start addresses of instructions
+location    wrpte       18    # write page table entry using data in a and address in d
+location    ldi8.ptb    65    # load immediate 8 bits into PTB register
+
+# instructions - actual implementation microcode
+
+# load immediate 8 bits into the page table block
+instruction ldi8.ptb    inc_pc        src_mar(pc)   load_mar        mem_read        src_mdr(data) mdr_byte(low) load_mdr        src_xy(mdr)   load_x      load_ptb      next_addr(fetch)
+
+# write page table entry, get data from A and write to page table address specified in D
+instruction wrpte       alu_op(x)     src_xy(d)       load_x          src_mar(z)      load_mar
+instruction wrpte       alu_op(x)     src_xy(a)       load_x          load_status
+instruction wrpte       write_pte     next_addr(fetch)
