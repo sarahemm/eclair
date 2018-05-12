@@ -10,4 +10,3 @@ halt
 // expect: pc=0x000007
 @00f
 data 0x11
-data 0x11
