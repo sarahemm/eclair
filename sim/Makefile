@@ -14,7 +14,7 @@ eclair.vvp: $(OBJS)
 
 microcode: microcode.bin
 
-microcode.bin: ../microcode/microcode.def ../utils/mcgen.rb
+microcode.bin: ../microcode/*.def ../utils/mcgen.rb
 	../utils/mcgen.rb ../microcode/microcode.def
 
 clean:
