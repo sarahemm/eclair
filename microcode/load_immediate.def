@@ -16,11 +16,6 @@ location    ldi16.d     202   # load immediate 16 bits into d
 location    ldi16.?     207   # load immediate 16 bits into register from IR
 location    ldi16.sp    39    # load immediate 16 bits into sp
 location    ldi16.dp    117   # load immediate 16 bits into dp
-location    ld16.a      58    # load 16-bit value from memory to register a
-location    ld16.b      87    # load 16-bit value from memory to register b
-location    ld16.c      182   # load 16-bit value from memory to register c
-location    ld16.d      192   # load 16-bit value from memory to register d
-location    ld16.?      183   # load 16-bit value from memory to register
 
 # instructions - actual implementation microcode
 
