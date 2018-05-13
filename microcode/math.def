@@ -1,14 +1,37 @@
 # locations - start addresses of instructions
 location    add8.ab     24    # add lower 8 bits of a and b registers, result goes into a
 location    sub8.ab     62    # subtract lower 8 bits of a and b registers, result goes into a
-location    add16.ab    66    # add a and b registers, result goes into a
+location    add16.a?    16    # add a and another register, result goes into a
+location    add16.b?    89    # add b and another register, result goes into b
+location    add16.c?    134   # add c and another register, result goes into c
+location    add16.d?    234   # add d and another register, result goes into d
+location    add16.??    325   # add two registers, result goes into the first
+
+# aliases - other names for instructions
+alias       add16.aa    add16.a?
+alias       add16.ab    add16.a?
+alias       add16.ac    add16.a?
+alias       add16.ad    add16.a?
+alias       add16.ba    add16.b?
+alias       add16.bb    add16.b?
+alias       add16.bc    add16.b?
+alias       add16.bd    add16.b?
+alias       add16.ca    add16.c?
+alias       add16.cb    add16.c?
+alias       add16.cc    add16.c?
+alias       add16.cd    add16.c?
+alias       add16.da    add16.d?
+alias       add16.db    add16.d?
+alias       add16.dc    add16.d?
+alias       add16.dd    add16.d?
 
 # instructions - actual implementation microcode
-
-# add 16 bits from registers A and B, result goes into A
-instruction add16.ab    src_xy(a)     load_x
-instruction add16.ab    src_xy(b)     load_y
-instruction add16.ab    alu_mode(arith) alu_op(add)   op_16bit      load_reg(a)     next_addr(fetch)  load_status
+instruction add16.a?    inc_pc src_xy(from_ir)  load_x next_addr(add16.??)
+instruction add16.b?    inc_pc src_xy(from_ir)  load_x next_addr(add16.??)
+instruction add16.c?    inc_pc src_xy(from_ir)  load_x next_addr(add16.??)
+instruction add16.d?    inc_pc src_xy(from_ir)  load_x next_addr(add16.??)
+instruction add16.??    src_mar(pc) load_mar  load_rr src_xy(from_rr) load_y
+instruction add16.??    alu_mode(arith) alu_op(add)   op_16bit      load_reg(via_ir)   load_status    next_addr(fetch)
 
 # add 8 bits from low bytes of registers A and B, result goes into A
 instruction add8.ab     src_xy(a)     load_x

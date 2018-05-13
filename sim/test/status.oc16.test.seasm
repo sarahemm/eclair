@@ -3,11 +3,15 @@
 ldi16.a   0xFFFE
 ldi16.b   0x0001
 // add the two 16s and make sure OC is unset
+// TODO: fix the below 2 lines once the assembler supports 2-byte instructions
 add16.ab
+data      0x01  // second byte of the above instruction
 // expect: status=zzzzzz00
 // immediate load a larger 16
 ldi16.a   0xFFFF
 // add the two 16s and make sure OC is now set
+// TODO: fix the below 2 lines once the assembler supports 2-byte instructions
 add16.ab
+data      0x01  // second byte of the above instruction
 // expect: status=zzzzzz11
 halt

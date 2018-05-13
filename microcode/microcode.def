@@ -23,7 +23,7 @@ field load_mdr        1     1
 # bit 2 is currently available
 field load_mar        3     1
 field load_ir         4     1
-# bit 5 is currently available
+field load_rr         5     1
 # bit 6 is currently available
 field load_reg        7     3
 field load_x          10    1
@@ -93,6 +93,7 @@ enum  src_xy      mar-shr  9
 enum  src_xy      mar-sex  10
 enum  src_xy      mar-swab 11
 enum  src_xy      dp       12
+enum  src_xy      from_rr  14
 enum  src_xy      from_ir  15
 enum  branch_cond always  0
 enum  branch_cond z       1

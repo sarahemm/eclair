@@ -69,6 +69,7 @@ module ECLair(int);
   wire          reg_sp_load;
   wire          reg_dp_load;
   wire          reg_ir_load;
+  wire          reg_rr_load;
   wire          reg_mar_load;
   wire          reg_mdr_load;
   wire          reg_x_load;
@@ -83,6 +84,7 @@ module ECLair(int);
   wire  [15:0]  reg_sp;
   wire  [15:0]  reg_dp;
   wire  [7:0]   reg_ir;
+  wire  [7:0]   reg_rr;
   wire  [8:0]   reg_ir_padded;  // reg_ir extended to 9 bits for driving microcode addresses
   wire  [15:0]  reg_mar;
   wire  [15:0]  reg_mar_shr;    // reg_mar shifted one bit right, used in the shift right microcode
@@ -115,6 +117,7 @@ module ECLair(int);
   // XY driver latch resets
   wire  [15:0]  xy_reset_normal;
   wire  [4:1]   xy_reset_from_ir;
+  wire  [4:1]   xy_reset_from_rr;
   wire  [15:0]  xy_reset;
   wire          xy_reset_imm;
   wire          xy_reset_a;
@@ -176,7 +179,7 @@ module ECLair(int);
     _ext_reset = 1'b1;
     _por_reset = 1'b0;
     #10 _por_reset = 1'b1;
-    #500000 $finish;
+    #750000 $finish;
   end
   
   counter         #(.WIDTH(3))                  ctr_clk_divider(.clk(clk_main), .ce(1'b1), .reset(1'b0), .out(clk_divided), .load(1'b0), .preset(3'b000));
@@ -213,6 +216,7 @@ module ECLair(int);
   latch           #(.WIDTH(16))                 lat_reg_x(.clk(reg_x_load), .reset(1'b0), .in(lat_xy), .out(reg_x));
   latch           #(.WIDTH(16))                 lat_reg_y(.clk(reg_y_load), .reset(1'b0), .in(lat_xy), .out(reg_y));
   latch                                         lat_reg_ir(.clk(reg_ir_load), .reset(1'b0), .in(bus_data), .out(reg_ir));
+  latch                                         lat_reg_rr(.clk(reg_rr_load), .reset(1'b0), .in(bus_data), .out(reg_rr));
   latch           #(.WIDTH(6))                  lat_reg_ptb(.clk(load_ptb), .reset(1'b0), .in(bus_z[5:0]), .out(reg_ptb));
   latch           #(.WIDTH(16))                 lat_reg_mar(.clk(reg_mar_load), .reset(1'b0), .in(lat_mar), .out(reg_mar));
   latch           #(.WIDTH(8))                  lat_reg_mdr_l(.clk(~(reg_mdr_load & ~mdr_byte)), .reset(1'b0), .in(lat_mdr[7:0]),  .out(reg_mdr[7:0]));
@@ -261,6 +265,7 @@ module ECLair(int);
   decoder_8                                     dcd_xy_a(.in(reg_xy_src[2:0]), .out(xy_reset_normal[7:0]), .enable(reg_xy_src[3]));
   decoder_8                                     dcd_xy_b(.in(reg_xy_src[2:0]), .out(xy_reset_normal[15:8]), .enable(~reg_xy_src[3]));
   decoder_8                                     dcd_xy_from_ir(.in(3'b000 | reg_ir[7:6]), .out(xy_reset_from_ir[4:1]), .enable(reg_xy_src != 4'b1111));
+  decoder_8                                     dcd_xy_from_rr(.in(1'b0 | reg_rr[3:0]), .out(xy_reset_from_rr[4:1]), .enable(reg_xy_src != 4'b1110));
   updowncounter #(.WIDTH(12))                   ctr_rpt(.clk(rpt_exec), .reset(~_reset), .out(rpt), .mode(rpt_mode ? 2'b01 : 2'b00), .preset(rpt_mdr_source), .cout(rpt_zero));
   shiftreg      #(.WIDTH(8))                    shr_cswrite(.clk(clk_main), .in(write_cse & ~cs_write_in_progress), .out(cs_write_seq));
   
@@ -270,7 +275,8 @@ module ECLair(int);
   // bit 2 is currently available
   assign reg_mar_load = ~cs_data[3];
   assign reg_ir_load = ~cs_data[4];
-  // bits 5 and 6 are currentl available
+  assign reg_rr_load = ~cs_data[5];
+  // bit 6 is currentl available
   assign load_reg = cs_data[9:7];
   assign reg_x_load = ~cs_data[10];
   assign reg_y_load = ~cs_data[11];
@@ -377,7 +383,7 @@ module ECLair(int);
 
   // driver reset signals that control which register is driving XY
   assign xy_reset[15:5] = xy_reset_normal[15:5];
-  assign xy_reset[4:1] = xy_reset_normal[4:1] & xy_reset_from_ir[4:1];
+  assign xy_reset[4:1] = xy_reset_normal[4:1] & xy_reset_from_ir[4:1] & xy_reset_from_rr[4:1];
   assign xy_reset[0] = xy_reset_normal[0];
   assign xy_reset_imm = xy_reset[0];
   assign xy_reset_a = xy_reset[1];
@@ -419,6 +425,7 @@ module ECLair(int);
       $display("bus_data: %0b (0x%0h)", bus_data, bus_data);
       $display("rpt:      %04b_%08b (0x%0h)", rpt[11:8], rpt[7:0], rpt);
       $display("reg_ir:   %0b", reg_ir);
+      $display("reg_rr:   %0b", reg_rr);
       $display("reg_mar:  %08b_%08b (0x%0h)", reg_mar[15:8], reg_mar[7:0], reg_mar);
       $display("reg_mdr:  %08b_%08b (0x%0h)", reg_mdr[15:8], reg_mdr[7:0], reg_mdr);
       $display("reg_a:    %08b_%08b (0x%0h)", reg_a[15:8],  reg_a[7:0],  reg_a);

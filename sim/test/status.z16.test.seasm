@@ -5,12 +5,16 @@ ldi16.a   0x55AA
 ldi16.b   0x0000
 // expect: status=zzzzzz01
 // add the two 16s and make sure Z is unset
+// TODO: fix the below 2 lines once the assembler supports 2-byte instructions
 add16.ab
+data      0x01  // second byte of the above instruction
 // expect: status=zzzzzz00
 // change register A so that the value will be zero
 ldi16.a   0x0000
 // expect: status=zzzzzz01
 // add the two zeroes together, make sure at Z is set
+// TODO: fix the below 2 lines once the assembler supports 2-byte instructions
 add16.ab
+data      0x01  // second byte of the above instruction
 // expect: status=zzzzzz01
 halt
