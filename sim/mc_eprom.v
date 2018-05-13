@@ -6,7 +6,7 @@ module microcode_eprom(_cs, _oe, addr, data);
   
   input                 _cs;
   input                 _oe;
-  input   [7:0]         addr;
+  input   [8:0]         addr;
   output  [WIDTH-1:0]   data; 
   reg     [WIDTH-1:0]   rom[0:511];
   wire    [WIDTH-1:0]   data_val;

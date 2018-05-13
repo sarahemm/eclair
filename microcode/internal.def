@@ -11,7 +11,7 @@ location    init        0
 location    init2       223
 location    fetch       224
 location    fetch2      225
-location    lz          255   # landing zone, required to be all zeroes for control store writer
+location    lz          511   # landing zone, has to be at the end of the CS and be all zeroes for control store writer
 
 # instructions - actual implementation microcode
 

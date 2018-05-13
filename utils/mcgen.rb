@@ -253,7 +253,7 @@ mapfiles.each do |file_info|
         last_instruction = @locations[addr] 
         last_instruction_baseaddr = addr
       end
-      mapfile.puts "#{addr.to_s(16).upcase.rjust(2, "0")} #{last_instruction}-#{addr-last_instruction_baseaddr}"
+      mapfile.puts "#{addr.to_s(16).upcase.rjust(3, "0")} #{last_instruction}-#{addr-last_instruction_baseaddr}"
     end
   end
 end

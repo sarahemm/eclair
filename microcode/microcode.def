@@ -37,8 +37,7 @@ field load_flag_pe    18    1
 field load_flag_m     19    1
 field load_flag_ie    20    1
 # level-sensitive signals
-field mdr_byte        24    1
-field next_addr       25    8
+field next_addr       24    9
 field src_mar         33    1
 field src_mdr         34    1
 field alu_mode        35    1
@@ -55,6 +54,7 @@ field rptz_next_addr  54    4
 field write_cse       58    1
 field inc_pc          59    1
 field load_pc         60    1
+field mdr_byte        61    1
 
 # enums - names for values that go into bit positions
 enum  src_mar     z       0
