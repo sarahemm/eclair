@@ -13,7 +13,7 @@ location    ldi16.a     10    # load immediate 16 bits into a
 location    ldi16.b     74    # load immediate 16 bits into b
 location    ldi16.c     138   # load immediate 16 bits into c
 location    ldi16.d     202   # load immediate 16 bits into d
-location    ldi16.?     207   # load immediate 16 bits into register from IR
+location    ldi16.?     227   # load immediate 16 bits into register from IR
 location    ldi16.sp    39    # load immediate 16 bits into sp
 location    ldi16.dp    117   # load immediate 16 bits into dp
 

@@ -24,8 +24,8 @@ location    shr16.d     200   # shift register d right
 location    shr16.?     272   # shift 16 bits right
 location    shr16.?-done  276 # shift 16 bits right (finalization step)
 location    shr8.al     43    # shift low byte of register a right
-location    shr8.bl     80    # shift low byte of register b right
-location    shr8.cl     144   # shift low byte of register c right
+location    shr8.bl     89    # shift low byte of register b right
+location    shr8.cl     134   # shift low byte of register c right
 location    shr8.dl     199   # shift low byte of register d right
 location    shr8.?l     277   # shift low byte of register left
 location    shr8.?l-done 284  # shift low byte of register left (finalization step)
