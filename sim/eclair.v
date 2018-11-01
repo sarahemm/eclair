@@ -154,6 +154,9 @@ module ECLair(int);
   wire  [7:0]   status_in;      // input to status latch (output from 8/16 status selector mux)
   wire          status_z_8;     // last operation result was zero (8-bit)
   wire          status_z_16;    // last operation result was zero (16-bit)
+  wire          status_e_8;     // last X and Y values were equal (8-bit)
+  wire          status_e_8h;    // last X and Y values were equal (8-bit high byte)
+  wire          status_e_16;    // last X and Y values were equal (16-bit)
   wire  [7:0]   status_8;       // status byte full of 8-bit-operation status information
   wire  [7:0]   status_16;      // status byte full of 16-bit-operation status information
   wire          branch_cond_met;  // branch condition is met
@@ -269,6 +272,8 @@ module ECLair(int);
   decoder_8                                     dcd_xy_from_rr(.in(1'b0 | reg_rr[3:0]), .out(xy_reset_from_rr[4:1]), .enable(reg_xy_src != 4'b1110));
   updowncounter #(.WIDTH(12))                   ctr_rpt(.clk(rpt_exec), .reset(~_reset), .out(rpt), .mode(rpt_mode ? 2'b01 : 2'b00), .preset(rpt_mdr_source), .cout(rpt_zero));
   shiftreg      #(.WIDTH(8))                    shr_cswrite(.clk(clk_main), .in(write_cse & ~cs_write_in_progress), .out(cs_write_seq));
+  magcomp                                       mc_status_l(.a(reg_x[7:0]), .b(reg_y[7:0]), .eq(status_e_8));
+  magcomp                                       mc_status_h(.a(reg_x[15:8]), .b(reg_y[15:8]), .eq(status_e_8h));
   
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
@@ -348,10 +353,13 @@ module ECLair(int);
   assign flags[7:3] = 5'b00000;
   assign status_z_8  = (bus_z[7:0] == 8'd0);
   assign status_z_16 = (bus_z == 16'd0);
+  assign status_e_16 = status_e_8 && status_e_8h;
   assign status_8[0]  = status_z_8;
   assign status_16[0] = status_z_16;
   assign status_8[1]  = alu_cout8;
   assign status_16[1] = alu_cout16;
+  assign status_8[2]  = status_e_8;
+  assign status_16[2] = status_e_16;
   assign really_load_pc = (load_pc & branch_cond_met) ^ branch_negate;
   assign xy_imm_val[1:0] = xy_imm_lsb;
   assign xy_imm_val[15:2] = 14'b00_0000_0000_0000;
