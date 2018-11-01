@@ -99,6 +99,7 @@ enum  src_xy      from_ir  15
 enum  branch_cond always  0
 enum  branch_cond z       1
 enum  branch_cond co      2
+enum  branch_cond e       3
 enum  mdr_byte    low     0
 enum  mdr_byte    high    1
 enum  reg_byte    low     0

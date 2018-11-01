@@ -4,9 +4,30 @@ location    jmpz        27    # jump if Z
 location    jmpnz       113   # jump if not Z
 location    call        211   # push PC to stack then jump immediate
 location    pop16.pc    92    # pop 16 bits from address pointed to by SP-- into PC
+location    cmp16.a?    38    # load two registers into X/Y and set flags
+location    cmp16.b?    102   # load two registers into X/Y and set flags
+location    cmp16.c?    166   # load two registers into X/Y and set flags
+location    cmp16.d?    230   # load two registers into X/Y and set flags
+location    cmp16.??    150   # load two registers into X/Y and set flags
 
 # aliases - other names for instructions
 alias       ret         pop16.pc
+alias       cmp16.aa    cmp16.a?
+alias       cmp16.ab    cmp16.a?
+alias       cmp16.ac    cmp16.a?
+alias       cmp16.ad    cmp16.a?
+alias       cmp16.ba    cmp16.b?
+alias       cmp16.bb    cmp16.b?
+alias       cmp16.bc    cmp16.b?
+alias       cmp16.bd    cmp16.b?
+alias       cmp16.ca    cmp16.c?
+alias       cmp16.cb    cmp16.c?
+alias       cmp16.cc    cmp16.c?
+alias       cmp16.cd    cmp16.c?
+alias       cmp16.da    cmp16.d?
+alias       cmp16.db    cmp16.d?
+alias       cmp16.dc    cmp16.d?
+alias       cmp16.dd    cmp16.d?
 
 # instructions - actual implementation microcode
 
@@ -27,6 +48,14 @@ instruction jmpnz       inc_pc        src_mar(pc)     mem_read        load_mar  
 instruction jmpnz       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
 instruction jmpnz       inc_pc        src_xy(mdr)     alu_op(x)       load_x
 instruction jmpnz       branch_negate branch_cond(z)  load_pc         next_addr(fetch2)
+
+# load two registers into X/Y and set flags
+instruction cmp16.a?    inc_pc src_xy(from_ir)  load_x next_addr(cmp16.??)
+instruction cmp16.b?    inc_pc src_xy(from_ir)  load_x next_addr(cmp16.??)
+instruction cmp16.c?    inc_pc src_xy(from_ir)  load_x next_addr(cmp16.??)
+instruction cmp16.d?    inc_pc src_xy(from_ir)  load_x next_addr(cmp16.??)
+instruction cmp16.??    src_mar(pc) load_mar  load_rr src_xy(from_rr) load_y
+instruction cmp16.??    alu_mode(arith) alu_op(x)   op_16bit      load_status    next_addr(fetch)
 
 # push current pc onto stack then jump to immediate location
 instruction call        include(push16.pc,no_next)

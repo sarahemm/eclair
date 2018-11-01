@@ -1,6 +1,6 @@
 # locations - start addresses of instructions
 location    ei          23
-location    di          38
+location    di          66
 location    wrcse       90    # write control store entry using data in A-D and address in SP
 location    ldi8.flags  21    # load immediate 8 bits into system flags
 location    cir         175   # clear internal registers (instruction used for testing only)
