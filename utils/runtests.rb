@@ -3,6 +3,14 @@
 
 require 'colorize'
 
+def bit_compare(a, b)
+  # compare a and b, understanding that 'x' means ignore the bit position in the other one
+  (0..(a.length-1)).each do |char_idx|
+    return false unless (a[char_idx] == b[char_idx]) || a[char_idx].downcase == "x" || b[char_idx].downcase == "x"
+  end
+  true
+end
+
 def run_test(filename)
   puts "\nTEST:    #{File.basename(filename).gsub(".test", "")}".light_white
   # find all the expects and put them into an array of arrays
@@ -116,9 +124,9 @@ def run_test(filename)
         puts "PROBLEM: Simulator did not report value of register '#{reg}'".light_yellow
         next
       end
-      if(results[addr][reg] == val)
+      if(bit_compare(results[addr][reg], val))
         pass += 1
-        puts "PASS:    #{reg} is #{val}".light_green
+        puts "PASS:    #{reg} is #{results[addr][reg]}".light_green
       else
         fails += 1
         puts "FAIL:    #{reg} should be #{val} but was #{results[addr][reg]}".light_red
