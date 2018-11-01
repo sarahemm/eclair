@@ -159,6 +159,7 @@ module ECLair(int);
   wire          branch_cond_met;  // branch condition is met
   wire          really_load_pc;   // request to load pc and branch condition is met
   wire  [2:0]   branch_cond;    // which branch condition to use
+  wire          branch_negate;  // negate the branch condition
   wire          carry_in;       // carry input to the ALU, from a microcode bit
   wire  [3:0]   intvect;        // highest-priority interrupt flag currently active
   wire  [8:0]   intvect_padded; // interrupt vector padded to 9 bits, for driving microcode
@@ -307,6 +308,7 @@ module ECLair(int);
   assign inc_pc = cs_data[59];
   assign load_pc = cs_data[60];
   assign mdr_byte = cs_data[61];
+  assign branch_negate = cs_data[62];
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
@@ -350,7 +352,7 @@ module ECLair(int);
   assign status_16[0] = status_z_16;
   assign status_8[1]  = alu_cout8;
   assign status_16[1] = alu_cout16;
-  assign really_load_pc = load_pc & branch_cond_met;
+  assign really_load_pc = (load_pc & branch_cond_met) ^ branch_negate;
   assign xy_imm_val[1:0] = xy_imm_lsb;
   assign xy_imm_val[15:2] = 14'b00_0000_0000_0000;
   assign int_pending = ~(intvect[3:0] == 4'b0000);

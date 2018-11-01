@@ -55,6 +55,7 @@ field write_cse       58    1
 field inc_pc          59    1
 field load_pc         60    1
 field mdr_byte        61    1
+field branch_negate   62    1
 
 # enums - names for values that go into bit positions
 enum  src_mar     z       0
