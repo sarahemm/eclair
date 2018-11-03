@@ -75,6 +75,12 @@ asm_lines.each do |line|
   end
   opcode_bin = instructions[opcode].to_s(2).rjust(8, '0')
   puts "#{opcode_bin}\t// #{opcode}"
+  # if it's a two-byte instruction, figure out and add the second byte
+  if(matches = /\.[a-d]([a-d])$/.match(opcode)) then
+    regcode_byte = matches[1].ord - 'a'.ord
+    regcode_bin = regcode_byte.to_s(2).rjust(8, '0')
+    puts "#{regcode_bin}\t// reg: #{matches[1]}"
+  end
   operand_nbr = 0
   operands.each do |operand_raw|
     break if operand_raw == "//"

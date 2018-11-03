@@ -3,15 +3,11 @@
 ldi16.a   0x5A5A
 ldi16.b   0xA5A5
 // add the two 16s and make sure E is unset
-// TODO: fix the below 2 lines once the assembler supports 2-byte instructions
 add16.ab
-data      0x01  // second byte of the above instruction
 // expect: status=xxxxx0xx
 // immediate load a new matching 16
 ldi16.a   0xA5A5
 // add the two 16s and make sure E is now set
-// TODO: fix the below 2 lines once the assembler supports 2-byte instructions
 add16.ab
-data      0x01  // second byte of the above instruction
 // expect: status=xxxxx1xx
 halt

@@ -3,38 +3,38 @@ ldi8.al 0xFF
 ldi8.bl 0xFF
 // expect: reg_a=xxxxxxxx_11111111
 // expect: reg_b=xxxxxxxx_11111111
-sub8.ab
+sub8l.ab
 // expect: reg_a=xxxxxxxx_00000000
 // expect: reg_b=xxxxxxxx_11111111
 
-@005
+@006
 ldi8.al 0xFF
 ldi8.bl 0x00
 // expect: reg_a=xxxxxxxx_11111111
 // expect: reg_b=xxxxxxxx_00000000
-sub8.ab
+sub8l.ab
 // expect: reg_a=xxxxxxxx_11111111
 // expect: reg_b=xxxxxxxx_00000000
 
-@00A
+@00C
 ldi8.al 0x18
 ldi8.bl 0x14
 // expect: reg_a=xxxxxxxx_00011000
 // expect: reg_b=xxxxxxxx_00010100
-sub8.ab
+sub8l.ab
 // expect: reg_a=xxxxxxxx_00000100
 // expect: reg_b=xxxxxxxx_00010100
 
-@00F
+@012
 ldi8.al 0x03
 ldi8.bl 0x01
 // expect: reg_a=xxxxxxxx_00000011
 // expect: reg_b=xxxxxxxx_00000001
-sub8.ab
+sub8l.ab
 // expect: reg_a=xxxxxxxx_00000010
 // expect: reg_b=xxxxxxxx_00000001
 
-@014
+@017
 halt
 
 // expect: reg_c=xxxxxxxx_xxxxxxxx

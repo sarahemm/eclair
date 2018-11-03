@@ -3,10 +3,8 @@
 ldi16.a   0x5A5A
 ldi16.b   0xA5A5
 // compare the two which should load them into X/Y
-// TODO: fix the below 2 lines once the assembler supports 2-byte instructions
 cir
 cmp16.ab
-data      0x01  // second byte of the above instruction
 // expect: reg_x=01011010_01011010
 // expect: reg_y=10100101_10100101
 halt

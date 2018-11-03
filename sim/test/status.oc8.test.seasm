@@ -1,9 +1,9 @@
 @000
 ldi8.al 0xFE
 ldi8.bl 0x01
-add8.ab
+add8l.ab
 // expect: status=xxxxxx0x
 ldi8.al 0xFF
-add8.ab
+add8l.ab
 // expect: status=xxxxxx1x
 halt

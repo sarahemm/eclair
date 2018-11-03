@@ -1,9 +1,7 @@
 @000
 ldi16.a 0x44C5
 ldi16.b 0x6005
-// TODO: fix the below 2 lines once the assembler supports 2-byte instructions
 add16.ab
-data      0x01  // second byte of the above instruction
 halt
 
 // expect: reg_a=10100100_11001010
