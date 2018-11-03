@@ -1,0 +1,17 @@
+@000
+ldi16.a 0xAA55
+ldi16.b 0x55AA
+cmp16.ab
+jmpe    0x0007
+// expect: pc=0x00000a
+ldi16.b 0xAA55
+cmp16.ab
+jmpe    0x001D
+@013
+halt    // should jump over this
+halt    // should jump over this
+@01D
+halt
+// expect: pc=0x00001d
+@01E
+halt    // should never get here
