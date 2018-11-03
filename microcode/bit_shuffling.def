@@ -1,7 +1,7 @@
 # locations - start addresses of instructions
 location    sex.a       51    # sign extend register a 8->16 bits
-location    sex.b       82    # sign extend register b 8->16 bits
-location    sex.c       146   # sign extend register c 8->16 bits
+location    sex.b       107   # sign extend register b 8->16 bits
+location    sex.c       168   # sign extend register c 8->16 bits
 location    sex.d       197   # sign extend register d 8->16 bits
 location    sex.?       177   # sign extend 8->16 bits
 location    swab.a      57    # swap bytes in register a

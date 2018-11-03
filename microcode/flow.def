@@ -2,7 +2,9 @@
 location    jmp         69    # unconditional immediate jump
 location    jmpz        27    # jump if Z
 location    jmpnz       113   # jump if not Z
-location    call        211   # push PC to stack then jump immediate
+location    jmpe        239   # jump if E
+location    jmpne       243   # jump if not E
+location    call        155   # push PC to stack then jump immediate
 location    pop16.pc    92    # pop 16 bits from address pointed to by SP-- into PC
 location    cmp16.a?    38    # load two registers into X/Y and set flags
 location    cmp16.b?    102   # load two registers into X/Y and set flags
@@ -48,6 +50,18 @@ instruction jmpnz       inc_pc        src_mar(pc)     mem_read        load_mar  
 instruction jmpnz       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
 instruction jmpnz       inc_pc        src_xy(mdr)     alu_op(x)       load_x
 instruction jmpnz       branch_negate branch_cond(z)  load_pc         next_addr(fetch2)
+
+# immediate jump to the address specified if E(qual) is true
+instruction jmpe        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
+instruction jmpe        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
+instruction jmpe        inc_pc        src_xy(mdr)     alu_op(x)       load_x
+instruction jmpe        branch_cond(e)                load_pc         next_addr(fetch2)
+
+# immediate jump to the address specified if E(qual) is false
+instruction jmpne       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
+instruction jmpne       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
+instruction jmpne       inc_pc        src_xy(mdr)     alu_op(x)       load_x
+instruction jmpne       branch_negate branch_cond(e)  load_pc         next_addr(fetch2)
 
 # load two registers into X/Y and set flags
 instruction cmp16.a?    inc_pc src_xy(from_ir)  load_x next_addr(cmp16.??)

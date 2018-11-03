@@ -15,7 +15,7 @@ location    ld8.ch      129   # load 8-bit value from memory to high byte of reg
 location    ld8.dh      236   # load 8-bit value from memory to high byte of register d
 location    ld8.?h      303   # load 8-bit value from memory to high byte of register
 location    st16.a      59    # load 16-bit value from register a to memory
-location    st16.b      88    # load 16-bit value from register b to memory
+location    st16.b      100   # load 16-bit value from register b to memory
 location    st16.c      135   # load 16-bit value from register c to memory
 location    st16.d      226   # load 16-bit value from register d to memory
 location    st16.?      307   # load 16-bit value from register to memory

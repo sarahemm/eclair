@@ -1,5 +1,5 @@
 # locations - start addresses of instructions
-location    wrpte       18    # write page table entry using data in a and address in d
+location    wrpte       103   # write page table entry using data in a and address in d
 location    ldi8.ptb    65    # load immediate 8 bits into PTB register
 
 # instructions - actual implementation microcode
