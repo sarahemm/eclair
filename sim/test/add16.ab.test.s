@@ -1,7 +1,6 @@
-@000
-ldi16.a 0x44C5
-ldi16.b 0x6005
-add16.ab
+ldi16 a, 0x44C5
+ldi16 b, 0x6005
+add16 a, b
 halt
 
 // expect: reg_a=10100100_11001010
