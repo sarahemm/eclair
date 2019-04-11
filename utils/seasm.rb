@@ -102,8 +102,8 @@ asm_lines.each do |line|
       operand_h = (operand & 0xFF00) >> 8
       operand_lbin = operand_l.to_s(2).rjust(8, '0')
       operand_hbin = operand_h.to_s(2).rjust(8, '0')
-      puts "#{operand_lbin}\t// low-byte of operand #{operand_nbr} for #{opcode} - #{operand_hex} / #{operand}"
-      puts "#{operand_hbin}\t// high-byte of operand #{operand_nbr}"
+      puts "#{operand_hbin}\t// high-byte of operand #{operand_nbr} for #{opcode} - #{operand_hex} / #{operand}"
+      puts "#{operand_lbin}\t// low-byte of operand #{operand_nbr}"
     else
       # operand(s) are 8 bits
       operand_bin = operand.to_s(2).rjust(8, '0')

@@ -34,32 +34,32 @@ alias       cmp16.dd    cmp16.d?
 # instructions - actual implementation microcode
 
 # immediate jump to the address specified
-instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
-instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
+instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)   load_mdr
+instruction jmp         inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)  load_mdr
 instruction jmp         src_xy(mdr)   alu_op(x)       load_x
 instruction jmp         branch_cond(always)           load_pc         next_addr(fetch2)
 
 # immediate jump to the address specified if Z(ero) is true
-instruction jmpz        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
-instruction jmpz        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
+instruction jmpz        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)   load_mdr
+instruction jmpz        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)  load_mdr
 instruction jmpz        inc_pc        src_xy(mdr)     alu_op(x)       load_x
 instruction jmpz        branch_cond(z)                load_pc         next_addr(fetch2)
 
 # immediate jump to the address specified if Z(ero) is false
-instruction jmpnz       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
-instruction jmpnz       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
+instruction jmpnz       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)   load_mdr
+instruction jmpnz       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)  load_mdr
 instruction jmpnz       inc_pc        src_xy(mdr)     alu_op(x)       load_x
 instruction jmpnz       branch_negate branch_cond(z)  load_pc         next_addr(fetch2)
 
 # immediate jump to the address specified if E(qual) is true
-instruction jmpe        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
-instruction jmpe        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
+instruction jmpe        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)   load_mdr
+instruction jmpe        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)  load_mdr
 instruction jmpe        inc_pc        src_xy(mdr)     alu_op(x)       load_x
 instruction jmpe        branch_cond(e)                load_pc         next_addr(fetch2)
 
-# immediate jump to the address specified if E(qual) is false
-instruction jmpne       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)   load_mdr
-instruction jmpne       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)  load_mdr
+# immediate jgump to the address specified if E(qual) is false
+instruction jmpne       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)   load_mdr
+instruction jmpne       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)  load_mdr
 instruction jmpne       inc_pc        src_xy(mdr)     alu_op(x)       load_x
 instruction jmpne       branch_negate branch_cond(e)  load_pc         next_addr(fetch2)
 
@@ -80,12 +80,12 @@ instruction call        include(jmp)
 # pop 16 bits from address pointed to by SP-- into PC
 # load SP into MAR
 instruction pop16.pc    src_xy(sp)      load_x      alu_op(x-1)   src_mar(z)    load_mar
-# load RAM contents into high byte of MDR and load MAR back into SP
-instruction pop16.pc    mdr_byte(high)  mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_reg(sp)
+# load RAM contents into low byte of MDR and load MAR back into SP
+instruction pop16.pc    mdr_byte(low)  mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_reg(sp)
 # subtract 1 from SP, put it into the MAR
 instruction pop16.pc    src_xy(sp)      alu_op(x-1) src_mar(z)    load_mar
-# load RAM contents into the low byte of MDR and push that all the way through to Z
-instruction pop16.pc    mdr_byte(low)   mem_read    src_mdr(data) load_mdr      src_xy(mdr)   load_x
+# load RAM contents into the high byte of MDR and push that all the way through to Z
+instruction pop16.pc    mdr_byte(high)   mem_read    src_mdr(data) load_mdr      src_xy(mdr)   load_x
 # load contents of MDR into PC
 instruction pop16.pc    src_xy(mdr)     load_x      load_pc
 # load MAR back into SP now that we're done, then fetch next instruction w/o incrementing PC
