@@ -1,7 +1,7 @@
 # locations - start addresses of instructions
 location    ld16.a      58    # load 16-bit value from memory to register a
 location    ld16.b      87    # load 16-bit value from memory to register b
-location    ld16.c      182   # load 16-bit value from memory to register c
+location    ld16.c      184   # load 16-bit value from memory to register c
 location    ld16.d      192   # load 16-bit value from memory to register d
 location    ld16.?      292   # load 16-bit value from memory to register
 location    ld8.al      60    # load 8-bit value from memory to low byte of register a

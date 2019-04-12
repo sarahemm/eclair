@@ -2,7 +2,7 @@
 location    push8.imm   31    # push immediate 8 bits to address pointed to by SP++
 location    push8.?     33    # common latter half of push8.*
 location    push16.imm  44    # push immediate 16 bits to address pointed to by SP++
-location    push16.pc   52    # push PC to address pointed to by SP++
+location    push16.pc   67    # push PC to address pointed to by SP++
 location    push16.?    47    # common latter half of push16.*
 
 # instructions - actual implementation microcode

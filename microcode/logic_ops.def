@@ -1,18 +1,18 @@
 # locations - start addresses of instructions
-location    inv.a       54    # invert 16-bit register a
-location    inv.b       83    # invert 16-bit register b
-location    inv.c       147   # invert 16-bit register c
-location    inv.d       196   # invert 16-bit register d
+location    inv.a       53    # invert 16-bit register a
+location    inv.b       117   # invert 16-bit register b
+location    inv.c       181   # invert 16-bit register c
+location    inv.d       245   # invert 16-bit register d
 location    inv.?       178   # invert 16-bit register
-location    inv.al      55    # invert low byte of register a
-location    inv.bl      84    # invert low byte of register b
-location    inv.cl      148   # invert low byte of register c
-location    inv.dl      195   # invert low byte of register d
+location    inv.al      54    # invert low byte of register a
+location    inv.bl      118   # invert low byte of register b
+location    inv.cl      182   # invert low byte of register c
+location    inv.dl      246   # invert low byte of register d
 location    inv.?l      179   # invert low byte of register
-location    inv.ah      56    # invert high byte of register a
-location    inv.bh      85    # invert high byte of register b
-location    inv.ch      149   # invert high byte of register c
-location    inv.dh      194   # invert high byte of register d
+location    inv.ah      55    # invert high byte of register a
+location    inv.bh      119   # invert high byte of register b
+location    inv.ch      183   # invert high byte of register c
+location    inv.dh      247   # invert high byte of register d
 location    inv.?h      180   # invert high byte of register
 
 # instructions - actual implementation microcode
