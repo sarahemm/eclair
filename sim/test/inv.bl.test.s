@@ -1,10 +1,9 @@
-@000
-ldi8.bh 0b01101001
+ldi8l bl, 0b10101011
 cir
-inv.bh
+inv bl
 halt
 // expect: reg_a=xxxxxxxx_xxxxxxxx
-// expect: reg_b=10010110_xxxxxxxx
+// expect: reg_b=xxxxxxxx_01010100
 // expect: reg_c=xxxxxxxx_xxxxxxxx
 // expect: reg_d=xxxxxxxx_xxxxxxxx
 // expect: pc=0x000004

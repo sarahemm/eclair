@@ -1,7 +1,6 @@
-@000
-ldi16.a 0xA5E1
+ldi16 a, 0xA5E1
 cir
-inv.a
+inv a
 halt
 // expect: reg_a=01011010_00011110
 // expect: reg_b=xxxxxxxx_xxxxxxxx

@@ -1,7 +1,6 @@
-@000
-ldi8.dl 0b10101011
+ldi8l dl, 0b10101011
 cir
-inv.dl
+inv dl
 halt
 // expect: reg_a=xxxxxxxx_xxxxxxxx
 // expect: reg_b=xxxxxxxx_xxxxxxxx
