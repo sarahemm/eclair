@@ -36,6 +36,9 @@ stdout.each_line do |line|
   elsif(/.org\s+(\d+)/.match(line)) then
     loc = /.org\s+(\d+)/.match(line)[1]
     outfd.puts "@#{loc}"
+  elsif(/^\s*#.*/.match(line)) then
+    comment = /^\s*#(.*)/.match(line)[1]
+    outfd.puts "// #{comment}"
   else
     outfd.puts line
   end
