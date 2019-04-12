@@ -2,7 +2,7 @@
 location    shl16.a     12    # shift register a left
 location    shl16.b     76    # shift register b left
 location    shl16.c     140   # shift register c left
-location    shl16.d     206   # shift register d left
+location    shl16.d     204   # shift register d left
 location    shl16.?       256 # shift 16 bits left
 location    shl16.?-done  260 # shift 16 bits left (finalization step)
 location    shl8.al     13    # shift low byte of register a left
