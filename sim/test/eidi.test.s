@@ -1,4 +1,3 @@
-@000
 ei
 // expect: flags=00000001
 di
