@@ -3,17 +3,17 @@ location    inv.a       53    # invert 16-bit register a
 location    inv.b       117   # invert 16-bit register b
 location    inv.c       181   # invert 16-bit register c
 location    inv.d       245   # invert 16-bit register d
-location    inv.?       178   # invert 16-bit register
+location    inv.?       339   # invert 16-bit register
 location    inv.al      54    # invert low byte of register a
 location    inv.bl      118   # invert low byte of register b
 location    inv.cl      182   # invert low byte of register c
 location    inv.dl      246   # invert low byte of register d
-location    inv.?l      179   # invert low byte of register
+location    inv.?l      340   # invert low byte of register
 location    inv.ah      55    # invert high byte of register a
 location    inv.bh      119   # invert high byte of register b
 location    inv.ch      183   # invert high byte of register c
 location    inv.dh      247   # invert high byte of register d
-location    inv.?h      180   # invert high byte of register
+location    inv.?h      341   # invert high byte of register
 
 # instructions - actual implementation microcode
 
