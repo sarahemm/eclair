@@ -46,11 +46,12 @@ stdout.each_line do |line|
       outfd.puts value.to_i(16).to_s(2).rjust(8, "0")
     end
   elsif(/.org\s+0x([0-9A-Fa-f]+)/.match(line)) then
-    loc = /.org\s+0x([0-9A-Fa-f]+)/.match(line)[1].to_i(16)
-    outfd.puts "@#{loc}"
+    loc, comments = /.org\s+0x([0-9A-Fa-f]+)\s*,\s*\d+(.*)/.match(line).captures
+    p comments
+    outfd.puts "@#{sprintf("%03X", loc.to_i)} #{comments.sub('#','//')}"
   elsif(/.org\s+(\d+)/.match(line)) then
-    loc = /.org\s+(\d+)/.match(line)[1]
-    outfd.puts "@#{loc}"
+    loc, comments = /.org\s+(\d+)\s*,\s*\d+\s*(.*)/.match(line).captures
+    outfd.puts "@#{sprintf("%03X", loc.to_i)} #{comments.sub('#','//')}"
   elsif(/^\s*#.*/.match(line)) then
     comment = /^\s*#(.*)/.match(line)[1]
     outfd.puts "// #{comment}"
