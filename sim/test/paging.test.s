@@ -1,23 +1,22 @@
-@000
-ldi8.flags  0x02  // switches to user mode but leaves paging off
+ldi flags, 0x02  // switches to user mode but leaves paging off
 // set up page table block 1 (actually used to page)
-ldi8.ptb    0x01
-ldi16.a     0x0001
-ldi16.d     0x0000
+ldi ptb, 0x01
+ldi a,   0x0001
+ldi d,   0x0000
 wrpte
 // second page table block, (used to make sure we can have two blocks
 // that don't interfere with each other)
-@00B
-ldi8.ptb    0x02
-ldi16.a     0x0002
-ldi16.d     0x0000
+.org 0x00B
+ldi ptb, 0x02
+ldi a,   0x0002
+ldi d,   0x0000
 wrpte
 // switch back to PTB 1, enable paging, and make sure the address jumps
-@014
-ldi8.ptb    0x01
-ldi8.flags  0x06  // enables paging, which means the next code runs from 0x418
+.org 0x014
+ldi ptb,   0x01
+ldi flags, 0x06  // enables paging, which means the next code runs from 0x418
 halt
-@417        // pc: 017
+.org 0x417        // pc: 017
 halt      // should jump over this
 halt
 
