@@ -13,7 +13,19 @@ if(ARGV.length != 1 and ARGV.length != 2) then
 end
 asmfilename = ARGV[0]
 
-stdin, stdout, stderr, wait_thr = Open3.popen3(LLVM_MC, *CMDLINE.split(" "), asmfilename)
+asm = ""
+File.open(asmfilename, "r").each_line do |line|
+  if(/#include\s+\"([^\"]+)\"/.match(line)) then
+    incfile = /#include\s+\"([^\"]+)\"/.match(line)[1]
+    asm += File.open(incfile, "r").read
+  else
+    asm += line
+  end
+end
+
+stdin, stdout, stderr, wait_thr = Open3.popen3(LLVM_MC, *CMDLINE.split(" "))
+stdin.print asm
+stdin.close
 err = stderr.read
 if(err.length > 0) then
   puts "Errors found while assembling, aborting!"
@@ -33,6 +45,9 @@ stdout.each_line do |line|
     hex.split(",").each do |value|
       outfd.puts value.to_i(16).to_s(2).rjust(8, "0")
     end
+  elsif(/.org\s+0x([0-9A-Fa-f]+)/.match(line)) then
+    loc = /.org\s+0x([0-9A-Fa-f]+)/.match(line)[1].to_i(16)
+    outfd.puts "@#{loc}"
   elsif(/.org\s+(\d+)/.match(line)) then
     loc = /.org\s+(\d+)/.match(line)[1]
     outfd.puts "@#{loc}"
