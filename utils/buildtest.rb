@@ -18,7 +18,7 @@ err = stderr.read
 if(err.length > 0) then
   puts "Errors found while assembling, aborting!"
   puts err
-  Kernel.exit wait_thr.value.to_i
+  Kernel.exit -1
 end
 
 outfd = STDOUT
