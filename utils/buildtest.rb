@@ -18,6 +18,7 @@ File.open(asmfilename, "r").each_line do |line|
   if(/#include\s+\"([^\"]+)\"/.match(line)) then
     incfile = /#include\s+\"([^\"]+)\"/.match(line)[1]
     asm += File.open(incfile, "r").read
+    asm += "\n"
   else
     asm += line
   end
