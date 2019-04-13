@@ -39,8 +39,8 @@ instruction ld16.c  next_addr(ld16.?)
 instruction ld16.d  next_addr(ld16.?)
 # TODO: optimize this, 8 clocks to do a load is way too high on a load/store architecture
 # get the supplied memory address into MDR
-instruction ld16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low)  load_mdr
-instruction ld16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high) load_mdr op_16bit load_x
+instruction ld16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high)  load_mdr
+instruction ld16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low) load_mdr op_16bit load_x
 # add the supplied address and DP and put that into MAR
 instruction ld16.?  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
 # load the value from RAM into the register
@@ -55,8 +55,8 @@ instruction ld8.bl  next_addr(ld8.?l)
 instruction ld8.cl  next_addr(ld8.?l)
 instruction ld8.dl  next_addr(ld8.?l)
 # get the supplied memory address into MDR
-instruction ld8.?l  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low)  load_mdr
-instruction ld8.?l  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high) load_mdr op_16bit load_x
+instruction ld8.?l  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high)  load_mdr
+instruction ld8.?l  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low) load_mdr op_16bit load_x
 # add the supplied address and DP and put that into MAR
 instruction ld8.?l  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
 # load the value from RAM into the register
@@ -68,8 +68,8 @@ instruction ld8.bh  next_addr(ld8.?h)
 instruction ld8.ch  next_addr(ld8.?h)
 instruction ld8.dh  next_addr(ld8.?h)
 # get the supplied memory address into MDR
-instruction ld8.?h  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low)  load_mdr
-instruction ld8.?h  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high) load_mdr op_16bit load_x
+instruction ld8.?h  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high)  load_mdr
+instruction ld8.?h  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low) load_mdr op_16bit load_x
 # add the supplied address and DP and put that into MAR
 instruction ld8.?h  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
 # load the value from RAM into the register
