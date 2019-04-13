@@ -3,12 +3,12 @@ location    ldi8.al     9     # load immediate 8 bits into low byte of a
 location    ldi8.bl     73    # load immediate 8 bits into low byte of b
 location    ldi8.cl     137   # load immediate 8 bits into low byte of c
 location    ldi8.dl     201   # load immediate 8 bits into low byte of d
-location    ldi8.?l     206   # load immediate 8 bits into register from IR
+location    ldi8.?l     352   # load immediate 8 bits into register from IR
 location    ldi8.ah     11    # load immediate 8 bits into high byte of a
 location    ldi8.bh     75    # load immediate 8 bits into high byte of b
 location    ldi8.ch     139   # load immediate 8 bits into high byte of c
 location    ldi8.dh     203   # load immediate 8 bits into high byte of d
-location    ldi8.?h     205   # load immediate 8 bits into register from IR
+location    ldi8.?h     353   # load immediate 8 bits into register from IR
 location    ldi16.a     10    # load immediate 16 bits into a
 location    ldi16.b     74    # load immediate 16 bits into b
 location    ldi16.c     138   # load immediate 16 bits into c

@@ -19,15 +19,15 @@ location    st16.b      123   # load 16-bit value from register b to memory
 location    st16.c      187   # load 16-bit value from register c to memory
 location    st16.d      251   # load 16-bit value from register d to memory
 location    st16.?      307   # load 16-bit value from register to memory
-location    st8.al      14    # load 8-bit value from high byte of register a to memory
-location    st8.bl      121   # load 8-bit value from high byte of register b to memory
-location    st8.cl      130   # load 8-bit value from high byte of register c to memory
-location    st8.dl      237   # load 8-bit value from high byte of register d to memory
+location    st8.al      13    # load 8-bit value from high byte of register a to memory
+location    st8.bl      77    # load 8-bit value from high byte of register b to memory
+location    st8.cl      141   # load 8-bit value from high byte of register c to memory
+location    st8.dl      205   # load 8-bit value from high byte of register d to memory
 location    st8.?l      315   # load 8-bit value from high byte of register to memory
-location    st8.ah      26    # load 8-bit value from low byte of register a to memory
-location    st8.bh      111   # load 8-bit value from low byte of register b to memory
-location    st8.ch      131   # load 8-bit value from low byte of register c to memory
-location    st8.dh      238   # load 8-bit value from low byte of register d to memory
+location    st8.ah      14    # load 8-bit value from low byte of register a to memory
+location    st8.bh      78    # load 8-bit value from low byte of register b to memory
+location    st8.ch      142   # load 8-bit value from low byte of register c to memory
+location    st8.dh      206   # load 8-bit value from low byte of register d to memory
 location    st8.?h      320   # load 8-bit value from low byte of register to memory
 
 # instructions - actual implementation microcode
