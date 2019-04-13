@@ -1,5 +1,4 @@
-@000
-ldi8.dh 0xF1
+ldi dh, 0xF1
 halt
 
 // expect: reg_a=xxxxxxxx_xxxxxxxx

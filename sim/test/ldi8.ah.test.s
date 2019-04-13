@@ -1,9 +1,8 @@
-@000
-ldi8.cl 0xC7
+ldi ah, 0xC5
 halt
 
-// expect: reg_a=xxxxxxxx_xxxxxxxx
+// expect: reg_a=11000101_xxxxxxxx
 // expect: reg_b=xxxxxxxx_xxxxxxxx
-// expect: reg_c=xxxxxxxx_11000111
+// expect: reg_c=xxxxxxxx_xxxxxxxx
 // expect: reg_d=xxxxxxxx_xxxxxxxx
 // expect: pc=0x000002

@@ -1,9 +1,8 @@
-@000
-ldi8.al 0xC5
+ldi bh, 0xD1
 halt
 
-// expect: reg_a=xxxxxxxx_11000101
-// expect: reg_b=xxxxxxxx_xxxxxxxx
+// expect: reg_a=xxxxxxxx_xxxxxxxx
+// expect: reg_b=11010001_xxxxxxxx
 // expect: reg_c=xxxxxxxx_xxxxxxxx
 // expect: reg_d=xxxxxxxx_xxxxxxxx
 // expect: pc=0x000002
