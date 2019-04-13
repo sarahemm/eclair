@@ -1,16 +1,15 @@
-@000
-ldi8.dh 0b00010001
+ldi dl, 0b00010001
 cir
-shl8.dh 0x02
+shr dl, 0x02
 // expect: reg_a=xxxxxxxx_xxxxxxxx
 // expect: reg_b=xxxxxxxx_xxxxxxxx
 // expect: reg_c=xxxxxxxx_xxxxxxxx
-// expect: reg_d=01000100_xxxxxxxx
+// expect: reg_d=xxxxxxxx_00000100
 cir
-shl8.dh 0x03
+shr dl, 0x01
 halt
 // expect: reg_a=xxxxxxxx_xxxxxxxx
 // expect: reg_b=xxxxxxxx_xxxxxxxx
 // expect: reg_c=xxxxxxxx_xxxxxxxx
-// expect: reg_d=00100000_xxxxxxxx
+// expect: reg_d=xxxxxxxx_00000010
 // expect: pc=0x000008
