@@ -1,16 +1,15 @@
-@000
-// immediate load two 8s and make sure Z reacts properly
-ldi8.al 0xAA
+// immediate load two 16s and make sure Z reacts properly
+ldi a, 0x55AA
 // expect: status=XXXXXXX0
-ldi8.bl 0x00
+ldi b, 0x0000
 // expect: status=XXXXXXX1
 // add the two 16s and make sure Z is unset
-add8l.ab
+add a, b
 // expect: status=XXXXXXX0
 // change register A so that the value will be zero
-ldi8.al 0x00
+ldi a, 0x0000
 // expect: status=XXXXXXX1
-// add the two 8s and make sure Z is set
-add8l.ab
+// add the two zeroes together, make sure at Z is set
+add a, b
 // expect: status=XXXXXXX1
 halt

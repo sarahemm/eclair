@@ -1,9 +1,0 @@
-@000
-ldi8.al 0x55
-ldi8.bl 0xAA
-add8l.ab
-// expect: status=XXXXX0XX
-ldi8.al 0xAA
-add8l.ab
-// expect: status=XXXXX1XX
-halt
