@@ -4,10 +4,10 @@ ldi16.a   0x5A5A
 ldi16.b   0xA5A5
 // add the two 16s and make sure E is unset
 add16.ab
-// expect: status=xxxxx0xx
+// expect: status=XXXXX0XX
 // immediate load a new matching 16
 ldi16.a   0xA5A5
 // add the two 16s and make sure E is now set
 add16.ab
-// expect: status=xxxxx1xx
+// expect: status=XXXXX1XX
 halt

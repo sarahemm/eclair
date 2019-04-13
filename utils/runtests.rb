@@ -4,9 +4,9 @@
 require 'colorize'
 
 def bit_compare(a, b)
-  # compare a and b, understanding that 'x' means ignore the bit position in the other one
+  # compare a and b, understanding that 'X' means ignore the bit position in the other one
   (0..(a.length-1)).each do |char_idx|
-    return false unless (a[char_idx] == b[char_idx]) || a[char_idx].downcase == "x" || b[char_idx].downcase == "x"
+    return false unless (a[char_idx] == b[char_idx]) || a[char_idx] == "X" || b[char_idx] == "X"
   end
   true
 end

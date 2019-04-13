@@ -1,16 +1,16 @@
 @000
 // immediate load two 16s and make sure Z reacts properly
 ldi16.a   0x55AA
-// expect: status=xxxxxxx0
+// expect: status=XXXXXXX0
 ldi16.b   0x0000
-// expect: status=xxxxxxx1
+// expect: status=XXXXXXX1
 // add the two 16s and make sure Z is unset
 add16.ab
-// expect: status=xxxxxxx0
+// expect: status=XXXXXXX0
 // change register A so that the value will be zero
 ldi16.a   0x0000
-// expect: status=xxxxxxx1
+// expect: status=XXXXXXX1
 // add the two zeroes together, make sure at Z is set
 add16.ab
-// expect: status=xxxxxxx1
+// expect: status=XXXXXXX1
 halt

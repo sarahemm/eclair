@@ -2,8 +2,8 @@
 ldi8.al 0x55
 ldi8.bl 0xAA
 add8l.ab
-// expect: status=xxxxx0xx
+// expect: status=XXXXX0XX
 ldi8.al 0xAA
 add8l.ab
-// expect: status=xxxxx1xx
+// expect: status=XXXXX1XX
 halt
