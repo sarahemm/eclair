@@ -1,9 +1,8 @@
-@000
-ldi16.a   0xAAAA
-ldi16.b   0x5555
-ldi16.c   0x1234
-ldi16.d   0x4321
-ldi16.dp  0x0078
+ldi a,  0xAAAA
+ldi b,  0x5555
+ldi c,  0x1234
+ldi d,  0x4321
+ldi dp, 0x0078
 wrcse
 halt
 
