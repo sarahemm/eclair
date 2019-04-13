@@ -10,7 +10,7 @@ location    cmp16.a?    38    # load two registers into X/Y and set flags
 location    cmp16.b?    102   # load two registers into X/Y and set flags
 location    cmp16.c?    166   # load two registers into X/Y and set flags
 location    cmp16.d?    230   # load two registers into X/Y and set flags
-location    cmp16.??    150   # load two registers into X/Y and set flags
+location    cmp16.??    350   # load two registers into X/Y and set flags
 
 # aliases - other names for instructions
 alias       ret         pop16.pc

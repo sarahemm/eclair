@@ -24,7 +24,7 @@ location    st8.bl      121   # load 8-bit value from high byte of register b to
 location    st8.cl      130   # load 8-bit value from high byte of register c to memory
 location    st8.dl      237   # load 8-bit value from high byte of register d to memory
 location    st8.?l      315   # load 8-bit value from high byte of register to memory
-location    st8.ah      19    # load 8-bit value from low byte of register a to memory
+location    st8.ah      26    # load 8-bit value from low byte of register a to memory
 location    st8.bh      111   # load 8-bit value from low byte of register b to memory
 location    st8.ch      131   # load 8-bit value from low byte of register c to memory
 location    st8.dh      238   # load 8-bit value from low byte of register d to memory

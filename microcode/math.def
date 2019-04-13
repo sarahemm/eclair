@@ -20,7 +20,7 @@ location    sub8l.??    331   # add lower 8 bits of two regs, result in first
 # location    sub8h.a?    18    # add high 8 bits of a and another reg, result in a
 # location    sub8h.b?    82    # add high 8 bits of a and another reg, result in a
 # location    sub8h.c?    146   # add high 8 bits of a and another reg, result in a
-# location    sub8h.d?    210   # add high 8 bits of a and another reg, result in a
+# location    sub8h.d?    215   # add high 8 bits of a and another reg, result in a
 # location    sub8h.??    333   # add high 8 bits of two regs, result in first
 
 location    add16.a?    16    # add a and another register, result goes into a
