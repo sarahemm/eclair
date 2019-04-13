@@ -3,6 +3,21 @@
 
 require 'colorize'
 
+class Issue
+  attr_reader :pc, :details
+  
+  def initialize(pc, details)
+    @pc = pc
+    @details = details
+  end
+end
+
+class Problem < Issue
+end
+
+class Failure < Issue
+end
+
 def bit_compare(a, b)
   # compare a and b, understanding that 'X' means ignore the bit position in the other one
   (0..(a.length-1)).each do |char_idx|
@@ -12,7 +27,7 @@ def bit_compare(a, b)
 end
 
 def run_test(filename)
-  puts "\nTEST:    #{File.basename(filename).gsub(".test", "")}".light_white
+  puts "\nTEST:    #{File.basename(filename).gsub(".test", "")}".light_green
   # find all the expects and put them into an array of arrays
   # expects[pc after which tests are run][register]
   expects = Array.new
@@ -109,18 +124,20 @@ def run_test(filename)
   end
   
   # check each register to make sure it matches what we think it should
-  fails = problems = pass = last_pc = 0
+  fails = Array.new
+  problems = Array.new
+  pass = last_pc = 0
   expects.each_index do |addr|
     next if !expects[addr] or expects[addr].length == 0
     puts "ADDR:    Running tests for PC 0x#{addr.to_s(16).upcase}"
     expects[addr].each do |reg, val|
       if(results[addr] == nil) then
-        problems += 1
+        problems.push Problem.new(addr, "Simulator did not report any values")
         puts "PROBLEM: Simulator did not report any values at PC 0x#{addr.to_s(16).upcase}".light_yellow
         next
       end
       if(results[addr][reg] == nil) then
-        problems += 1
+        problems.push Problem.new(addr, "Simulator did not report value of register '#{reg}'")
         puts "PROBLEM: Simulator did not report value of register '#{reg}'".light_yellow
         next
       end
@@ -128,7 +145,7 @@ def run_test(filename)
         pass += 1
         puts "PASS:    #{reg} is #{results[addr][reg]}".light_green
       else
-        fails += 1
+        fails.push Failure.new(addr, "#{reg} should be #{val} but was #{results[addr][reg]}")
         puts "FAIL:    #{reg} should be #{val} but was #{results[addr][reg]}".light_red
       end
     end
@@ -139,16 +156,12 @@ def run_test(filename)
     pass += 1
     puts "PASS:    Processor halted successfully.".light_green
   elsif(stdout.split(/\n/)[-1] =~ /ILLEGAL MICROINSTRUCTION EXECUTED.*/) then
-    fails += 1
+    fails.push Failure.new(nil, "Illegal microinstruction executed.")
     puts "FAIL:    Illegal microinstruction executed.".light_red
   else
-    fails += 1
+    fails.push Failure.new(nil, "Processor ran away and failed to halt.")
     puts "FAIL:    Processor ran away and failed to halt.".light_red
   end
-  
-  #if(fails + problems > 0) then
-  #  puts stdout
-  #end
   
   return fails, problems, pass
 end
@@ -161,10 +174,19 @@ else
 end
 
 total_fails = total_problems = total_pass = 0
+all_fails = Hash.new
+all_problems = Hash.new
 Dir.glob(filespec) do |test_file|
+  test_name = File.basename(test_file).gsub(".test", "")
+
   test_fails, test_problems, test_pass = run_test(test_file)
-  total_fails += test_fails
-  total_problems += test_problems
+
+  total_fails += test_fails.length
+  total_problems += test_problems.length
+
+  all_problems[test_name] = test_problems
+  all_fails[test_name] = test_fails
+
   total_pass += test_pass
 end
 
@@ -173,5 +195,26 @@ print "TOTALS:  #{total_pass} tests passed, ".light_green
 print "#{total_problems} tests had a problem, ".light_yellow
 print "and #{total_fails} tests failed.\n".light_red
 
-puts "\nALL TESTS SUCCESSFUL".light_cyan if total_problems + total_fails == 0
-
+if(total_problems + total_fails != 0 and Dir.glob(filespec).length > 1) then
+  puts "\nIssue Summary:"
+  all_problems.each do |test_name, issues|
+    issues.each do |issue|
+      if(issue.pc) then
+        puts "#{test_name} @ PC 0x#{issue.pc.to_s(16)}: #{issue.details}".light_yellow
+      else
+        puts "#{test_name}: #{issue.details}".light_yellow
+      end
+    end
+  end
+  all_fails.each do |test_name, issues|
+    issues.each do |issue|
+      if(issue.pc) then
+        puts "#{test_name} @ PC 0x#{issue.pc.to_s(16)}: #{issue.details}".light_red
+      else
+        puts "#{test_name}: #{issue.details}".light_red
+      end
+    end
+  end
+else
+  puts "\nALL TESTS SUCCESSFUL".light_cyan
+end
