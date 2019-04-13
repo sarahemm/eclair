@@ -38,7 +38,7 @@ def run_test(filename)
       if(matches = line.match(/expect:\s*([^=]+)=(.*)/)) then
         # expect line, record it in the array
         expects[addr][matches[1]] = matches[2]
-      elsif(matches = line.match(/^@([0-9A-Fa-f]+)$/)) then
+      elsif(matches = line.match(/^@([0-9A-Fa-f]+)\s*$/)) then
         # new address where ppc=pc
         addr = matches[1].to_i(16)
         expects[addr] = Hash.new
