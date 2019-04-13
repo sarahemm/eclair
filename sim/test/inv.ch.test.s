@@ -1,4 +1,4 @@
-ldi8h ch, 0b01101001
+ldi ch, 0b01101001
 cir
 inv ch
 halt

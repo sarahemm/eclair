@@ -1,4 +1,4 @@
-ldi16 c, 0xA5E1
+ldi c, 0xA5E1
 cir
 inv c
 halt

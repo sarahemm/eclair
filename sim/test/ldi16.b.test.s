@@ -1,4 +1,4 @@
-ldi16 b, 0xE005
+ldi b, 0xE005
 halt
 
 // expect: reg_a=xxxxxxxx_xxxxxxxx

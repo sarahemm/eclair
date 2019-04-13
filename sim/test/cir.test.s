@@ -1,9 +1,9 @@
-ldi16 a, 0xAAAA
-ldi16 b, 0xBBBB
-ldi16 c, 0xCCCC
-ldi16 d, 0xDDDD
-shl16 a, 0x02
-add16 a, b
+ldi a, 0xAAAA
+ldi b, 0xBBBB
+ldi c, 0xCCCC
+ldi d, 0xDDDD
+shl a, 0x02
+add a, b
 cir
 // expect: pc=0x000010
 // expect: reg_x=00000000_00000000

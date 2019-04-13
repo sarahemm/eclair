@@ -1,4 +1,4 @@
-ldi8l al, 0b10101011
+ldi al, 0b10101011
 cir
 inv al
 halt

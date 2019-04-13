@@ -1,4 +1,4 @@
-ldi8l bl, 0b10101011
+ldi bl, 0b10101011
 cir
 inv bl
 halt

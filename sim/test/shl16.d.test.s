@@ -1,12 +1,12 @@
-ldi16 d, 0b0001000100010001
+ldi d, 0b0001000100010001
 cir
-shl16 d, 0x04
+shl d, 0x04
 // expect: reg_a=xxxxxxxx_xxxxxxxx
 // expect: reg_b=xxxxxxxx_xxxxxxxx
 // expect: reg_c=xxxxxxxx_xxxxxxxx
 // expect: reg_d=00010001_00010000
 cir
-shl16 d, 0x02
+shl d, 0x02
 halt
 // expect: reg_a=xxxxxxxx_xxxxxxxx
 // expect: reg_b=xxxxxxxx_xxxxxxxx
