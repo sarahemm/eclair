@@ -1,17 +1,16 @@
-@000
-ldi16.a 0xAA55
-ldi16.b 0x55AA
-cmp16.ab
-jmpe    0x0007
+ldi a, 0xAA55
+ldi b, 0x55AA
+cmp a, b
+jmpe   0x0007
 // expect: pc=0x00000a
-ldi16.b 0xAA55
-cmp16.ab
-jmpe    0x001D
-@013
+ldi b, 0xAA55
+cmp a, b
+jmpe   0x001D
+.org 0x013
 halt    // should jump over this
 halt    // should jump over this
-@01D
+.org 0x01D
 halt
 // expect: pc=0x00001d
-@01E
+.org 0x01E
 halt    // should never get here
