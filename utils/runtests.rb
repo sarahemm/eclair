@@ -215,6 +215,6 @@ if(total_problems + total_fails != 0 and Dir.glob(filespec).length > 1) then
       end
     end
   end
-else
+elsif(total_problems + total_fails == 0) then
   puts "\nALL TESTS SUCCESSFUL".light_cyan
 end
