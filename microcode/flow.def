@@ -2,7 +2,7 @@
 location    jmp         69    # unconditional immediate jump
 location    jmpz        27    # jump if Z
 location    jmpnz       124   # jump if not Z
-location    jmpe        239   # jump if E
+location    jmpe        197   # jump if E
 location    jmpne       218   # jump if not E
 location    call        154   # push PC to stack then jump immediate
 location    pop16.pc    92    # pop 16 bits from address pointed to by SP-- into PC

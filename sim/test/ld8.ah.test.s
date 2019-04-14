@@ -1,12 +1,11 @@
-@000
-ldi16.dp 0x0000
+ldi dp, 0x0000
 cir
-ld8.ah 0x000f
+ld  ah, 0x000f
 halt
 // expect: reg_a=00010001_xxxxxxxx
 // expect: reg_b=xxxxxxxx_xxxxxxxx
 // expect: reg_c=xxxxxxxx_xxxxxxxx
 // expect: reg_d=xxxxxxxx_xxxxxxxx
 // expect: pc=0x000007
-@00f
-data 0x11
+.org 0x00F
+.data 0x11

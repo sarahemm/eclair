@@ -15,7 +15,7 @@ location    ldi16.c     138   # load immediate 16 bits into c
 location    ldi16.d     202   # load immediate 16 bits into d
 location    ldi16.?     335   # load immediate 16 bits into register from IR
 location    ldi16.sp    39    # load immediate 16 bits into sp
-location    ldi16.dp    108   # load immediate 16 bits into dp
+location    ldi16.dp    134   # load immediate 16 bits into dp
 
 # instructions - actual implementation microcode
 

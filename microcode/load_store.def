@@ -1,18 +1,18 @@
 # locations - start addresses of instructions
-location    ld16.a      58    # load 16-bit value from memory to register a
-location    ld16.b      87    # load 16-bit value from memory to register b
-location    ld16.c      184   # load 16-bit value from memory to register c
-location    ld16.d      192   # load 16-bit value from memory to register d
+location    ld16.a      46    # load 16-bit value from memory to register a
+location    ld16.b      110   # load 16-bit value from memory to register b
+location    ld16.c      174   # load 16-bit value from memory to register c
+location    ld16.d      238   # load 16-bit value from memory to register d
 location    ld16.?      292   # load 16-bit value from memory to register
-location    ld8.al      60    # load 8-bit value from memory to low byte of register a
-location    ld8.bl      98    # load 8-bit value from memory to low byte of register b
-location    ld8.cl      128   # load 8-bit value from memory to low byte of register c
-location    ld8.dl      235   # load 8-bit value from memory to low byte of register d
+location    ld8.al      47    # load 8-bit value from memory to low byte of register a
+location    ld8.bl      111   # load 8-bit value from memory to low byte of register b
+location    ld8.cl      175   # load 8-bit value from memory to low byte of register c
+location    ld8.dl      239   # load 8-bit value from memory to low byte of register d
 location    ld8.?l      299   # load 8-bit value from memory to low byte of register
-location    ld8.ah      61    # load 8-bit value from memory to high byte of register a
-location    ld8.bh      99    # load 8-bit value from memory to high byte of register b
-location    ld8.ch      129   # load 8-bit value from memory to high byte of register c
-location    ld8.dh      236   # load 8-bit value from memory to high byte of register d
+location    ld8.ah      48    # load 8-bit value from memory to high byte of register a
+location    ld8.bh      112   # load 8-bit value from memory to high byte of register b
+location    ld8.ch      176   # load 8-bit value from memory to high byte of register c
+location    ld8.dh      240   # load 8-bit value from memory to high byte of register d
 location    ld8.?h      303   # load 8-bit value from memory to high byte of register
 location    st16.a      59    # load 16-bit value from register a to memory
 location    st16.b      123   # load 16-bit value from register b to memory
