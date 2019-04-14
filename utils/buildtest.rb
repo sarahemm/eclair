@@ -56,6 +56,9 @@ stdout.each_line do |line|
   elsif(/^\s*#.*/.match(line)) then
     comment = /^\s*#(.*)/.match(line)[1]
     outfd.puts "// #{comment}"
+  elsif(/^\s*\.data\s+(\d+)/.match(line)) then
+    value = /^\s*\.data\s+(\d+)/.match(line)[1]
+    outfd.puts value.to_i.to_s(2).rjust(8, "0")
   else
     outfd.puts line
   end
