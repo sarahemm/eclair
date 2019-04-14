@@ -1,5 +1,4 @@
-@000
-ldi8.flags  0x04 // enables paging, which means the next code runs from 0x419
+ldi flags, 0x04 // enables paging, which means the next code runs from 0x419
 halt
 
 // expect: reg_a=xxxxxxxx_xxxxxxxx

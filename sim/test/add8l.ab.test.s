@@ -1,7 +1,6 @@
-@000
-ldi8.al 0x0F
-ldi8.bl 0x14
-add8l.ab
+ldi al, 0x0F
+ldi bl, 0x14
+add a, b
 halt
 
 // expect: reg_a=xxxxxxxx_00100011
