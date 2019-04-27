@@ -37,25 +37,30 @@ end
 outfd = STDOUT
 outfd = File.open(ARGV[1], "w") if ARGV[1]
 
+# run through the output from the assembler and convert it to
+# the format that iverilog will want
 outfd.puts "@000"
 stdout.each_line do |line|
   line.chomp!
+  # ignore the marker that the text section is starting
   next if /^\s*\.text\s*$/.match(line)
+  # the 'encoding' comment on each line is what we use to get the hex
+  # values that make up the output
   if(/encoding:\s*\[([^\]]+)/.match(line)) then
     hex = /encoding:\s*\[([^\]]+)/.match(line)[1]
     hex.split(",").each do |value|
       outfd.puts value.to_i(16).to_s(2).rjust(8, "0")
     end
-  elsif(/.org\s+0x([0-9A-Fa-f]+)/.match(line)) then
-    loc, comments = /.org\s+0x([0-9A-Fa-f]+)\s*,\s*\d+(.*)/.match(line).captures
-    p comments
-    outfd.puts "@#{sprintf("%03X", loc.to_i)} #{comments.sub('#','//')}"
+  # .org lines specify new absolute locations
+  # iverilog wants @[hex value] not .org [decimal value] so convert it
   elsif(/.org\s+(\d+)/.match(line)) then
     loc, comments = /.org\s+(\d+)\s*,\s*\d+\s*(.*)/.match(line).captures
     outfd.puts "@#{sprintf("%03X", loc.to_i)} #{comments.sub('#','//')}"
+  # the test framework uses comments, so we pass these through as-is
   elsif(/^\s*#.*/.match(line)) then
     comment = /^\s*#(.*)/.match(line)[1]
     outfd.puts "// #{comment}"
+  # .data lines specify raw values to pass into the output
   elsif(/^\s*\.data\s+(\d+)/.match(line)) then
     value = /^\s*\.data\s+(\d+)/.match(line)[1]
     outfd.puts value.to_i.to_s(2).rjust(8, "0")
