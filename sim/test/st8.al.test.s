@@ -1,4 +1,4 @@
-#include "std_paging.testfrag-mc"
+#include "std_paging.testfrag"
 .org 0x040
 ldi dp, 0x0000
 ldi al, 0xa5
