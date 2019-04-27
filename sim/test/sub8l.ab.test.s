@@ -1,40 +1,39 @@
-@000
-ldi8.al 0xFF
-ldi8.bl 0xFF
+ldi al, 0xFF
+ldi bl, 0xFF
 // expect: reg_a=xxxxxxxx_11111111
 // expect: reg_b=xxxxxxxx_11111111
-sub8l.ab
+sub al, bl
 // expect: reg_a=xxxxxxxx_00000000
 // expect: reg_b=xxxxxxxx_11111111
 
-@006
-ldi8.al 0xFF
-ldi8.bl 0x00
+.org 0x006
+ldi al, 0xFF
+ldi bl, 0x00
 // expect: reg_a=xxxxxxxx_11111111
 // expect: reg_b=xxxxxxxx_00000000
-sub8l.ab
+sub al, bl
 // expect: reg_a=xxxxxxxx_11111111
 // expect: reg_b=xxxxxxxx_00000000
 
-@00C
-ldi8.al 0x18
-ldi8.bl 0x14
+.org 0x00C
+ldi al, 0x18
+ldi bl, 0x14
 // expect: reg_a=xxxxxxxx_00011000
 // expect: reg_b=xxxxxxxx_00010100
-sub8l.ab
+sub al, bl
 // expect: reg_a=xxxxxxxx_00000100
 // expect: reg_b=xxxxxxxx_00010100
 
-@012
-ldi8.al 0x03
-ldi8.bl 0x01
+.org 0x012
+ldi al, 0x03
+ldi bl, 0x01
 // expect: reg_a=xxxxxxxx_00000011
 // expect: reg_b=xxxxxxxx_00000001
-sub8l.ab
+sub al, bl
 // expect: reg_a=xxxxxxxx_00000010
 // expect: reg_b=xxxxxxxx_00000001
 
-@017
+.org 0x017
 halt
 
 // expect: reg_c=xxxxxxxx_xxxxxxxx
