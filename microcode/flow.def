@@ -4,7 +4,8 @@ location    jmpz        128   # jump if Z
 location    jmpnz       124   # jump if not Z
 location    jmpe        197   # jump if E
 location    jmpne       218   # jump if not E
-location    call        154   # push PC to stack then jump immediate
+location    call        60    # push PC to stack then jump immediate
+location    call-cont   363
 location    pop16.pc    196   # pop 16 bits from address pointed to by SP-- into PC
 location    pop16.pc-cont 358
 location    cmp16.a?    38    # load two registers into X/Y and set flags
@@ -73,10 +74,10 @@ instruction cmp16.??    src_mar(pc) load_mar  load_rr src_xy(from_rr) load_y
 instruction cmp16.??    alu_mode(arith) alu_op(x)   op_16bit      load_status    next_addr(fetch)
 
 # push current pc onto stack then jump to immediate location
-instruction call        include(push16.pc,no_next)
-instruction call        xy_imm_lsb(3) src_xy(imm) load_y      alu_op(add) load_mdr  
-instruction call        include(push16.?,no_next)
-instruction call        include(jmp)
+instruction call        include(push16.pc,no_next) next_addr(call-cont)
+instruction call-cont        xy_imm_lsb(3) src_xy(imm) load_y      alu_op(add) load_mdr
+instruction call-cont        include(push16.?,no_next)
+instruction call-cont        include(jmp)
 
 # pop 16 bits from address pointed to by SP-- into PC
 # load SP into MAR

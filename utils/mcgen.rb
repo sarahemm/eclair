@@ -1,6 +1,8 @@
 #!/opt/local/bin/ruby2.0
 # mcgen - generate microcode binary output based on a text input file
 
+# TODO: this is overdue for a rewrite
+
 files = []
 images = []
 mapfiles = []
@@ -188,10 +190,22 @@ mc_descs = []
           # TODO: optimize out any words that end up /only/ nexting to the literal next address
           (mc_bits[addr], mc_descs[addr]) = gen_mc_word(include_instruction, addr, include_ins_fields, addr+1)
         else
-          (mc_bits[addr], mc_descs[addr]) = gen_mc_word(include_instruction, addr, include_ins_fields)          
+          (mc_bits[addr], mc_descs[addr]) = gen_mc_word(include_instruction, addr, include_ins_fields)
         end
         mc_descs[addr] = "include(#{include_instruction}) #{mc_descs[addr]}"
         addr += 1
+      end
+      # if there's a next_addr specified with the include, modify the last
+      # address in that included bit to be the specified next_addr
+      if(ins_fields[1] and next_info = ins_fields[1].match(/next_addr\(([^\)]+)\)/)) then
+        next_ins = next_info.captures[0]
+        next_addr = @locations.find_index(next_ins)
+        next_field_start = @fields["next_addr"].begin
+        next_field_len = @fields["next_addr"].end - @fields["next_addr"].begin + 1
+        next_mask = 0xFFFFFFFFFFFFFFFF ^ ((2**next_field_len)-1 << next_field_start)
+        mc_bits[addr-1] = mc_bits[addr-1] & next_mask
+        mc_bits[addr-1] = mc_bits[addr-1] | next_addr << next_field_start
+        mc_descs[addr-1] += " next_override(#{next_ins})"
       end
     else
       (mc_bits[addr], mc_descs[addr]) = gen_mc_word(instruction, addr, ins_fields)
