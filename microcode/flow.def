@@ -60,7 +60,7 @@ instruction jmpe        inc_pc        src_mar(pc)     mem_read        load_mar  
 instruction jmpe        inc_pc        src_xy(mdr)     alu_op(x)       load_x
 instruction jmpe        branch_cond(e)                load_pc         next_addr(fetch2)
 
-# immediate jgump to the address specified if E(qual) is false
+# immediate jump to the address specified if E(qual) is false
 instruction jmpne       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)   load_mdr next_addr(jmpne-cont)
 instruction jmpne-cont  inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)  load_mdr
 instruction jmpne-cont  inc_pc        src_xy(mdr)     alu_op(x)       load_x
