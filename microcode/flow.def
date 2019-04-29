@@ -3,7 +3,8 @@ location    jmp         69    # unconditional immediate jump
 location    jmpz        128   # jump if Z
 location    jmpnz       124   # jump if not Z
 location    jmpe        197   # jump if E
-location    jmpne       218   # jump if not E
+location    jmpne       188   # jump if not E
+location    jmpne-cont  372
 location    call        60    # push PC to stack then jump immediate
 location    call-cont   363
 location    pop16.pc    196   # pop 16 bits from address pointed to by SP-- into PC
@@ -60,10 +61,10 @@ instruction jmpe        inc_pc        src_xy(mdr)     alu_op(x)       load_x
 instruction jmpe        branch_cond(e)                load_pc         next_addr(fetch2)
 
 # immediate jgump to the address specified if E(qual) is false
-instruction jmpne       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)   load_mdr
-instruction jmpne       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)  load_mdr
-instruction jmpne       inc_pc        src_xy(mdr)     alu_op(x)       load_x
-instruction jmpne       branch_negate branch_cond(e)  load_pc         next_addr(fetch2)
+instruction jmpne       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)   load_mdr next_addr(jmpne-cont)
+instruction jmpne-cont  inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)  load_mdr
+instruction jmpne-cont  inc_pc        src_xy(mdr)     alu_op(x)       load_x
+instruction jmpne-cont  branch_negate branch_cond(e)  load_pc         next_addr(fetch2)
 
 # load two registers into X/Y and set flags
 instruction cmp16.a?    inc_pc src_xy(from_ir)  load_x next_addr(cmp16.??)

@@ -8,7 +8,7 @@ location    swab.a      37    # swap bytes in register a
 location    swab.b      101   # swap bytes in register b
 location    swab.c      165   # swap bytes in register c
 location    swab.d      229   # swap bytes in register d
-location    swab.?      169   # swap bytes in register
+location    swab.?      375   # swap bytes in register
 
 # instructions - actual implementation microcode
 
