@@ -31,31 +31,37 @@ location    and8h.c?    156   # AND high byte of reg c and another reg, result i
 location    and8h.d?    220   # AND high byte of reg d and another reg, result in d
 location    and8h.??    376
 
-#location    or16.a?     29    # OR 16-bit reg a and another reg, result in a
-#location    or16.b?     93    # OR 16-bit reg b and another reg, result in b
-#location    or16.c?     157   # OR 16-bit reg c and another reg, result in c
-#location    or16.d?     221   # OR 16-bit reg 3 and another reg, result in d
-#location    or8l.a?     30    # OR low byte of reg a and another reg, result in a
-#location    or8l.b?     94    # OR low byte of reg b and another reg, result in b
-#location    or8l.c?     158   # OR low byte of reg c and another reg, result in c
-#location    or8l.d?     222   # OR low byte of reg d and another reg, result in d
-#location    or8h.a?     31    # OR high byte of reg a and another reg, result in a
-#location    or8h.b?     95    # OR high byte of reg b and another reg, result in b
-#location    or8h.c?     159   # OR high byte of reg c and another reg, result in c
-#location    or8h.d?     223   # OR high byte of reg d and another reg, result in d
+location    or16.a?     29    # OR 16-bit reg a and another reg, result in a
+location    or16.b?     93    # OR 16-bit reg b and another reg, result in b
+location    or16.c?     157   # OR 16-bit reg c and another reg, result in c
+location    or16.d?     221   # OR 16-bit reg 3 and another reg, result in d
+location    or16.??     378
+location    or8l.a?     30    # OR low byte of reg a and another reg, result in a
+location    or8l.b?     94    # OR low byte of reg b and another reg, result in b
+location    or8l.c?     158   # OR low byte of reg c and another reg, result in c
+location    or8l.d?     222   # OR low byte of reg d and another reg, result in d
+location    or8l.??     380
+location    or8h.a?     31    # OR high byte of reg a and another reg, result in a
+location    or8h.b?     95    # OR high byte of reg b and another reg, result in b
+location    or8h.c?     159   # OR high byte of reg c and another reg, result in c
+location    or8h.d?     223   # OR high byte of reg d and another reg, result in d
+location    or8h.??     382
 
-#location    xor16.a?    32    # XOR 16-bit reg a and another reg, result in a
-#location    xor16.b?    96    # XOR 16-bit reg b and another reg, result in b
-#location    xor16.c?    160   # XOR 16-bit reg c and another reg, result in c
-#location    xor16.d?    224   # XOR 16-bit reg 3 and another reg, result in d
-#location    xor8l.a?    33    # XOR low byte of reg a and another reg, result in a
-#location    xor8l.b?    97    # XOR low byte of reg b and another reg, result in b
-#location    xor8l.c?    161   # XOR low byte of reg c and another reg, result in c
-#location    xor8l.d?    225   # XOR low byte of reg d and another reg, result in d
-#location    xor8h.a?    34    # XOR high byte of reg a and another reg, result in a
-#location    xor8h.b?    98    # XOR high byte of reg b and another reg, result in b
-#location    xor8h.c?    162   # XOR high byte of reg c and another reg, result in c
-#location    xor8h.d?    226   # XOR high byte of reg d and another reg, result in d
+location    xor16.a?    32    # XOR 16-bit reg a and another reg, result in a
+location    xor16.b?    96    # XOR 16-bit reg b and another reg, result in b
+location    xor16.c?    160   # XOR 16-bit reg c and another reg, result in c
+location    xor16.d?    224   # XOR 16-bit reg 3 and another reg, result in d
+location    xor16.??    384
+location    xor8l.a?    33    # XOR low byte of reg a and another reg, result in a
+location    xor8l.b?    97    # XOR low byte of reg b and another reg, result in b
+location    xor8l.c?    161   # XOR low byte of reg c and another reg, result in c
+location    xor8l.d?    225   # XOR low byte of reg d and another reg, result in d
+location    xor8l.??    386
+location    xor8h.a?    34    # XOR high byte of reg a and another reg, result in a
+location    xor8h.b?    98    # XOR high byte of reg b and another reg, result in b
+location    xor8h.c?    162   # XOR high byte of reg c and another reg, result in c
+location    xor8h.d?    226   # XOR high byte of reg d and another reg, result in d
+location    xor8h.??    388
 
 # instructions - actual implementation microcode
 
@@ -104,3 +110,50 @@ instruction and8h.d?     inc_pc src_xy(from_ir)   load_x    next_addr(and8h.??)
 instruction and8h.??     src_mar(pc)              load_mar  load_rr src_xy(from_rr) load_y
 instruction and8h.??     reg_byte(high) alu_mode(logic)   alu_op(and)     load_reg(via_ir)    load_status next_addr(fetch)
 
+# OR 16-bit register
+instruction or16.a?     inc_pc src_xy(from_ir)   load_x    next_addr(or16.??)
+instruction or16.b?     inc_pc src_xy(from_ir)   load_x    next_addr(or16.??)
+instruction or16.c?     inc_pc src_xy(from_ir)   load_x    next_addr(or16.??)
+instruction or16.d?     inc_pc src_xy(from_ir)   load_x    next_addr(or16.??)
+instruction or16.??     src_mar(pc)              load_mar  load_rr src_xy(from_rr) load_y
+instruction or16.??     op_16bit          alu_mode(logic)   alu_op(or)     load_reg(via_ir)    load_status next_addr(fetch)
+
+# OR low byte of register
+instruction or8l.a?     inc_pc src_xy(from_ir)   load_x    next_addr(or8l.??)
+instruction or8l.b?     inc_pc src_xy(from_ir)   load_x    next_addr(or8l.??)
+instruction or8l.c?     inc_pc src_xy(from_ir)   load_x    next_addr(or8l.??)
+instruction or8l.d?     inc_pc src_xy(from_ir)   load_x    next_addr(or8l.??)
+instruction or8l.??     src_mar(pc)              load_mar  load_rr src_xy(from_rr) load_y
+instruction or8l.??     alu_mode(logic)   alu_op(or)     load_reg(via_ir)    load_status next_addr(fetch)
+
+# OR high byte of register
+instruction or8h.a?     inc_pc src_xy(from_ir)   load_x    next_addr(or8h.??)
+instruction or8h.b?     inc_pc src_xy(from_ir)   load_x    next_addr(or8h.??)
+instruction or8h.c?     inc_pc src_xy(from_ir)   load_x    next_addr(or8h.??)
+instruction or8h.d?     inc_pc src_xy(from_ir)   load_x    next_addr(or8h.??)
+instruction or8h.??     src_mar(pc)              load_mar  load_rr src_xy(from_rr) load_y
+instruction or8h.??     reg_byte(high) alu_mode(logic)   alu_op(or)     load_reg(via_ir)    load_status next_addr(fetch)
+
+# XOR 16-bit register
+instruction xor16.a?    inc_pc src_xy(from_ir)   load_x    next_addr(xor16.??)
+instruction xor16.b?    inc_pc src_xy(from_ir)   load_x    next_addr(xor16.??)
+instruction xor16.c?    inc_pc src_xy(from_ir)   load_x    next_addr(xor16.??)
+instruction xor16.d?    inc_pc src_xy(from_ir)   load_x    next_addr(xor16.??)
+instruction xor16.??    src_mar(pc)              load_mar  load_rr src_xy(from_rr) load_y
+instruction xor16.??    op_16bit          alu_mode(logic)   alu_op(xor)     load_reg(via_ir)    load_status next_addr(fetch)
+
+# XOR low byte of register
+instruction xor8l.a?    inc_pc src_xy(from_ir)   load_x    next_addr(xor8l.??)
+instruction xor8l.b?    inc_pc src_xy(from_ir)   load_x    next_addr(xor8l.??)
+instruction xor8l.c?    inc_pc src_xy(from_ir)   load_x    next_addr(xor8l.??)
+instruction xor8l.d?    inc_pc src_xy(from_ir)   load_x    next_addr(xor8l.??)
+instruction xor8l.??    src_mar(pc)              load_mar  load_rr src_xy(from_rr) load_y
+instruction xor8l.??    alu_mode(logic)   alu_op(xor)     load_reg(via_ir)    load_status next_addr(fetch)
+
+# XOR high byte of register
+instruction xor8h.a?    inc_pc src_xy(from_ir)   load_x    next_addr(xor8h.??)
+instruction xor8h.b?    inc_pc src_xy(from_ir)   load_x    next_addr(xor8h.??)
+instruction xor8h.c?    inc_pc src_xy(from_ir)   load_x    next_addr(xor8h.??)
+instruction xor8h.d?    inc_pc src_xy(from_ir)   load_x    next_addr(xor8h.??)
+instruction xor8h.??    src_mar(pc)              load_mar  load_rr src_xy(from_rr) load_y
+instruction xor8h.??    reg_byte(high) alu_mode(logic)   alu_op(xor)     load_reg(via_ir)    load_status next_addr(fetch)
