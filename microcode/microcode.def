@@ -72,14 +72,14 @@ enum  load_reg    via_ir  7
 enum  alu_mode    arith   0
 enum  alu_mode    logic   1
 enum  alu_op      x       0
-enum  alu_op      not_x   0
 enum  alu_op      x+x     3
 enum  alu_op      add     6
 enum  alu_op      sub     9
 enum  alu_op      x-1     15
-enum  alu_op      and     8
+enum  alu_op      not_x   0
 enum  alu_op      xor     9
 enum  alu_op      or      11
+enum  alu_op      and     14
 enum  xy_imm_lsb  0       0
 enum  xy_imm_lsb  1       1
 enum  xy_imm_lsb  2       2
