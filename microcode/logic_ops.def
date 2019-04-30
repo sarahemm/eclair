@@ -20,14 +20,16 @@ location    and16.b?    90    # AND 16-bit reg b and another reg, result in b
 location    and16.c?    154   # AND 16-bit reg c and another reg, result in c
 location    and16.d?    218   # AND 16-bit reg 3 and another reg, result in d
 location    and16.??    331
-#location    and8l.a?    27    # AND low byte of reg a and another reg, result in a
-#location    and8l.b?    91    # AND low byte of reg b and another reg, result in b
-#location    and8l.c?    155   # AND low byte of reg c and another reg, result in c
-#location    and8l.d?    219   # AND low byte of reg d and another reg, result in d
-#location    and8h.a?    28    # AND high byte of reg a and another reg, result in a
-#location    and8h.b?    92    # AND high byte of reg b and another reg, result in b
-#location    and8h.c?    156   # AND high byte of reg c and another reg, result in c
-#location    and8h.d?    220   # AND high byte of reg d and another reg, result in d
+location    and8l.a?    27    # AND low byte of reg a and another reg, result in a
+location    and8l.b?    91    # AND low byte of reg b and another reg, result in b
+location    and8l.c?    155   # AND low byte of reg c and another reg, result in c
+location    and8l.d?    219   # AND low byte of reg d and another reg, result in d
+location    and8l.??    333
+location    and8h.a?    28    # AND high byte of reg a and another reg, result in a
+location    and8h.b?    92    # AND high byte of reg b and another reg, result in b
+location    and8h.c?    156   # AND high byte of reg c and another reg, result in c
+location    and8h.d?    220   # AND high byte of reg d and another reg, result in d
+location    and8h.??    376
 
 #location    or16.a?     29    # OR 16-bit reg a and another reg, result in a
 #location    or16.b?     93    # OR 16-bit reg b and another reg, result in b
@@ -85,3 +87,20 @@ instruction and16.c?     inc_pc src_xy(from_ir)   load_x    next_addr(and16.??)
 instruction and16.d?     inc_pc src_xy(from_ir)   load_x    next_addr(and16.??)
 instruction and16.??     src_mar(pc)              load_mar  load_rr src_xy(from_rr) load_y
 instruction and16.??     op_16bit          alu_mode(logic)   alu_op(and)     load_reg(via_ir)    load_status next_addr(fetch)
+
+# AND low byte of register
+instruction and8l.a?     inc_pc src_xy(from_ir)   load_x    next_addr(and8l.??)
+instruction and8l.b?     inc_pc src_xy(from_ir)   load_x    next_addr(and8l.??)
+instruction and8l.c?     inc_pc src_xy(from_ir)   load_x    next_addr(and8l.??)
+instruction and8l.d?     inc_pc src_xy(from_ir)   load_x    next_addr(and8l.??)
+instruction and8l.??     src_mar(pc)              load_mar  load_rr src_xy(from_rr) load_y
+instruction and8l.??     alu_mode(logic)   alu_op(and)     load_reg(via_ir)    load_status next_addr(fetch)
+
+# AND high byte of register
+instruction and8h.a?     inc_pc src_xy(from_ir)   load_x    next_addr(and8h.??)
+instruction and8h.b?     inc_pc src_xy(from_ir)   load_x    next_addr(and8h.??)
+instruction and8h.c?     inc_pc src_xy(from_ir)   load_x    next_addr(and8h.??)
+instruction and8h.d?     inc_pc src_xy(from_ir)   load_x    next_addr(and8h.??)
+instruction and8h.??     src_mar(pc)              load_mar  load_rr src_xy(from_rr) load_y
+instruction and8h.??     reg_byte(high) alu_mode(logic)   alu_op(and)     load_reg(via_ir)    load_status next_addr(fetch)
+
