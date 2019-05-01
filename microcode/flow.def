@@ -5,6 +5,11 @@ location    jmpnz       124   # jump if not Z
 location    jmpe        197   # jump if E
 location    jmpne       188   # jump if not E
 location    jmpne-cont  372
+location    jmpo        59    # jump if CO
+location    jmpo-cont   392
+location    jmpno       123   # jump if not CO
+location    jmpno-cont  395
+
 location    call        60    # push PC to stack then jump immediate
 location    call-cont   363
 location    pop16.pc    196   # pop 16 bits from address pointed to by SP-- into PC
@@ -65,6 +70,18 @@ instruction jmpne       inc_pc        src_mar(pc)     mem_read        load_mar  
 instruction jmpne-cont  inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)  load_mdr
 instruction jmpne-cont  inc_pc        src_xy(mdr)     alu_op(x)       load_x
 instruction jmpne-cont  branch_negate branch_cond(e)  load_pc         next_addr(fetch2)
+
+# immediate jump to the address specified if E(qual) is true
+instruction jmpo        inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)   load_mdr next_addr(jmpo-cont)
+instruction jmpo-cont   inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)  load_mdr
+instruction jmpo-cont   inc_pc        src_xy(mdr)     alu_op(x)       load_x
+instruction jmpo-cont   branch_cond(co)               load_pc         next_addr(fetch2)
+
+# immediate jump to the address specified if E(qual) is false
+instruction jmpno       inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)   load_mdr next_addr(jmpno-cont)
+instruction jmpno-cont  inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)  load_mdr
+instruction jmpno-cont  inc_pc        src_xy(mdr)     alu_op(x)       load_x
+instruction jmpno-cont  branch_negate branch_cond(co) load_pc         next_addr(fetch2)
 
 # load two registers into X/Y and set flags
 instruction cmp16.a?    inc_pc src_xy(from_ir)  load_x next_addr(cmp16.??)
