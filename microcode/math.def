@@ -1,4 +1,10 @@
 # locations - start addresses of instructions
+location    add16.a?    23    # add a and another register, result goes into a
+location    add16.b?    87    # add b and another register, result goes into b
+location    add16.c?    151   # add c and another register, result goes into c
+location    add16.d?    215   # add d and another register, result goes into d
+location    add16.??    325   # add two registers, result goes into the first
+
 location    add8l.a?    24    # add lower 8 bits of a and another reg, result in a
 location    add8l.b?    88    # add lower 8 bits of a and another reg, result in a
 location    add8l.c?    152   # add lower 8 bits of a and another reg, result in a
@@ -11,23 +17,23 @@ location    add8l.??    327   # add lower 8 bits of two regs, result in first
 # location    add8h.d?    217   # add high 8 bits of a and another reg, result in a
 # location    add8h.??    329   # add high 8 bits of two regs, result in first
 
-location    sub8l.a?    17    # add lower 8 bits of a and another reg, result in a
-location    sub8l.b?    81    # add lower 8 bits of a and another reg, result in a
-location    sub8l.c?    145   # add lower 8 bits of a and another reg, result in a
-location    sub8l.d?    209   # add lower 8 bits of a and another reg, result in a
-location    sub8l.??    354   # add lower 8 bits of two regs, result in first
+location    sub16.a?    16    # subtract a and another register, result goes into a
+location    sub16.b?    80    # subtract b and another register, result goes into b
+location    sub16.c?    144   # subtract c and another register, result goes into c
+location    sub16.d?    208   # subtract d and another register, result goes into d
+location    sub16.??    390   # subtract two registers, result goes into the first
+
+location    sub8l.a?    17    # subract lower 8 bits of a from another reg, result in a
+location    sub8l.b?    81    # subract lower 8 bits of a from another reg, result in a
+location    sub8l.c?    145   # subract lower 8 bits of a from another reg, result in a
+location    sub8l.d?    209   # subract lower 8 bits of a from another reg, result in a
+location    sub8l.??    354   # subract lower 8 bits of two regs, result in first
 
 # location    sub8h.a?    18    # add high 8 bits of a and another reg, result in a
 # location    sub8h.b?    82    # add high 8 bits of a and another reg, result in a
 # location    sub8h.c?    146   # add high 8 bits of a and another reg, result in a
 # location    sub8h.d?    215   # add high 8 bits of a and another reg, result in a
 # location    sub8h.??    356   # add high 8 bits of two regs, result in first
-
-location    add16.a?    23    # add a and another register, result goes into a
-location    add16.b?    87    # add b and another register, result goes into b
-location    add16.c?    151   # add c and another register, result goes into c
-location    add16.d?    215   # add d and another register, result goes into d
-location    add16.??    325   # add two registers, result goes into the first
 
 # aliases - other names for instructions
 alias       add16.aa    add16.a?
@@ -96,6 +102,14 @@ instruction add8l.c?    inc_pc src_xy(from_ir)  load_x next_addr(add8l.??)
 instruction add8l.d?    inc_pc src_xy(from_ir)  load_x next_addr(add8l.??)
 instruction add8l.??    src_mar(pc) load_mar  load_rr src_xy(from_rr) load_y
 instruction add8l.??    alu_op(add) alu_mode(arith)   load_reg(via_ir)     load_status next_addr(fetch)
+
+# subtract two 16-bit registers, result goes into the first
+instruction sub16.a?    inc_pc src_xy(from_ir)  load_x next_addr(sub16.??)
+instruction sub16.b?    inc_pc src_xy(from_ir)  load_x next_addr(sub16.??)
+instruction sub16.c?    inc_pc src_xy(from_ir)  load_x next_addr(sub16.??)
+instruction sub16.d?    inc_pc src_xy(from_ir)  load_x next_addr(sub16.??)
+instruction sub16.??    src_mar(pc) load_mar  load_rr src_xy(from_rr) load_y
+instruction sub16.??    alu_op(sub) alu_mode(arith)    carry_in(1)   op_16bit      load_reg(via_ir)   load_status    next_addr(fetch)
 
 # subtract 8 bits from low bytes of two registers, result goes into the first
 instruction sub8l.a?    inc_pc src_xy(from_ir)  load_x next_addr(sub8l.??)
