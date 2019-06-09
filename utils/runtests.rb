@@ -1,4 +1,4 @@
-#!/opt/local/bin/ruby1.9
+#!/usr/bin/env ruby
 # runtests - run all the unit tests found in sim/test/*
 
 require 'colorize'

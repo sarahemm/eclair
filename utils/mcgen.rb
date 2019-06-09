@@ -1,4 +1,4 @@
-#!/opt/local/bin/ruby2.0
+#!/usr/bin/env ruby
 # mcgen - generate microcode binary output based on a text input file
 
 # TODO: this is overdue for a rewrite
