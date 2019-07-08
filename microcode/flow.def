@@ -92,10 +92,24 @@ instruction cmp16.??    src_mar(pc) load_mar  load_rr src_xy(from_rr) load_y
 instruction cmp16.??    alu_mode(arith) alu_op(x)   op_16bit      load_status    next_addr(fetch)
 
 # push current pc onto stack then jump to immediate location
-instruction call        include(push16.pc,no_next) next_addr(call-cont)
-instruction call-cont        xy_imm_lsb(3) src_xy(imm) load_y      alu_op(add) load_mdr
-instruction call-cont        include(push16.?,no_next)
-instruction call-cont        include(jmp)
+# === these 2 words are from push16.pc ===
+instruction call   src_mar(pc)     load_mar      src_xy(mar)     load_x        alu_op(x)   src_mdr(z)  mdr_byte(high) load_mdr
+instruction call   mdr_byte(low)  src_xy(mdr)   load_mdr        load_x        next_addr(call-cont)
+# === this 1 word is independent ===
+instruction call-cont    xy_imm_lsb(3) src_xy(imm) load_y      alu_op(add) load_mdr
+# === these 4 words are from push16.? ===
+instruction call-cont    mdr_byte(high) alu_op(x)     src_xy(sp)      load_x          src_mar(z)      load_mar  mem_write
+# increment SP into Z and load that into MAR
+instruction call-cont    xy_imm_lsb(1) load_y          alu_op(add)     src_mar(z)      load_mar
+# write immediate value from low byte of MDR into SP+1
+instruction call-cont    mdr_byte(low)  mem_write
+# add the 1'b1 already in Y to the SP+1 already in MAR, put the result (SP+2) back into SP
+instruction call-cont    src_xy(mar)   load_x          alu_op(add)     load_reg(sp)
+# === these 4 words are from jmp ===
+instruction call-cont    inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(high)   load_mdr
+instruction call-cont    inc_pc        src_mar(pc)     mem_read        load_mar      src_mdr(data)   src_xy(mdr)       mdr_byte(low)  load_mdr
+instruction call-cont    src_xy(mdr)   alu_op(x)       load_x
+instruction call-cont    branch_cond(always)           load_pc         next_addr(fetch2)
 
 # pop 16 bits from address pointed to by SP-- into PC
 # load SP into MAR
