@@ -58,7 +58,7 @@ class Instruction
       if spec_matches = /([^\(]+)\(([^\)]+)\)/.match(spec)
         # field with a specific enum value
         field = fields[spec_matches[1]]
-        raise ArgumentError, "No such field #{spec_matches[1]} (in instruction #{instruction})" unless field
+        raise ArgumentError, "No such field #{spec_matches[1]}" unless field
 
         specs[field.name] = InstructionSpec.new(
           field: field,
