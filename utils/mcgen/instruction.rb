@@ -10,8 +10,6 @@ class Instruction
 
   # turn the Instruction into its numeric representation
   def to_i(addr: nil)
-    decoder = FieldDecodes.new
-
     value = 0
     @instruction_specs.each do |_field_name, spec|
       value |= spec.raw_value(addr: addr) << spec.field.first_bit
@@ -19,10 +17,8 @@ class Instruction
 
     unless @instruction_specs['next_addr']
       # if a next address isn't specified, use addr+1
-      #puts value.to_s(2).rjust(64, '0')
       fields = Fields.instance
       value |= (addr + 1) << fields['next_addr'].first_bit
-      #puts value.to_s(2).rjust(64, '0')
     end
 
     value
@@ -37,7 +33,7 @@ class Instruction
     length = 64
     bits = ("%0#{length}b" % value).gsub(/(\d)(?=(\d\d\d\d\d\d\d\d)+(?!\d))/, '\\1_')
     comments = ''
-    @instruction_specs.each do |field_name, spec|
+    @instruction_specs.each do |_field_name, spec|
       comments += "#{spec} "
     end
     "#{bits} // #{comments.strip}"
@@ -48,7 +44,6 @@ class Instruction
     params = line.split(/\s+/)
     return nil unless params[0] == 'instruction'
 
-    instruction = params[1]
     spec_defs = params[2..-1]
     specs = parse_specs(spec_defs)
 
@@ -73,34 +68,10 @@ class Instruction
         # field that's just set to 1
         raise ArgumentError, "No such field #{spec} (in instruction @instruction)" unless fields[spec]
 
-        specs[spec] = InstructionSpec.new(
-            field: fields[spec]
-        )
+        specs[spec] = InstructionSpec.new(field: fields[spec])
       end
     end
 
     specs
-  end
-end
-
-# InstructionSpecs define one specific field/value, many of which make up one Instruction
-class InstructionSpec
-  attr_accessor :field, :value
-
-  def initialize(field: nil, value: nil)
-    @field = field
-    @value = value
-  end
-
-  def to_s
-    if @value
-      "#{@field.name}(#{@value})"
-    else
-      @field.name
-    end
-  end
-
-  def raw_value(addr: nil)
-    FieldDecodes.new.decode(field: @field.name, value: @value, addr: addr)
   end
 end
