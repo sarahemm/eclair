@@ -1,13 +1,13 @@
 # ECLair Microcode
 
 # files - output binary-text files with which bit positions go in each one
-file    microcode.bin  0   64
+file    microcode.bin  0   64   512
 
 # images - output true binary image files with which bit positions go in each one
-image   microcode.img  0   64
+image   microcode.img  0   64   512
 
 # mapfile - output a map of addresses to instructions for gtkwave to use
-mapfile microcode_map.txt
+mapfile microcode_map.txt 512
 
 # graphfile - output a digraph of the microcode flow
 #graphfile microcode_graph.pdf
@@ -118,9 +118,9 @@ include system.def
 include load_immediate.def
 include load_store.def
 include bit_shuffling.def
+include stack.def
 include flow.def
 include logic_ops.def
 include math.def
 include paging.def
 include shift.def
-include stack.def
