@@ -90,7 +90,7 @@ class MapFile < OutputFile
   attr_accessor :length
 
   def initialize(filename: nil, length: nil)
-    super :filename => filename
+    super filename: filename
     @length = length
   end
 
@@ -103,7 +103,7 @@ class MapFile < OutputFile
     (0..@length - 1).each do |addr|
       next unless layout[addr]
 
-      if layout[addr].routine_index == 0
+      if layout[addr].routine_index.zero?
         outfile.printf "%03X %s\n", addr, layout[addr].routine.name
       else
         outfile.printf "%03X %s-%d\n", addr, layout[addr].routine.name, layout[addr].routine_index
@@ -118,7 +118,7 @@ class OutputFiles
   attr_accessor :output_files
 
   def initialize
-    @output_files = Array.new
+    @output_files = []
   end
 
   def each
@@ -129,39 +129,39 @@ class OutputFiles
 
   def parse(line)
     params = line.split(/\s+/)
-    case params[0]
-      when 'file'
+    case params[0].to_sym
+      when :file
         # ascii-binary output file
         filename = params[1]
         first_bit = params[2].to_i
         width = params[3].to_i
         length = params[4].to_i
         @output_files.push OutputAsciiBitstream.new(
-          :filename => filename,
-          :first_bit => first_bit,
-          :width => width,
-          :length => length
+          filename: filename,
+          first_bit: first_bit,
+          width: width,
+          length: length
         )
         return @output_files.last
-      when 'image'
+      when :image
         # raw binary output file
         filename = params[1]
         first_bit = params[2].to_i
         width = params[3].to_i
         length = params[4].to_i
         @output_files.push OutputBinaryBitstream.new(
-          :filename => filename,
-          :first_bit => first_bit,
-          :width => width,
-          :length => length
+          filename: filename,
+          first_bit: first_bit,
+          width: width,
+          length: length
         )
         return @output_files.last
-      when 'mapfile'
+      when :mapfile
         filename = params[1]
         length = params[2].to_i
         @output_files.push MapFile.new(
-          :filename => filename,
-          :length => length
+          filename: filename,
+          length: length
         )
         return @output_files.last
     end

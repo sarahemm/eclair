@@ -46,7 +46,7 @@ class Routines
 
     name = params[1]
     instruction = Instruction.new(line)
-    if(@routines[name]) then
+    if @routines[name]
       @routines[name].add_instruction instruction
     else
       @routines[name] = Routine.new(name: name, instructions: [instruction])
@@ -57,6 +57,7 @@ class Routines
     locations = Locations.instance
     @routines.each do |name, routine|
       raise ArgumentError, "No location defined for routine #{name}" unless locations[name]
+
       routine.base_address = locations[name].address
     end
   end

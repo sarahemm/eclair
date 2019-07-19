@@ -41,11 +41,6 @@ class ECLairMicrocode
 
   def write_output_files
     @items[:outputfiles].each(&:write_file)
-
-    #@items[:instructions].each do |instruction|
-    #  puts instruction.instruction
-    #  puts instruction.to_s
-    #end
   end
 
   # read a microcode definition file and merge in any included files
@@ -74,10 +69,10 @@ class ECLairMicrocode
 
   def parse_definition(mc_def)
     mc_def.each_line do |line|
-      next if /^\s*$/.match(line) or /^\s*#/.match(line)
+      next if /^\s*$/.match(line) || /^\s*#/.match(line)
 
       result = nil
-      @items.each do |key, item|
+      @items.each do |_key, item|
         result = item.parse(line)
         break if result
       end
@@ -86,7 +81,7 @@ class ECLairMicrocode
   end
 end
 
-if(ARGV.length != 1) then
+if ARGV.length != 1
   puts "usage: #{$0} microcodedef"
   Kernel.exit 1
 end

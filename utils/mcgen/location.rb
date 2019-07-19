@@ -14,24 +14,24 @@ class Locations
   include Singleton
 
   def initialize
-    @locations = Array.new
+    @locations = []
   end
-  
+
   def [](key)
     @locations.each do |location|
       return location if location.instruction == key
     end
     nil
   end
-  
+
   def each
     @locations.each do |location|
       yield location
     end
   end
-  
+
   def parse(line)
-    if(location_matches = /^\s*location\s*(\S+)\s*(\d+)/.match(line)) then
+    if location_matches = /^\s*location\s*(\S+)\s*(\d+)/.match(line)
       @locations.push Location.new(
         instruction: location_matches[1],
         address: location_matches[2].to_i

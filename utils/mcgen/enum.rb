@@ -38,6 +38,7 @@ class Enums
       name: params[2],
       value: params[3].to_i
     )
-    return @enums.last
+
+    @enums.last
   end
 end
