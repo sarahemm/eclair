@@ -20,6 +20,18 @@ location    cmp16.c?    166   # load two registers into X/Y and set flags
 location    cmp16.d?    230   # load two registers into X/Y and set flags
 location    cmp16.??    350   # load two registers into X/Y and set flags
 
+location    cmp8l.a?    35    # load two low registers into X/Y and set flags
+location    cmp8l.b?    99    # load two low registers into X/Y and set flags
+location    cmp8l.c?    163   # load two low registers into X/Y and set flags
+location    cmp8l.d?    227   # load two low registers into X/Y and set flags
+location    cmp8l.??    398   # load two low registers into X/Y and set flags
+
+#location    cmp8h.a?    36    # load two low registers into X/Y and set flags
+#location    cmp8h.b?    100   # load two low registers into X/Y and set flags
+#location    cmp8h.c?    164   # load two low registers into X/Y and set flags
+#location    cmp8h.d?    228   # load two low registers into X/Y and set flags
+#location    cmp8h.??    000   # load two low registers into X/Y and set flags
+
 # aliases - other names for instructions
 alias       ret         pop16.pc
 alias       cmp16.aa    cmp16.a?
@@ -90,6 +102,14 @@ instruction cmp16.c?    inc_pc src_xy(from_ir)  load_x next_addr(cmp16.??)
 instruction cmp16.d?    inc_pc src_xy(from_ir)  load_x next_addr(cmp16.??)
 instruction cmp16.??    src_mar(pc) load_mar  load_rr src_xy(from_rr) load_y
 instruction cmp16.??    alu_mode(arith) alu_op(x)   op_16bit      load_status    next_addr(fetch)
+
+# load two low-half registers into X/Y and set flags
+instruction cmp8l.a?    inc_pc src_xy(from_ir)  load_x next_addr(cmp8l.??)
+instruction cmp8l.b?    inc_pc src_xy(from_ir)  load_x next_addr(cmp8l.??)
+instruction cmp8l.c?    inc_pc src_xy(from_ir)  load_x next_addr(cmp8l.??)
+instruction cmp8l.d?    inc_pc src_xy(from_ir)  load_x next_addr(cmp8l.??)
+instruction cmp8l.??    src_mar(pc) load_mar  load_rr src_xy(from_rr) load_y
+instruction cmp8l.??    alu_mode(arith) alu_op(x)    load_status    next_addr(fetch)
 
 # push current pc onto stack then jump to immediate location
 # === these 2 words are from push16.pc ===
