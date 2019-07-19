@@ -4,7 +4,7 @@
 
 require 'open3'
 
-LLVM_MC="#{ENV['HOME']}/llvm/build/bin/llvm-mc"
+LLVM_MC="#{ENV['HOME']}/llvm-eclair/build/bin/llvm-mc"
 CMDLINE="-assemble -triple=eclair -preserve-comments -show-encoding"
 
 if(ARGV.length != 1 and ARGV.length != 2) then
