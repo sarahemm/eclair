@@ -10,9 +10,10 @@ class Instruction
 
   # turn the Instruction into its numeric representation
   def to_i(addr: nil)
-    value = 0
+    decoder = FieldDecodes.new
 
-    @instruction_specs.each do |field_name, spec|
+    value = 0
+    @instruction_specs.each do |_field_name, spec|
       value |= spec.raw_value(addr: addr) << spec.field.first_bit
     end
 
@@ -100,62 +101,6 @@ class InstructionSpec
   end
 
   def raw_value(addr: nil)
-    @locations = Locations.instance
-
-    enums = Enums.instance
-
-    # TODO: clean this up
-    if @field.name == 'next_addr'
-      # next_addr values are actually locations to jump to, so find that
-      case @value
-        when 'ir'
-          return 0
-        when '-1'
-          return addr - 1
-        when '0'
-          return addr
-        when '+1'
-          return addr + 1
-        when '+2'
-          return addr + 2
-      else
-          location = @locations[@value]
-          raise ArgumentError, "No such next_addr '#{@value}'" unless location
-
-          return location.address
-      end
-    elsif @field.name == 'rptz_next_addr'
-        # rptz_next_addr values are actually locations to jump to, so find that
-        # also these only use the least significant 5 bits
-        # FIXME: move this somewhere that makes more sense and add alignment checking
-      case @value
-        when 'ir'
-          return 0
-        when '-1'
-          return (addr - 1) & 0x0F
-        when '0'
-          return addr & 0x0F
-        when '+1'
-          return (addr + 1) & 0x0F
-        when '+2'
-          return (addr + 2) & 0x0F
-        else
-          location = @locations[@value]
-          raise ArgumentError, "No such rptz_next_addr '#{@value}'" unless location
-
-          return location.address & 0x0F
-        end
-    elsif @value
-      # enum-based settable-value field, figure out the numeric value
-      enum_value = enums[@field.name][@value]
-      raise ArgumentError, "No such enum value '#{@value}' for field '#{@field.name}'" unless enum_value
-
-      return enum_value
-    else
-      # plain "set this bit if the spec is included" type, so set the bit
-      raise ArgumentError, 'No value included for multi-bit field' if @field.length > 1
-
-      return 1
-    end
+    FieldDecodes.new.decode(field: @field.name, value: @value, addr: addr)
   end
 end
