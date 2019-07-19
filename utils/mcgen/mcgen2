@@ -1,0 +1,93 @@
+#!/usr/bin/env ruby
+# mcgen2 - generate microcode binary output based on a text input file
+#          rewritten from scratch as mcgen had gotten unmaintainable
+
+require './enum.rb'
+require './field.rb'
+require './location.rb'
+require './instruction.rb'
+require './alias.rb'
+require './routine.rb'
+require './layout.rb'
+require './output.rb'
+
+require 'pp'
+
+class ECLairMicrocode
+  def initialize(filename)
+    @items = {
+      fields: Fields.instance,
+      enums: Enums.instance,
+      locations: Locations.instance,
+      routines: Routines.instance,
+      layout: Layout.instance,
+      aliases: Aliases.new,
+      outputfiles: OutputFiles.new
+    }
+
+    mc_def = read_and_merge_files(filename).join("\n")
+
+    # parse the mc_def text into a series of objects in @items
+    parse_definition(mc_def)
+
+    # use Locations to resolve the base address of each Routine
+    @items[:routines].resolve_addresses
+
+    # build the layout (what microcode is at which address)
+    @items[:layout].build_layout
+  end
+
+  def write_output_files
+    @items[:outputfiles].each(&:write_file)
+
+    #@items[:instructions].each do |instruction|
+    #  puts instruction.instruction
+    #  puts instruction.to_s
+    #end
+  end
+
+  # read a microcode definition file and merge in any included files
+  # TODO: should maybe parse it as it's read instead of reading it all then parsing it all?
+  def read_and_merge_files(start_filename)
+    def_lines = []
+    # read in the microcode text file and put it into an array
+    File.open(start_filename, 'r') do |infile|
+      def_lines += infile.readlines
+    end
+
+    # go through the array and handle any includes
+    basedir = File.dirname(ARGV[0])
+    def_lines.each_index do |line_index|
+      line = def_lines[line_index]
+      next unless matches = /^include\s+(.*)/.match(line)
+
+      file = matches[1]
+      File.open("#{basedir}/#{file}", 'r') do |incfile|
+        def_lines[line_index] = incfile.readlines
+      end
+    end
+
+    def_lines.flatten!
+  end
+
+  def parse_definition(mc_def)
+    mc_def.each_line do |line|
+      next if /^\s*$/.match(line) or /^\s*#/.match(line)
+
+      result = nil
+      @items.each do |key, item|
+        result = item.parse(line)
+        break if result
+      end
+      puts "Unparsed line: #{line}" unless result
+    end
+  end
+end
+
+if(ARGV.length != 1) then
+  puts "usage: #{$0} microcodedef"
+  Kernel.exit 1
+end
+
+microcode = ECLairMicrocode.new ARGV[0]
+microcode.write_output_files
