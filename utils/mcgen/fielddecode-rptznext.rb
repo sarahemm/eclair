@@ -31,6 +31,6 @@ class FieldDecodeRptzNext
     end
 
     # rptz_next_addr only uses the least significant 4 bits
-    rptz_next_addr & 0x1F
+    rptz_next_addr & 0xF
   end
 end
