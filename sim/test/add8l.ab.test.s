@@ -1,6 +1,6 @@
 ldi al, 0x0F
 ldi bl, 0x14
-add a, b
+add al, bl
 halt
 
 // expect: reg_a=xxxxxxxx_00100011
