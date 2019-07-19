@@ -6,7 +6,6 @@ class FieldDecodeRptzNext
     locations = Locations.instance
     rptz_next_addr = nil
 
-    # FIXME: add alignment checking
     rptz_next_addr = case value
       when 'ir'
         0

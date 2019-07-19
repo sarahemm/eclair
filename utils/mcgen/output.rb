@@ -43,8 +43,6 @@ class OutputAsciiBitstream < OutputFile
     last_inst = nil
     super do |file, addr, routine, instruction|
       if instruction
-        # TODO: don't print addresses on every line, only need them for discontinuities
-
         if(last_addr != addr - 1 || last_inst != routine.name) then
           # address discontinuity, print the new address
           file.printf "@%03X // %s\n", addr, routine.name
