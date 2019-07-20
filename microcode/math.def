@@ -29,11 +29,11 @@ location    sub8l.c?    145   # subract lower 8 bits of a from another reg, resu
 location    sub8l.d?    209   # subract lower 8 bits of a from another reg, result in a
 location    sub8l.??    354   # subract lower 8 bits of two regs, result in first
 
-# location    sub8h.a?    18    # add high 8 bits of a and another reg, result in a
-# location    sub8h.b?    82    # add high 8 bits of a and another reg, result in a
-# location    sub8h.c?    146   # add high 8 bits of a and another reg, result in a
-# location    sub8h.d?    215   # add high 8 bits of a and another reg, result in a
-# location    sub8h.??    356   # add high 8 bits of two regs, result in first
+location    sub8h.a?    18    # add high 8 bits of a and another reg, result in a
+location    sub8h.b?    82    # add high 8 bits of a and another reg, result in a
+location    sub8h.c?    146   # add high 8 bits of a and another reg, result in a
+location    sub8h.d?    210   # add high 8 bits of a and another reg, result in a
+location    sub8h.??    406   # add high 8 bits of two regs, result in first
 
 # aliases - other names for instructions
 alias       add16.aa    add16.a?
@@ -138,3 +138,23 @@ instruction sub8l.c?    inc_pc src_xy(from_ir)  load_x next_addr(sub8l.??)
 instruction sub8l.d?    inc_pc src_xy(from_ir)  load_x next_addr(sub8l.??)
 instruction sub8l.??    src_mar(pc) load_mar  load_rr src_xy(from_rr) load_y
 instruction sub8l.??    alu_op(sub) alu_mode(arith)   carry_in(1) load_reg(via_ir)     load_status next_addr(fetch)
+
+# subtract 8 bits from high bytes of two registers, result goes into the first
+# increment PC and load that value into RR
+instruction sub8h.a?    inc_pc src_mar(pc) load_mar load_rr next_addr(sub8h.??)
+instruction sub8h.b?    inc_pc src_mar(pc) load_mar load_rr next_addr(sub8h.??)
+instruction sub8h.c?    inc_pc src_mar(pc) load_mar load_rr next_addr(sub8h.??)
+instruction sub8h.d?    inc_pc src_mar(pc) load_mar load_rr next_addr(sub8h.??)
+
+# load register pointed to by RR into MAR via X path
+instruction sub8h.??    src_xy(from_rr) alu_op(x) load_x src_mar(z) load_mar op_16bit
+# load MAR into Y via byte swap path
+instruction sub8h.??    src_xy(mar-swab) load_y op_16bit
+# load register pointed to by IR into MAR via X path
+instruction sub8h.??    src_xy(from_ir) alu_op(x) load_x src_mar(z) load_mar op_16bit
+# load MAR into X via byte swap path
+instruction sub8h.??    src_xy(mar-swab) load_x op_16bit
+# subtract and put result into MAR, update status byte
+instruction sub8h.??    alu_op(sub) carry_in(1) src_mar(z) load_mar load_status
+# store MAR into register pointed to by IR via byte swap path/X path
+instruction sub8h.??    src_xy(mar-swab) load_x alu_op(x) load_reg(via_ir) reg_byte(high) next_addr(fetch)
