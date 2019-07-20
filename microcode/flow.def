@@ -26,11 +26,11 @@ location    cmp8l.c?    163   # load two low registers into X/Y and set flags
 location    cmp8l.d?    227   # load two low registers into X/Y and set flags
 location    cmp8l.??    398   # load two low registers into X/Y and set flags
 
-#location    cmp8h.a?    36    # load two low registers into X/Y and set flags
-#location    cmp8h.b?    100   # load two low registers into X/Y and set flags
-#location    cmp8h.c?    164   # load two low registers into X/Y and set flags
-#location    cmp8h.d?    228   # load two low registers into X/Y and set flags
-#location    cmp8h.??    000   # load two low registers into X/Y and set flags
+location    cmp8h.a?    36    # load two high registers into X/Y and set flags
+location    cmp8h.b?    100   # load two high registers into X/Y and set flags
+location    cmp8h.c?    164   # load two high registers into X/Y and set flags
+location    cmp8h.d?    228   # load two high registers into X/Y and set flags
+location    cmp8h.??    412   # load two high registers into X/Y and set flags
 
 # aliases - other names for instructions
 alias       ret         pop16.pc
@@ -110,6 +110,22 @@ instruction cmp8l.c?    inc_pc src_xy(from_ir)  load_x next_addr(cmp8l.??)
 instruction cmp8l.d?    inc_pc src_xy(from_ir)  load_x next_addr(cmp8l.??)
 instruction cmp8l.??    src_mar(pc) load_mar  load_rr src_xy(from_rr) load_y
 instruction cmp8l.??    alu_mode(arith) alu_op(x)    load_status    next_addr(fetch)
+
+# load two high-half registers into X/Y and set flags
+# increment PC and load that value into RR
+instruction cmp8h.a?    inc_pc src_mar(pc) load_mar load_rr next_addr(cmp8h.??)
+instruction cmp8h.b?    inc_pc src_mar(pc) load_mar load_rr next_addr(cmp8h.??)
+instruction cmp8h.c?    inc_pc src_mar(pc) load_mar load_rr next_addr(cmp8h.??)
+instruction cmp8h.d?    inc_pc src_mar(pc) load_mar load_rr next_addr(cmp8h.??)
+
+# load register pointed to by IR into MAR via X path
+instruction cmp8h.??    src_xy(from_rr) alu_op(x) load_x src_mar(z) load_mar op_16bit
+# load MAR into Y via byte swap path
+instruction cmp8h.??    src_xy(mar-swab) load_y op_16bit
+# load register pointed to by RR into MAR via X path
+instruction cmp8h.??    src_xy(from_ir) alu_op(x) load_x src_mar(z) load_mar op_16bit
+# load MAR into X via byte swap path, update status byte
+instruction cmp8h.??    src_xy(mar-swab) load_x load_status next_addr(fetch)
 
 # push current pc onto stack then jump to immediate location
 # === these 2 words are from push16.pc ===
