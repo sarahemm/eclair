@@ -16,7 +16,7 @@ class Layout
     Routines.instance.each do |name, routine|
       (0..routine.length-1).each do |index|
         this_address = routine.base_address + index
-        raise ArgumentError, "Overlap between #{name}-#{index} and #{addresses[this_address].routine.name}-#{addresses[this_address].routine_index}." if @addresses[this_address]
+        raise ArgumentError, "Overlap between #{name}-#{index} and #{@addresses[this_address].routine.name}-#{@addresses[this_address].routine_index}." if @addresses[this_address]
 
         @addresses[this_address] = Address.new(
           address: this_address,
