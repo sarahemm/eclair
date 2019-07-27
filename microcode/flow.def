@@ -30,7 +30,7 @@ location    cmp8h.a?    36    # load two high registers into X/Y and set flags
 location    cmp8h.b?    100   # load two high registers into X/Y and set flags
 location    cmp8h.c?    164   # load two high registers into X/Y and set flags
 location    cmp8h.d?    228   # load two high registers into X/Y and set flags
-location    cmp8h.??    412   # load two high registers into X/Y and set flags
+location    cmp8h.??    329   # load two high registers into X/Y and set flags
 
 # aliases - other names for instructions
 alias       ret         pop16.pc

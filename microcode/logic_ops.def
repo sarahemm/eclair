@@ -19,7 +19,7 @@ location    and16.a?    26    # AND 16-bit reg a and another reg, result in a
 location    and16.b?    90    # AND 16-bit reg b and another reg, result in b
 location    and16.c?    154   # AND 16-bit reg c and another reg, result in c
 location    and16.d?    218   # AND 16-bit reg 3 and another reg, result in d
-location    and16.??    331
+location    and16.??    356
 location    and8l.a?    27    # AND low byte of reg a and another reg, result in a
 location    and8l.b?    91    # AND low byte of reg b and another reg, result in b
 location    and8l.c?    155   # AND low byte of reg c and another reg, result in c
