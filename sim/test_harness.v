@@ -10,7 +10,7 @@ module ECLairTestHarness();
     end
 
     always begin
-        #500000 int[0] = 1'b0;
-        #500005 int[0] = 1'b1;
+        #400000 int[0] = 1'b0;
+        #400005 int[0] = 1'b1;
     end
 endmodule
