@@ -165,7 +165,7 @@ module ECLair(int);
   wire          branch_negate;  // negate the branch condition
   wire          carry_in;       // carry input to the ALU, from a microcode bit
   wire  [3:0]   intvect;        // highest-priority interrupt flag currently active
-  wire  [8:0]   intvect_padded; // interrupt vector padded to 9 bits, for driving microcode
+  wire  [7:0]   intvect_shifted; // interrupt shifted by one, for driving XY
   wire  [7:0]   intflg;         // interrupt flags
   wire  [7:0]   intclr;         // clear interrupt flag
   wire          int_jmp;        // jump to IRQ area of microcode on next fetch/execute
@@ -197,7 +197,7 @@ module ECLair(int);
   mux_2x          #(.WIDTH(9))                  mux_cs_addr_write(.sel(cs_addr_from_dp), .a(cs_addr_normal), .b(reg_dp[8:0]), .y(cs_addr));
   mux_2x          #(.WIDTH(9))                  mux_cs_next_addr_rptz(.sel(rptz_next_nibble != 4'b0000 && rpt_zero), .a(cs_next_addr), .b(cs_next_addr_rptz), .y(cs_next_addr_normal));
   mux_2x          #(.WIDTH(9))                  mux_cs_next_addr(.sel(cs_next_addr == 9'b000000000), .a(cs_next_addr_normal), .b(cs_next_addr_alt), .y(next_addr));
-  mux_2x          #(.WIDTH(9))                  mux_cs_next_addr_alt(.sel(int_jmp), .a(reg_ir_padded), .b(intvect_padded), .y(cs_next_addr_alt));
+  mux_2x          #(.WIDTH(9))                  mux_cs_next_addr_alt(.sel(int_jmp), .a(reg_ir_padded), .b(9'b000000001), .y(cs_next_addr_alt)); // IRQ handler is at microcode location 1
   counter         #(.WIDTH(9))                  ctr_cs_seq(.clk(clk_cs), .ce(~cs_ready), .reset(~_por_reset), .out(cs_addr_init), .load(1'b0), .preset(9'b000000000));
   flipflop_d      #(.WIDTH(9))                  flp_cs_addr(.clk(clk_cs), .reset(~cs_ready), .in(next_addr), .out(cs_addr_run));
   microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(1'b0, 1'b0, cs_addr_init, cs_rom_data);
@@ -261,7 +261,7 @@ module ECLair(int);
   latch         #(.WIDTH(16))                   lat_sp_xy(.clk(1'b0), .reset(xy_reset_sp), .in(reg_sp), .out(reg_sp_xy));
   latch         #(.WIDTH(16))                   lat_mar_xy(.clk(1'b0), .reset(xy_reset_mar), .in(reg_mar), .out(reg_mar_xy));
   latch         #(.WIDTH(16))                   lat_mdr_xy(.clk(1'b0), .reset(xy_reset_mdr), .in(reg_mdr), .out(reg_mdr_xy));
-  latch         #(.WIDTH(16))                   lat_intvect_xy(.clk(1'b0), .reset(xy_reset_intvect), .in(intvect), .out(reg_intvect_xy));
+  latch         #(.WIDTH(16))                   lat_intvect_xy(.clk(1'b0), .reset(xy_reset_intvect), .in(intvect_shifted), .out(reg_intvect_xy));
   latch         #(.WIDTH(16))                   lat_mar_shr_xy(.clk(1'b0), .reset(xy_reset_mar_shr), .in(reg_mar_shr), .out(reg_mar_shr_xy));
   latch         #(.WIDTH(16))                   lat_mar_sex_xy(.clk(1'b0), .reset(xy_reset_mar_sex), .in(reg_mar_sex), .out(reg_mar_sex_xy));
   latch         #(.WIDTH(16))                   lat_mar_swab_xy(.clk(1'b0), .reset(xy_reset_mar_swab), .in(reg_mar_swab), .out(reg_mar_swab_xy));
@@ -378,8 +378,9 @@ module ECLair(int);
   assign reg_mar_swab[15:8] = reg_mar[7:0];
   assign reg_ir_padded[7:0] = reg_ir;
   assign reg_ir_padded[8] = 1'b0;
-  assign intvect_padded[3:0] = intvect;
-  assign intvect_padded[8:4] = 5'b00000;
+  assign intvect_shifted[1:0] = 2'b00;
+  assign intvect_shifted[5:2] = intvect;
+  assign intvect_shifted[7:6] = 2'b00;
   
   // FIXME: temporary until proper clear/reset logic is worked out
   assign intclr[0] = ~_por_reset;

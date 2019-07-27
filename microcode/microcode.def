@@ -124,3 +124,4 @@ include logic_ops.def
 include math.def
 include paging.def
 include shift.def
+include interrupts.def

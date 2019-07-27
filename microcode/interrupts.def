@@ -1,0 +1,44 @@
+# locations - start addresses of instructions
+location    irq         1
+location    irq-cont    416
+#location    irq2        2
+#location    irq3        3
+#location    irq4        4
+#location    irq5        5
+#location    irq6        6
+#location    irq7        7
+#location    irq8        8
+
+location    reti        39
+location    reti-cont   448
+
+# instructions - actual implementation microcode
+
+# handle interrupts
+# TODO: push all the registers so we can restore them later
+# disable interrupts
+instruction irq         src_xy(imm)     load_x alu_op(x) xy_imm_lsb(0) load_flag_ie next_addr(irq-cont)
+# put us in supervisor mode
+instruction irq-cont    src_xy(imm)     load_x alu_op(x) xy_imm_lsb(0) load_flag_m
+
+# push PC to stack
+# TODO: optimize this possibly
+instruction irq-cont    src_mar(pc)     load_mar      src_xy(mar)     load_x        alu_op(x)   src_mdr(z)  mdr_byte(high) load_mdr
+instruction irq-cont    mdr_byte(low)  src_xy(mdr)   load_mdr        load_x
+instruction irq-cont    mdr_byte(high) alu_op(x)     src_xy(sp)      load_x          src_mar(z)      load_mar  mem_write
+instruction irq-cont    xy_imm_lsb(1) load_y          alu_op(add)     src_mar(z)      load_mar 
+instruction irq-cont    mdr_byte(low)  mem_write
+instruction irq-cont    src_xy(mar)   load_x          alu_op(add)     load_reg(sp)
+
+# jump to the interrupt handler
+# TODO: can this be one clock long instead of two?
+instruction irq-cont    src_xy(intvect) load_x
+instruction irq-cont    alu_op(x) load_pc next_addr(fetch2)
+
+# pop 16 bits from address pointed to by SP-- into PC
+instruction reti        src_xy(sp)      load_x      alu_op(x-1)   src_mar(z)    load_mar      next_addr(reti-cont)
+instruction reti-cont   mdr_byte(low)   mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_reg(sp)
+instruction reti-cont   src_xy(sp)      alu_op(x-1) src_mar(z)    load_mar
+instruction reti-cont   mdr_byte(high)  mem_read    src_mdr(data) load_mdr      src_xy(mdr)   load_x
+instruction reti-cont   src_xy(mdr)     load_x      load_pc
+instruction reti-cont   src_xy(mar)     load_x      load_reg(sp)  next_addr(fetch2)
