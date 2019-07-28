@@ -1,6 +1,6 @@
 # locations - start addresses of instructions
 location    irq         1
-location    irq-cont    416
+location    irq-cont    412
 #location    irq2        2
 #location    irq3        3
 #location    irq4        4
@@ -30,13 +30,93 @@ instruction irq-cont    xy_imm_lsb(1) load_y          alu_op(add)     src_mar(z)
 instruction irq-cont    mdr_byte(low)  mem_write
 instruction irq-cont    src_xy(mar)   load_x          alu_op(add)     load_reg(sp)
 
+# push DP to stack
+instruction irq-cont    src_xy(dp)     load_x        alu_op(x)       src_mdr(z)  mdr_byte(high) load_mdr
+instruction irq-cont                                 alu_op(x)       src_mdr(z)  mdr_byte(low)  load_mdr
+instruction irq-cont    src_xy(sp)     load_x        alu_op(x)       src_mar(z)  mdr_byte(high) load_mar mem_write
+instruction irq-cont    xy_imm_lsb(1)  load_y        alu_op(add)     src_mar(z)                 load_mar 
+instruction irq-cont    mdr_byte(low)  mem_write     src_xy(mar)     load_x      alu_op(add)    load_reg(sp)
+
+# TODO: implement op_16bit for MDR transfers so we can load all of these in one cycle
+# push A to stack
+instruction irq-cont    src_xy(a)      load_x        alu_op(x)       src_mdr(z)  mdr_byte(high) load_mdr
+instruction irq-cont                                 alu_op(x)       src_mdr(z)  mdr_byte(low)  load_mdr
+instruction irq-cont    src_xy(sp)     load_x        alu_op(x)       src_mar(z)  mdr_byte(high) load_mar mem_write
+instruction irq-cont    xy_imm_lsb(1)  load_y        alu_op(add)     src_mar(z)                 load_mar 
+instruction irq-cont    mdr_byte(low)  mem_write     src_xy(mar)     load_x      alu_op(add)    load_reg(sp)
+
+# push B to stack
+instruction irq-cont    src_xy(b)      load_x        alu_op(x)       src_mdr(z)  mdr_byte(high) load_mdr
+instruction irq-cont                                 alu_op(x)       src_mdr(z)  mdr_byte(low)  load_mdr
+instruction irq-cont    src_xy(sp)     load_x        alu_op(x)       src_mar(z)  mdr_byte(high) load_mar mem_write
+instruction irq-cont    xy_imm_lsb(1)  load_y        alu_op(add)     src_mar(z)                 load_mar 
+instruction irq-cont    mdr_byte(low)  mem_write     src_xy(mar)     load_x      alu_op(add)    load_reg(sp)
+
+# push C to stack
+instruction irq-cont    src_xy(c)      load_x        alu_op(x)       src_mdr(z)  mdr_byte(high) load_mdr
+instruction irq-cont                                 alu_op(x)       src_mdr(z)  mdr_byte(low)  load_mdr
+instruction irq-cont    src_xy(sp)     load_x        alu_op(x)       src_mar(z)  mdr_byte(high) load_mar mem_write
+instruction irq-cont    xy_imm_lsb(1)  load_y        alu_op(add)     src_mar(z)                 load_mar 
+instruction irq-cont    mdr_byte(low)  mem_write     src_xy(mar)     load_x      alu_op(add)    load_reg(sp)
+
+# push D to stack
+instruction irq-cont    src_xy(d)      load_x        alu_op(x)       src_mdr(z)  mdr_byte(high) load_mdr
+instruction irq-cont                                 alu_op(x)       src_mdr(z)  mdr_byte(low)  load_mdr
+instruction irq-cont    src_xy(sp)     load_x        alu_op(x)       src_mar(z)  mdr_byte(high) load_mar mem_write
+instruction irq-cont    xy_imm_lsb(1)  load_y        alu_op(add)     src_mar(z)                 load_mar 
+instruction irq-cont    mdr_byte(low)  mem_write     src_xy(mar)     load_x      alu_op(add)    load_reg(sp)
+
+
 # jump to the interrupt handler
 # TODO: can this be one clock long instead of two?
 instruction irq-cont    src_xy(intvect) load_x
 instruction irq-cont    alu_op(x) load_pc next_addr(fetch2)
 
-# pop 16 bits from address pointed to by SP-- into PC
+# === reti ===
+
+# pop D from stack
 instruction reti        src_xy(sp)      load_x      alu_op(x-1)   src_mar(z)    load_mar      next_addr(reti-cont)
+# 1C0
+instruction reti-cont   mdr_byte(low)   mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_reg(sp)
+instruction reti-cont   src_xy(sp)      alu_op(x-1) src_mar(z)    load_mar
+instruction reti-cont   mdr_byte(high)  mem_read    src_mdr(data) load_mdr      src_xy(mdr)   load_x  load_reg(d) op_16bit
+instruction reti-cont   src_xy(mar)     load_x      load_reg(sp)
+
+# pop C from stack
+# 1C4
+instruction reti-cont   src_xy(sp)      load_x      alu_op(x-1)   src_mar(z)    load_mar
+instruction reti-cont   mdr_byte(low)   mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_reg(sp)
+instruction reti-cont   src_xy(sp)      alu_op(x-1) src_mar(z)    load_mar
+instruction reti-cont   mdr_byte(high)  mem_read    src_mdr(data) load_mdr      src_xy(mdr)   load_x load_reg(c) op_16bit
+instruction reti-cont   src_xy(mar)     load_x      load_reg(sp)
+
+# pop B from stack
+# 1C9
+instruction reti-cont   src_xy(sp)      load_x      alu_op(x-1)   src_mar(z)    load_mar
+instruction reti-cont   mdr_byte(low)   mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_reg(sp)
+instruction reti-cont   src_xy(sp)      alu_op(x-1) src_mar(z)    load_mar
+instruction reti-cont   mdr_byte(high)  mem_read    src_mdr(data) load_mdr      src_xy(mdr)   load_x load_reg(b) op_16bit
+instruction reti-cont   src_xy(mar)     load_x      load_reg(sp)
+
+# pop A from stack
+# 1CE
+instruction reti-cont   src_xy(sp)      load_x      alu_op(x-1)   src_mar(z)    load_mar
+instruction reti-cont   mdr_byte(low)   mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_reg(sp)
+instruction reti-cont   src_xy(sp)      alu_op(x-1) src_mar(z)    load_mar
+instruction reti-cont   mdr_byte(high)  mem_read    src_mdr(data) load_mdr      src_xy(mdr)   load_x load_reg(a) op_16bit
+instruction reti-cont   src_xy(mar)     load_x      load_reg(sp)
+
+# pop DP from stack
+# 1D3
+instruction reti-cont   src_xy(sp)      load_x      alu_op(x-1)   src_mar(z)    load_mar
+instruction reti-cont   mdr_byte(low)   mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_reg(sp)
+instruction reti-cont   src_xy(sp)      alu_op(x-1) src_mar(z)    load_mar
+instruction reti-cont   mdr_byte(high)  mem_read    src_mdr(data) load_mdr      src_xy(mdr)   load_x load_reg(dp)
+instruction reti-cont   src_xy(mar)     load_x      load_reg(sp)
+
+# pop 16 bits from address pointed to by SP-- into PC
+# 1D8
+instruction reti-cont   src_xy(sp)      load_x      alu_op(x-1)   src_mar(z)    load_mar
 instruction reti-cont   mdr_byte(low)   mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_reg(sp)
 instruction reti-cont   src_xy(sp)      alu_op(x-1) src_mar(z)    load_mar
 instruction reti-cont   mdr_byte(high)  mem_read    src_mdr(data) load_mdr      src_xy(mdr)   load_x
