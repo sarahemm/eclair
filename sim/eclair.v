@@ -137,6 +137,8 @@ module ECLair(int);
   wire          alu_cout16;
   wire  [11:0]  pagetable_addr; // currently selected address in the pagetable
   wire  [15:0]  pagetable_out;  // output from the page table
+  wire          page_status_present;  // current page is present
+  wire          page_status_writable; // current page is writable
   wire  [5:0]   reg_ptb;        // currently addressed page table block register output
   wire  [5:0]   ptb;            // currently addressed page table block (taking into account supervisor mode PTB=0)
   wire          write_pte;      // 1=write page table entry
@@ -170,6 +172,9 @@ module ECLair(int);
   wire  [7:0]   intclr;         // clear interrupt flag
   wire          int_jmp;        // jump to IRQ area of microcode on next fetch/execute
   wire          int_pending;    // at least one interrupt is waiting to be serviced
+  wire          page_fault_pnp; // a page-not-present fault is in progress
+  wire          page_fault_pnw; // a page-not-writable fault is in progress
+  wire          page_fault;     // a page fault is in progress
   wire          rpt_zero;       // RPT register is zero
   wire          write_cse;      // microcode bit to activate CS write logic
   wire  [7:0]   cs_write_seq;           // steps of the control store write sequencer, controlled by a shift register
@@ -347,6 +352,8 @@ module ECLair(int);
   assign reg_x_load_ir_src[2] = reg_x_load_ir & reg_ir[7];
   assign pagetable_addr[5:0] = reg_mar[15:10];
   assign pagetable_addr[11:6] = ptb[5:0];
+  assign page_status_writable = pagetable_out[14];
+  assign page_status_present = pagetable_out[15];
   assign flags[0] = flag_ie;
   assign flags[1] = flag_m;
   assign flags[2] = flag_pe;
@@ -364,6 +371,9 @@ module ECLair(int);
   assign xy_imm_val[1:0] = xy_imm_lsb;
   assign xy_imm_val[15:2] = 14'b00_0000_0000_0000;
   assign int_pending = ~(intvect[3:0] == 4'b0000);
+  assign page_fault_pnp = ram_read & flag_pe & ~page_status_present;
+  assign page_fault_pnw = ram_write & flag_pe & ~page_status_writable;
+  assign page_fault = page_fault_pnp | page_fault_pnw;
   assign int_jmp = int_pending & flag_ie;
   assign cs_next_addr_rptz[8:4] = cs_next_addr[8:4];
   assign cs_next_addr_rptz[3:0] = rptz_next_nibble;
