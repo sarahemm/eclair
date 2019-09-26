@@ -1,7 +1,9 @@
 ldi flags, 0x02  // switches to user mode but leaves paging off
 // set up page table block 1 (actually used to page)
+// pagetable address 0x0000 is set to 0x0001, with the
+// "page present" and "page writeable" bits set
 ldi ptb, 0x01
-ldi a,   0x0001
+ldi a,   0xC001
 ldi d,   0x0000
 wrpte
 // second page table block, (used to make sure we can have two blocks
