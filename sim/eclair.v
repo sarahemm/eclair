@@ -371,7 +371,7 @@ module ECLair(int);
   assign xy_imm_val[1:0] = xy_imm_lsb;
   assign xy_imm_val[15:2] = 14'b00_0000_0000_0000;
   assign int_pending = ~(intvect[3:0] == 4'b0000);
-  assign page_fault_pnp = ram_read & flag_pe & ~page_status_present;
+  assign page_fault_pnp = (ram_read | ram_write) & flag_pe & ~page_status_present;
   assign page_fault_pnw = ram_write & flag_pe & ~page_status_writable;
   assign page_fault = page_fault_pnp | page_fault_pnw;
   assign int_jmp = int_pending & flag_ie;
