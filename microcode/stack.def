@@ -4,10 +4,15 @@ location    push8.?     346   # common latter half of push8.*
 location    push16.imm  135   # push immediate 16 bits to address pointed to by SP++
 location    push16.pc   67    # push PC to address pointed to by SP++
 location    push16.?    342   # common latter half of push16.*
-location    push16.a    52    # push A to stack
-location    push16.b    116   # push A to stack
-location    push16.c    180   # push A to stack
-location    push16.d    244   # push A to stack
+location    push16.a    52    # push a to stack
+location    push16.b    116   # push b to stack
+location    push16.c    180   # push c to stack
+location    push16.d    244   # push d to stack
+location    pop16.a     42    # pop stack to a
+location    pop16.b     106   # pop stack to b
+location    pop16.c     170   # pop stack to c
+location    pop16.d     234   # pop stack to d
+location    pop16.?     478   # common latter half of pop16.*
 
 # instructions - actual implementation microcode
 
@@ -50,3 +55,22 @@ instruction push16.?    xy_imm_lsb(1) load_y          alu_op(add)     src_mar(z)
 instruction push16.?    mdr_byte(low)  mem_write
 # add the 1'b1 already in Y to the SP+1 already in MAR, put the result (SP+2) back into SP
 instruction push16.?    src_xy(mar)   load_x          alu_op(add)     load_reg(sp)    next_addr(fetch)
+
+# pop 16 bits from address pointed to by SP-- into specified register
+instruction pop16.a next_addr(pop16.?)
+instruction pop16.b next_addr(pop16.?)
+instruction pop16.c next_addr(pop16.?)
+instruction pop16.d next_addr(pop16.?)
+
+# load SP into MAR
+instruction pop16.?    src_xy(sp)      load_x      alu_op(x-1)   src_mar(z)    load_mar
+# load RAM contents into low byte of MDR and load MAR back into SP
+instruction pop16.?    mdr_byte(low)  mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_reg(sp)
+# subtract 1 from SP, put it into the MAR
+instruction pop16.?    src_xy(sp)      alu_op(x-1) src_mar(z)    load_mar
+# load RAM contents into the high byte of MDR and push that all the way through to Z
+instruction pop16.?    mdr_byte(high)   mem_read    src_mdr(data) load_mdr      src_xy(mdr)   load_x
+# load contents of MDR into the register referenced in IR
+instruction pop16.?    src_xy(mdr)     load_x      op_16bit      load_reg(via_ir)
+# load MAR back into SP now that we're done, then go back to fetch the next instruction
+instruction pop16.?    src_xy(mar)     load_x      load_reg(sp)  next_addr(fetch)
