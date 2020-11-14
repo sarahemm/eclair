@@ -13,6 +13,11 @@ location    push8.bl    77    # push low byte of b to stack
 location    push8.cl    141   # push low byte of c to stack
 location    push8.dl    205   # push low byte of d to stack
 location    push8.?l    484   # common latter half of push8.*l
+location    push8.ah    14    # push high byte of a to stack
+location    push8.bh    78    # push high byte of b to stack
+location    push8.ch    142   # push high byte of c to stack
+location    push8.dh    206   # push high byte of d to stack
+location    push8.?h    487   # common latter half of push8.*h
 
 location    pop16.a     42    # pop stack to a
 location    pop16.b     106   # pop stack to b
@@ -74,6 +79,19 @@ instruction push8.?l    mdr_byte(low) alu_op(x)     src_xy(sp)      load_x      
 instruction push8.?l    xy_imm_lsb(1) load_y          alu_op(add)     src_mar(z)      load_mar 
 # load MAR back into SP
 instruction push8.?l    src_xy(mar)   load_x          alu_op(x)     load_reg(sp)    next_addr(fetch)
+
+# push high 8 bits from register
+instruction push8.ah  src_mdr(z)  src_xy(from_ir) reg_byte(high) mdr_byte(high) load_x  load_mdr next_addr(push8.?h)
+instruction push8.bh  src_mdr(z)  src_xy(from_ir) reg_byte(high) mdr_byte(high) load_x  load_mdr next_addr(push8.?h)
+instruction push8.ch  src_mdr(z)  src_xy(from_ir) reg_byte(high) mdr_byte(high) load_x  load_mdr next_addr(push8.?h)
+instruction push8.dh  src_mdr(z)  src_xy(from_ir) reg_byte(high) mdr_byte(high) load_x  load_mdr next_addr(push8.?h)
+
+# write immediate value from high byte of MDR into address pointed to by SP (via SP->X->Z->MAR)
+instruction push8.?h    mdr_byte(high) alu_op(x)     src_xy(sp)      load_x          src_mar(z)      load_mar  mem_write
+# increment SP into Z and load that into MAR
+instruction push8.?h    xy_imm_lsb(1) load_y          alu_op(add)     src_mar(z)      load_mar 
+# load MAR back into SP
+instruction push8.?h    src_xy(mar)   load_x          alu_op(x)     load_reg(sp)    next_addr(fetch)
 
 
 # pop 16 bits from address pointed to by SP-- into specified register
