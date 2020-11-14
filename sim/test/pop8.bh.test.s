@@ -15,16 +15,16 @@ wrpte
 ldi sp,    0x0400
 ldi flags, 0x05  // system mode, paging on
 .org 0x015
-// load a test value into bh
+// load a test value into ah
 ldi bh, 0x9B
 push bh
-ldi bh, 0x00
+ldi b, 0xDADA
 cir
 pop bh
-.org 0x01c
+.org 0x01d
 halt
 
-// expect: pc=0x00001c
+// expect: pc=0x00001d
 // expect: reg_sp=00000100_00000000
-// expect: reg_b=10011011_XXXXXXXX
+// expect: reg_b=10011011_11011010
 // expect: ram[0x100000]=0x9b
