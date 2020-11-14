@@ -4,6 +4,10 @@ location    push8.?     346   # common latter half of push8.*
 location    push16.imm  135   # push immediate 16 bits to address pointed to by SP++
 location    push16.pc   67    # push PC to address pointed to by SP++
 location    push16.?    342   # common latter half of push16.*
+location    push16.a    52    # push A to stack
+location    push16.b    116   # push A to stack
+location    push16.c    180   # push A to stack
+location    push16.d    244   # push A to stack
 
 # instructions - actual implementation microcode
 
@@ -31,7 +35,13 @@ instruction push16.imm  inc_pc        src_mar(pc)     load_mar        src_mdr(da
 instruction push16.pc   src_mar(pc)     load_mar      src_xy(mar)     load_x        alu_op(x)   src_mdr(z)  mdr_byte(high) load_mdr
 instruction push16.pc   mdr_byte(low)  src_xy(mdr)   load_mdr        load_x        next_addr(push16.?)
 
-# push 16 bits from register selected by IR[6..7]
+# push 16 bits from a register onto the stack
+instruction push16.a  src_mdr(z)  src_xy(from_ir) op_16bit load_x  load_mdr next_addr(push16.?)
+instruction push16.b  src_mdr(z)  src_xy(from_ir) op_16bit load_x  load_mdr next_addr(push16.?)
+instruction push16.c  src_mdr(z)  src_xy(from_ir) op_16bit load_x  load_mdr next_addr(push16.?)
+instruction push16.d  src_mdr(z)  src_xy(from_ir) op_16bit load_x  load_mdr next_addr(push16.?)
+
+# push 16 bits from MDR
 # write immediate value from high byte of MDR into address pointed to by SP (via SP->X->Z->MAR)
 instruction push16.?    mdr_byte(high) alu_op(x)     src_xy(sp)      load_x          src_mar(z)      load_mar  mem_write
 # increment SP into Z and load that into MAR
