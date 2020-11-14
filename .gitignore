@@ -7,3 +7,6 @@ microcode.bin
 microcode_map.txt
 complete_microcode.def
 xcuserdata/
+sim/eclair_base.gtkw
+.idea/
+.vscode/
