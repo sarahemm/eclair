@@ -8,6 +8,12 @@ location    push16.a    52    # push a to stack
 location    push16.b    116   # push b to stack
 location    push16.c    180   # push c to stack
 location    push16.d    244   # push d to stack
+location    push8.al    13    # push low byte of a to stack
+location    push8.bl    77    # push low byte of b to stack
+location    push8.cl    141   # push low byte of c to stack
+location    push8.dl    205   # push low byte of d to stack
+location    push8.?l    484   # common latter half of push8.*l
+
 location    pop16.a     42    # pop stack to a
 location    pop16.b     106   # pop stack to b
 location    pop16.c     170   # pop stack to c
@@ -55,6 +61,20 @@ instruction push16.?    xy_imm_lsb(1) load_y          alu_op(add)     src_mar(z)
 instruction push16.?    mdr_byte(low)  mem_write
 # add the 1'b1 already in Y to the SP+1 already in MAR, put the result (SP+2) back into SP
 instruction push16.?    src_xy(mar)   load_x          alu_op(add)     load_reg(sp)    next_addr(fetch)
+
+# push low 8 bits from register
+instruction push8.al  src_mdr(z)  src_xy(from_ir) reg_byte(low) mdr_byte(low) load_x  load_mdr next_addr(push8.?l)
+instruction push8.bl  src_mdr(z)  src_xy(from_ir) reg_byte(low) mdr_byte(low) load_x  load_mdr next_addr(push8.?l)
+instruction push8.cl  src_mdr(z)  src_xy(from_ir) reg_byte(low) mdr_byte(low) load_x  load_mdr next_addr(push8.?l)
+instruction push8.dl  src_mdr(z)  src_xy(from_ir) reg_byte(low) mdr_byte(low) load_x  load_mdr next_addr(push8.?l)
+
+# write immediate value from low byte of MDR into address pointed to by SP (via SP->X->Z->MAR)
+instruction push8.?l    mdr_byte(low) alu_op(x)     src_xy(sp)      load_x          src_mar(z)      load_mar  mem_write
+# increment SP into Z and load that into MAR
+instruction push8.?l    xy_imm_lsb(1) load_y          alu_op(add)     src_mar(z)      load_mar 
+# load MAR back into SP
+instruction push8.?l    src_xy(mar)   load_x          alu_op(x)     load_reg(sp)    next_addr(fetch)
+
 
 # pop 16 bits from address pointed to by SP-- into specified register
 instruction pop16.a next_addr(pop16.?)
