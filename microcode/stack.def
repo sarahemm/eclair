@@ -25,6 +25,12 @@ location    pop16.c     170   # pop stack to c
 location    pop16.d     234   # pop stack to d
 location    pop16.?     478   # common latter half of pop16.*
 
+location    pop8.al     57    # pop stack to low byte of a
+location    pop8.bl     121   # pop stack to low byte of b
+location    pop8.cl     185   # pop stack to low byte of c
+location    pop8.dl     249   # pop stack to low byte of d
+location    pop8.?l     490   # common latter half of pop16.*
+
 # instructions - actual implementation microcode
 
 # load immediate 8 bits into MDR
@@ -112,3 +118,16 @@ instruction pop16.?    mdr_byte(high)   mem_read    src_mdr(data) load_mdr      
 instruction pop16.?    src_xy(mdr)     load_x      op_16bit      load_reg(via_ir)
 # load MAR back into SP now that we're done, then go back to fetch the next instruction
 instruction pop16.?    src_xy(mar)     load_x      load_reg(sp)  next_addr(fetch)
+
+# pop byte from address pointed to by SP-- into low byte of specified register
+instruction pop8.al next_addr(pop8.?l)
+instruction pop8.bl next_addr(pop8.?l)
+instruction pop8.cl next_addr(pop8.?l)
+instruction pop8.dl next_addr(pop8.?l)
+
+# load SP-1 into MAR
+instruction pop8.?l    src_xy(sp)      load_x      alu_op(x-1)   src_mar(z)    load_mar
+# load RAM contents into low byte of MDR and load MAR back into SP
+instruction pop8.?l    mdr_byte(low)  mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_reg(sp)
+# load contents of MDR into the register referenced in IR
+instruction pop8.?l    src_xy(mdr)     load_x      op_16bit      load_reg(via_ir) next_addr(fetch)
