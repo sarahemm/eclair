@@ -18,13 +18,13 @@ ldi flags, 0x05  // system mode, paging on
 // load a test value into al
 ldi al, 0xB9
 push al
-ldi al, 0x00
+ldi a, 0xDEDE
 cir
 pop al
-.org 0x01c
+.org 0x01d
 halt
 
-// expect: pc=0x00001c
+// expect: pc=0x00001d
 // expect: reg_sp=00000100_00000000
-// expect: reg_a=XXXXXXXX_10111001
+// expect: reg_a=11011110_10111001
 // expect: ram[0x100000]=0xb9

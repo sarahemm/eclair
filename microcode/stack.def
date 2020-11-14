@@ -136,7 +136,7 @@ instruction pop8.?l    src_xy(sp)      load_x      alu_op(x-1)   src_mar(z)    l
 # load RAM contents into low byte of MDR and load MAR back into SP
 instruction pop8.?l    mdr_byte(low)  mem_read    src_mdr(data) load_mdr      src_xy(mar)   load_x  load_reg(sp)
 # load contents of MDR into the register referenced in IR
-instruction pop8.?l    src_xy(mdr)     load_x      op_16bit      load_reg(via_ir) next_addr(fetch)
+instruction pop8.?l    src_xy(mdr)     load_x     load_reg(via_ir) next_addr(fetch)
 
 
 # pop byte from address pointed to by SP-- into high byte of specified register
