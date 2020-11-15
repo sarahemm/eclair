@@ -5,8 +5,17 @@ all: eclair.vvp microcode
 run: eclair.vvp microcode
 	./eclair.vvp
 	
+unit_tests: eclair.vvp microcode
+	make -C unit_tests
+	../utils/runtests.rb 'unit_tests/*.test'
+
+integration_tests: eclair.vvp microcode
+	make -C integration_tests
+	../utils/runtests.rb 'integration_tests/*.test'
+
 test: eclair.vvp microcode
-	make -C test
+	make -C unit_tests
+	make -C integration_tests
 	../utils/runtests.rb
 
 eclair.vvp: $(OBJS)
@@ -19,4 +28,4 @@ microcode.bin: ../microcode/*.def ../utils/mcgen/mcgen2
 
 clean:
 	rm -f *.vvp *.vcd a.out microcode*.bin microcode_map.txt microcode_graph.pdf complete_microcode.def sysrom.bin
-	make -C test clean
+	make -C unit_tests clean

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# runtests - run all the unit tests found in sim/test/*
+# runtests - run all the unit tests found in sim/*tests*/*
 
 require 'colorize'
 
@@ -170,7 +170,7 @@ filespec = nil
 if(ARGV[0]) then
   filespec = ARGV[0]
 else
-  filespec = "../sim/test/*.test"
+  filespec = "../sim/*_tests/*.test"
 end
 
 total_fails = total_problems = total_pass = 0
