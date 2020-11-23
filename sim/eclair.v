@@ -143,7 +143,6 @@ module ECLair(int);
   wire  [5:0]   ptb;            // currently addressed page table block (taking into account supervisor mode PTB=0)
   wire          write_pte;      // 1=write page table entry
   wire          load_ptb;       // load PTB register from Z
-  wire          load_flags;     // load system flags from Z
   wire          load_status;    // load system status from ALU
   wire  [7:0]   flags;          // system flags (paging enabled, etc.)
   wire  [7:0]   status;         // system status (ALU zero, carry/overflow, etc.)
@@ -381,9 +380,14 @@ module ECLair(int);
   assign rpt_mdr_source[7:0] = reg_mdr[7:0];
   assign reg_mar_shr = reg_mar >> 1;
   assign reg_mar_sex[7:0] = reg_mar[7:0];
-  assign reg_mar_sex[8]  = reg_mar[7]; assign reg_mar_sex[9]  = reg_mar[7]; assign reg_mar_sex[10] = reg_mar[7];
-  assign reg_mar_sex[11] = reg_mar[7]; assign reg_mar_sex[12] = reg_mar[7]; assign reg_mar_sex[13] = reg_mar[7];
-  assign reg_mar_sex[14] = reg_mar[7]; assign reg_mar_sex[15] = reg_mar[7];
+  assign reg_mar_sex[8]  = reg_mar[7];
+  assign reg_mar_sex[9]  = reg_mar[7];
+  assign reg_mar_sex[10] = reg_mar[7];
+  assign reg_mar_sex[11] = reg_mar[7];
+  assign reg_mar_sex[12] = reg_mar[7];
+  assign reg_mar_sex[13] = reg_mar[7];
+  assign reg_mar_sex[14] = reg_mar[7];
+  assign reg_mar_sex[15] = reg_mar[7];
   assign reg_mar_swab[7:0] = reg_mar[15:8];
   assign reg_mar_swab[15:8] = reg_mar[7:0];
   assign reg_ir_padded[7:0] = reg_ir;
