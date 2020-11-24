@@ -190,11 +190,14 @@ module ECLair(int);
     #750000 $finish;
   end
   
+  // Subsystem: Clock
   counter         #(.WIDTH(3))                  ctr_clk_divider(.clk(clk_main), .ce(1'b1), .reset(1'b0), .out(clk_divided), .load(1'b0), .preset(3'b000));
   flipflop_jk                                   flp_cs_ready(.clk(top_of_cs), .j(1'b1), .k(1'b0), .q(cs_ready));
   // controls whether the clock is directed to the control store (normal) or the control store writing counter (only when writing CS)
   // TODO: figure out the logic in real life with real prop delays
   andgate         #(.WIDTH(1))                  and_clk_cs(.a(clk_cs_mid), .b(~cs_write_in_progress), .y(clk_cs));
+  
+  // Subsystem: Control Store
   mux_21                                        mux_cs_clk_selector(.sel(cs_ready), .a(clk_quarter), .b(clk_main), .y(clk_cs_mid));
   mux_2x          #(.WIDTH(9))                  mux_cs_addr(.sel(cs_ready), .a(cs_addr_init), .b(cs_addr_run), .y(cs_addr_normal));
   // TODO: clean up the two chained muxes. we also had to bump the _dly clock delays from 8ns to 10ns to make this work, fix that when this is fixed.
@@ -208,9 +211,24 @@ module ECLair(int);
   microcode_ram                                 ram_cs(._cs(1'b0), ._oe(1'b0), ._w(cs_ram__w), .addr(cs_addr), .data_in(cs_ram_data_in), .data_out(cs_data_prelatch));
   flipflop_d      #(.WIDTH(24))                 flp_ram_cs_e(.clk(clk_cs_dly2), .reset(~(clk_cs && clk_cs_dly2)), .in(cs_data_prelatch[23:0]),  .out(cs_data[23:0]));
   flipflop_d      #(.WIDTH(40))                 flp_ram_cs_l(.clk(clk_cs_dly), .reset(1'b0), .in(cs_data_prelatch[63:24]), .out(cs_data[63:24]));
+  mux_18                                        mux_branch_cond(.sel(branch_cond), .a(1'b1), .b(status[0]), .c(status[1]), .d(status[2]), .e(1'b0), .f(1'b0), .g(1'b0), .h(1'b0), .y(branch_cond_met));
+  updowncounter #(.WIDTH(12))                   ctr_rpt(.clk(rpt_exec), .reset(~_reset), .out(rpt), .mode(rpt_mode ? 2'b01 : 2'b00), .preset(rpt_mdr_source), .cout(rpt_zero));
+  shiftreg      #(.WIDTH(8))                    shr_cswrite(.clk(clk_main), .in(write_cse & ~cs_write_in_progress), .out(cs_write_seq));
+
+  // Subsystem: Memory
   main_ram        #(.TYPE("Main"))              ram_main(._cs(1'b0), ._oe(~(~ram_write & ~addr_ram)), ._w(~(ram_write & ~addr_ram)), .addr(bus_addr[19:0]), .data_in(reg_mdr_8bit), .data_out(bus_data));
   main_eprom      #(.ROM_FILE("sysrom.bin"))    rom_boot(._cs(1'b0), ._oe(addr_rom), .addr(bus_addr[19:0]), .data(bus_data));
   counter         #(.WIDTH(16))                 ctr_pc(.clk(clk_cs_dly2), .ce(inc_pc), .reset(~_reset), .out(pc), .load(really_load_pc), .preset(bus_z));
+  mux_2x                                        mux_mar_l(.sel(mux_mar_src), .a(bus_z[7:0]),  .b(pc[7:0]),  .y(lat_mar[7:0]));
+  mux_2x                                        mux_mar_h(.sel(mux_mar_src), .a(bus_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
+  mux_2x                                        mux_mdr_l(.sel(mux_mdr_src), .a(bus_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
+  mux_2x                                        mux_mdr_h(.sel(mux_mdr_src), .a(bus_z[15:8]), .b(bus_data[7:0]), .y(lat_mdr[15:8]));
+  mux_2x                                        mux_mdr_byte(.sel(mdr_byte), .a(reg_mdr[7:0]), .b(reg_mdr[15:8]), .y(reg_mdr_8bit));
+  main_ram      #(.WIDTH(16), .ADDR_WIDTH(12), .TYPE("Page Table"))  ram_paging(._cs(1'b0), ._oe(1'b0), ._w(~write_pte), .addr(pagetable_addr), .data_in(bus_z), .data_out(pagetable_out));
+  mux_2x                                        mux_paging_l(.sel(flag_pe), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr[17:10]));
+  mux_2x        #(.WIDTH(6))                    mux_paging_h(.sel(flag_pe), .a(6'b0),           .b(pagetable_out[13:8]), .y(bus_addr[23:18]));
+  
+  // Subsystem: Registers
   latch           #(.WIDTH(8))                  lat_reg_a_h(.clk(reg_a_load | ~op_16bit & ~reg_byte), .reset(1'b0), .in(bus_z[15:8]), .out(reg_a[15:8]));
   latch           #(.WIDTH(8))                  lat_reg_b_h(.clk(reg_b_load | ~op_16bit & ~reg_byte), .reset(1'b0), .in(bus_z[15:8]), .out(reg_b[15:8]));
   latch           #(.WIDTH(8))                  lat_reg_c_h(.clk(reg_c_load | ~op_16bit & ~reg_byte), .reset(1'b0), .in(bus_z[15:8]), .out(reg_c[15:8]));
@@ -231,31 +249,11 @@ module ECLair(int);
   latch           #(.WIDTH(8))                  lat_reg_mdr_h(.clk(~(reg_mdr_load & mdr_byte)), .reset(1'b0), .in(lat_mdr[15:8]), .out(reg_mdr[15:8]));
   demux_38                                      dmx_reg_load(.in(load_reg), .out(reg_load));
   demux_38                                      dmx_reg_load_ir(.in(reg_x_load_ir_src), .out(reg_load_via_ir));
-  mux_2x                                        mux_mar_l(.sel(mux_mar_src), .a(bus_z[7:0]),  .b(pc[7:0]),  .y(lat_mar[7:0]));
-  mux_2x                                        mux_mar_h(.sel(mux_mar_src), .a(bus_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
-  mux_2x                                        mux_mdr_l(.sel(mux_mdr_src), .a(bus_z[7:0]),  .b(bus_data[7:0]), .y(lat_mdr[7:0]));
-  mux_2x                                        mux_mdr_h(.sel(mux_mdr_src), .a(bus_z[15:8]), .b(bus_data[7:0]), .y(lat_mdr[15:8]));
-  mux_2x                                        mux_mdr_byte(.sel(mdr_byte), .a(reg_mdr[7:0]), .b(reg_mdr[15:8]), .y(reg_mdr_8bit));
   mux_2x          #(.WIDTH(6))                  mux_ptb(.sel(flag_m), .a(6'b000000), .b(reg_ptb), .y(ptb));
-  alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(carry_in), .x(reg_x), .y(reg_y), .z(bus_z), .c_out8(alu_cout8), .c_out16(alu_cout16));
-  main_ram      #(.WIDTH(16), .ADDR_WIDTH(12), .TYPE("Page Table"))  ram_paging(._cs(1'b0), ._oe(1'b0), ._w(~write_pte), .addr(pagetable_addr), .data_in(bus_z), .data_out(pagetable_out));
-  mux_2x                                        mux_paging_l(.sel(flag_pe), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr[17:10]));
-  mux_2x        #(.WIDTH(6))                    mux_paging_h(.sel(flag_pe), .a(6'b0),           .b(pagetable_out[13:8]), .y(bus_addr[23:18]));
   flipflop_d    #(.WIDTH(1))                    flp_flag_ie(.clk(load_flag_ie), .reset(~_reset), .in(bus_z[0]), .out(flag_ie));
   flipflop_d    #(.WIDTH(1))                    flp_flag_m(.clk(load_flag_m), .reset(~_reset), .in(bus_z[1]), .out(flag_m));
   flipflop_d    #(.WIDTH(1))                    flp_flag_pe(.clk(load_flag_pe), .reset(~_reset), .in(bus_z[2]), .out(flag_pe));
   latch         #(.WIDTH(8))                    lat_reg_status(.clk(load_status), .reset(~_reset), .in(status_in), .out(status));
-  mux_2x                                        mux_status(.sel(op_16bit), .a(status_8), .b(status_16), .y(status_in));
-  mux_18                                        mux_branch_cond(.sel(branch_cond), .a(1'b1), .b(status[0]), .c(status[1]), .d(status[2]), .e(1'b0), .f(1'b0), .g(1'b0), .h(1'b0), .y(branch_cond_met));
-  prienc_8                                      pri_intvect(.clk(1'b0), .a(intflg[7:0]), .y(intvect));
-  latch         #(.WIDTH(1))                    lat_int_0(.clk(int[0]), .reset(intclr[0]), .in(1'b1), .out(intflg[0]));
-  latch         #(.WIDTH(1))                    lat_int_1(.clk(int[1]), .reset(intclr[1]), .in(1'b1), .out(intflg[1]));
-  latch         #(.WIDTH(1))                    lat_int_2(.clk(int[2]), .reset(intclr[2]), .in(1'b1), .out(intflg[2]));
-  latch         #(.WIDTH(1))                    lat_int_3(.clk(int[3]), .reset(intclr[3]), .in(1'b1), .out(intflg[3]));
-  latch         #(.WIDTH(1))                    lat_int_4(.clk(int[4]), .reset(intclr[4]), .in(1'b1), .out(intflg[4]));
-  latch         #(.WIDTH(1))                    lat_int_5(.clk(int[5]), .reset(intclr[5]), .in(1'b1), .out(intflg[5]));
-  latch         #(.WIDTH(1))                    lat_int_6(.clk(int[6]), .reset(intclr[6]), .in(1'b1), .out(intflg[6]));
-  latch         #(.WIDTH(1))                    lat_int_7(.clk(int[7]), .reset(intclr[7]), .in(1'b1), .out(intflg[7]));
 
   latch         #(.WIDTH(16))                   lat_imm_xy(.clk(1'b0), .reset(xy_reset_imm), .in(xy_imm_val), .out(reg_imm_xy));
   latch         #(.WIDTH(16))                   lat_a_xy(.clk(1'b0), .reset(xy_reset_a), .in(reg_a), .out(reg_a_xy));
@@ -274,10 +272,23 @@ module ECLair(int);
   decoder_8                                     dcd_xy_b(.in(reg_xy_src[2:0]), .out(xy_reset_normal[15:8]), .enable(~reg_xy_src[3]));
   decoder_8                                     dcd_xy_from_ir(.in(3'b000 | reg_ir[7:6]), .out(xy_reset_from_ir[4:1]), .enable(reg_xy_src != 4'b1111));
   decoder_8                                     dcd_xy_from_rr(.in(1'b0 | reg_rr[3:0]), .out(xy_reset_from_rr[4:1]), .enable(reg_xy_src != 4'b1110));
-  updowncounter #(.WIDTH(12))                   ctr_rpt(.clk(rpt_exec), .reset(~_reset), .out(rpt), .mode(rpt_mode ? 2'b01 : 2'b00), .preset(rpt_mdr_source), .cout(rpt_zero));
-  shiftreg      #(.WIDTH(8))                    shr_cswrite(.clk(clk_main), .in(write_cse & ~cs_write_in_progress), .out(cs_write_seq));
+
+  // Subsystem: ALU
   magcomp                                       mc_status_l(.a(reg_x[7:0]), .b(reg_y[7:0]), .eq(status_e_8));
   magcomp                                       mc_status_h(.a(reg_x[15:8]), .b(reg_y[15:8]), .eq(status_e_8h));
+  alu_16                                        alu(.mode(alu_mode), .alu_op(alu_op), .c_in(carry_in), .x(reg_x), .y(reg_y), .z(bus_z), .c_out8(alu_cout8), .c_out16(alu_cout16));
+  mux_2x                                        mux_status(.sel(op_16bit), .a(status_8), .b(status_16), .y(status_in));
+
+  // Subsystem: Interrupts
+  prienc_8                                      pri_intvect(.clk(1'b0), .a(intflg[7:0]), .y(intvect));
+  latch         #(.WIDTH(1))                    lat_int_0(.clk(int[0]), .reset(intclr[0]), .in(1'b1), .out(intflg[0]));
+  latch         #(.WIDTH(1))                    lat_int_1(.clk(int[1]), .reset(intclr[1]), .in(1'b1), .out(intflg[1]));
+  latch         #(.WIDTH(1))                    lat_int_2(.clk(int[2]), .reset(intclr[2]), .in(1'b1), .out(intflg[2]));
+  latch         #(.WIDTH(1))                    lat_int_3(.clk(int[3]), .reset(intclr[3]), .in(1'b1), .out(intflg[3]));
+  latch         #(.WIDTH(1))                    lat_int_4(.clk(int[4]), .reset(intclr[4]), .in(1'b1), .out(intflg[4]));
+  latch         #(.WIDTH(1))                    lat_int_5(.clk(int[5]), .reset(intclr[5]), .in(1'b1), .out(intflg[5]));
+  latch         #(.WIDTH(1))                    lat_int_6(.clk(int[6]), .reset(intclr[6]), .in(1'b1), .out(intflg[6]));
+  latch         #(.WIDTH(1))                    lat_int_7(.clk(int[7]), .reset(intclr[7]), .in(1'b1), .out(intflg[7]));
   
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
