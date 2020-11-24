@@ -11,6 +11,13 @@ class String
   end
 end
 
+class Hash
+  def value_sort
+    sorted_array = self.sort_by {|k, v| v}
+    sorted_array.reverse!
+  end
+end
+
 class VerilogModule
   attr_accessor :name, :ports
 
@@ -31,9 +38,11 @@ end
 
 class Instance
   attr_reader :name, :of, :params, :ports
+  attr_accessor :subsystem
 
-  def initialize(of: nil, cfg: nil, name: nil)
+  def initialize(of: nil, cfg: nil, name: nil, subsystem: nil)
     @of = of
+    @subsystem = subsystem
 
     phase = :start
     @name = name
@@ -122,6 +131,27 @@ def text_to_colour(module_name)
   "#{hue} 1 1"
 end
 
+def most_common_subsystem(inouts)
+  subsystems = {}
+  inouts.each do |inout|
+    name = inout[:instance].subsystem
+    subsystems[name] = 0 if !subsystems[name]
+    subsystems[name] += 1
+  end
+  sorted = subsystems.value_sort
+
+  # prefer colocating in a cluster rather than the root graph, if possible
+  return sorted[1][0] if sorted[1] and sorted[0][0] == nil
+  subsystems.value_sort[0][0]
+end
+
+def subsystem_to_subgraph(graph:, subgraphs:, subsystem:)
+  return graph if subsystem == nil
+  cluster_name = "cluster-#{subsystem}"
+  subgraphs[cluster_name] = graph.subgraph(cluster_name, label: subsystem, bgcolor: :linen, fontsize: 100) if !subgraphs[cluster_name]
+  subgraphs[cluster_name]
+end
+
 modules = {}
 Dir.glob("*.v").each do |filename|
   next if filename == 'eclair.v' # we do this one last
@@ -141,8 +171,11 @@ end
 wires = {}
 instances = []
 wire_conns = {}
+current_subsystem = nil
 File.read('eclair.v').each_line do |line|
-  if(matches = /^\s*(?:wire|reg)\s+(\[\d+:\d+\])?\s*([^;]+)/.match(line)) then
+  if(matches = /^\s*\/\/\s*Subsystem:\s*(.*)/.match(line)) then
+    current_subsystem = matches[1]
+  elsif(matches = /^\s*(?:wire|reg)\s+(\[\d+:\d+\])?\s*([^;]+)/.match(line)) then
     # wire/register
     bits = matches[1]
     name = matches[2]
@@ -158,8 +191,20 @@ File.read('eclair.v').each_line do |line|
     logic = matches[2]     # the logic that makes up the 'module'
 
     this_module = VerilogModule.new(name: "aimplicit-#{out}")
-    instance = Instance.new(name: "aimplicit-#{out}", of: this_module)
-    instances.push instance
+    instance = nil
+    # see if there's an existing instance for this which we can use
+    # this can happen if there are multiple assigns to different bits of the same wire
+    instances.each do |test_instance|
+      if(test_instance.name == "aimplicit-#{out}") then
+        instance = test_instance
+        break;
+      end
+    end
+    if(!instance) then
+      # no existing instance, create a new one
+      instance = Instance.new(name: "aimplicit-#{out}", of: this_module) 
+      instances.push instance
+    end
     wires[out].ins.push({instance: instance})
     pp logic_split(logic).uniq if out == 'clk_half'
     logic_split(logic).uniq.each do |element|
@@ -175,7 +220,7 @@ File.read('eclair.v').each_line do |line|
   elsif(modules.keys.include?(line.strip.split(/\s+/)[0])) then
     # instantiation of a module
     module_name = line.strip.split(/\s+/)[0]
-    this_instance = Instance.new(of: modules[module_name], cfg: line)
+    this_instance = Instance.new(of: modules[module_name], subsystem: current_subsystem, cfg: line)
     this_instance.ports.each do |port_name, full_wire|
       if(!this_instance.of.ports[port_name])
         puts "Skipping for #{port_name}"
@@ -186,14 +231,13 @@ File.read('eclair.v').each_line do |line|
       if(logic_elements.length > 1) then
         # instantiate an implicit logic module to combine the multiple elements
         implicit_module = VerilogModule.new(name: "pimplicit-#{this_instance.name}-#{port_name}")
-        implicit_instance = Instance.new(name: "pimplicit-#{this_instance.name}-#{port_name}", of: implicit_module)
+        implicit_instance = Instance.new(name: "pimplicit-#{this_instance.name}-#{port_name}", of: implicit_module, subsystem: current_subsystem)
         instances.push implicit_instance
         # connect one wire from the new implicit instance to the port
         wires[implicit_instance.name] = Wire.new()
         if(dir == :out) then
           STDERR.puts "Combinatorial logic on output ports not supported: #{implicit_instance.name}."
         else
-          puts " input for wire #{implicit_instance.name} connects to #{implicit_instance.name}, output connects to #{this_instance.name} port #{this_instance.of.ports[port_name]}"
           # wire goes from implicit instance to port
           wires[implicit_instance.name].ins.push({instance: implicit_instance})
           wires[implicit_instance.name].outs.push({instance: this_instance, port: this_instance.of.ports[port_name]})
@@ -221,35 +265,77 @@ File.read('eclair.v').each_line do |line|
   end
 end
 
-graph = GraphViz.new(:G, type: 'strict digraph', splines: :polyline, landscape: true)
-
+graph = GraphViz.new(:G, type: 'strict digraph', splines: :line)
+subgraphs = {}
 instances.each do |instance|
   if(instance.name.include? 'implicit-') then
-    graph.add_nodes(instance.name, label: '', shape: :circle, style: :filled, fillcolor: :black)
-    #graph.add_nodes(instance.name, label: instance.name, style: :filled)
+    common_subsystems = {}
+    wires.each do |wire_name, wire|
+      # ignore constants as they connect to many modules and we split them up later
+      next if (/\d+'[bhd][0-9a-fA-F]*/.match(wire_name) or /^\d+$/.match(wire_name))
+      connected_to_instance = false
+      (wire.ins + wire.outs).flatten.each do |inout|
+        if(inout[:instance] == instance) then
+          # this wire connects to this instance
+          connected_to_instance = true
+        end
+      end
+      if(connected_to_instance) then
+        (wire.ins + wire.outs).flatten.each do |inout|
+          next if inout[:instance] == instance
+          name = inout[:instance].subsystem
+          common_subsystems[name] = 0 if !common_subsystems[name]
+          common_subsystems[name] += 1
+        end
+      end
+    end
+    
+    sorted_comsubs = common_subsystems.value_sort
+    colocate_subsystem = sorted_comsubs[0][0]
+    # prefer colocating the implicit instance in a cluster rather than the root graph, if possible
+    colocate_subsystem = sorted_comsubs[1][0] if sorted_comsubs[1] and sorted_comsubs[0][0] == nil
+    # keep track of where we place this instance so other placements can use that info
+    instance.subsystem = colocate_subsystem
+    subgraph = subsystem_to_subgraph(graph: graph, subgraphs: subgraphs, subsystem: colocate_subsystem)
+    subgraph.add_nodes(instance.name, label: '', shape: :circle, style: :filled, fillcolor: :black)
   else
     in_ports = []
     out_ports = []
     instance.of.ports.each do |port_name, port|
-      if(port.direction == :out) then
-        out_ports.push "<#{port_name}>#{port_name}"
-      else
-        in_ports.push "<#{port_name}>#{port_name}"
-      end
+      in_ports.push port_name if port.direction == :in
+      out_ports.push port_name if port.direction == :out
     end
-    graph.add_nodes(
+    subgraph = subsystem_to_subgraph(graph: graph, subgraphs: subgraphs, subsystem: instance.subsystem)
+    highest_ports = [in_ports.length, out_ports.length].sort.reverse[0]
+    
+    in_port_label = ""
+    in_ports.each do |port|
+      colspan = (highest_ports / in_ports.length).floor
+      in_port_label += "<td colspan='#{colspan}' port='#{port}'>#{port}</td>"
+    end
+    out_port_label = ""
+    out_ports.each do |port|
+      colspan = (highest_ports / out_ports.length).floor
+      out_port_label += "<td colspan='#{colspan}' port='#{port}'>#{port}</td>"
+    end
+
+    record_label =  "<table cellspacing='0' cellpadding='10'>"
+    record_label += "<tr>#{in_port_label}</tr>"
+    record_label += "<tr><td #{"colspan='#{highest_ports}'"}>#{instance.name}<br />[#{instance.of.name}]</td></tr>"
+    record_label += "<tr>#{out_port_label}</tr>"
+    record_label += "</table>"
+    subgraph.add_nodes(
       instance.name,
-      :label => "{{#{in_ports.join('|')}}|#{instance.name}\n[#{instance.of.name}]|{#{out_ports.join('|')}}}",
-      :shape => :record,
+      :label => "< #{record_label} >",
+      :shape => :plain,
       color: text_to_colour(instance.of.name)
     )
   end
 end
 
 # the interrupt input comes from the test bench, we'll just hardcode that in
-graph.add_nodes('int', shape: :rect);
 graph.add_nodes('testbench', shape: :invhouse);
-graph.add_edge('testbench', 'int', label: 'int');
+graph.add_edge('testbench', 'branch-int', label: 'int');
 
 wires.each do |wire_name, wire|
   if(wire.ins.length == 1 and wire.outs.length == 1) then
@@ -268,7 +354,8 @@ wires.each do |wire_name, wire|
     # constant assignment, not a real wire
     wire.outs.each do |output|
       constant_node = "#{wire_name}-#{output[:instance].name}"
-      graph.add_node(constant_node, label: wire_name, shape: :none, fontsize: 10)
+      subgraph = subsystem_to_subgraph(graph: graph, subgraphs: subgraphs, subsystem: output[:instance].subsystem)
+      subgraph.add_node(constant_node, label: wire_name, shape: :none, fontsize: 10)
       if(output[:port]) then
         graph.add_edges(constant_node, output[:instance].name, headport: output[:port].name, arrowsize: 0.7, arrowhead: :empty, :color => :darkslategray)
       else
@@ -279,30 +366,36 @@ wires.each do |wire_name, wire|
     # branching wire, add a node in the middle to connect everything to
     color = 'black'
     color = text_to_colour(wire.ins[0][:instance].of.name) if wire.ins[0]
-    #graph.add_nodes(wire_name, :label => wire_name, :shape => :circle)
-    graph.add_nodes(wire_name, :label => '', :shape => :circle, :color => color)
+    
+    # we want to put the branching node in the cluster that has the most
+    # endpoints, to reduce long edges
+    colocate_subsystem = most_common_subsystem((wire.ins + wire.outs).flatten)
+    subgraph = subsystem_to_subgraph(graph: graph, subgraphs: subgraphs, subsystem: colocate_subsystem)
+    branchnode_name = "branch-#{wire_name}"
+    subgraph.add_nodes(branchnode_name, :label => '', :shape => :point, :color => color)
+
     wire.ins.each do |input|
       if(input[:port]) then
-        #puts "HOOKING UP OUTPUT from #{wire_name} to #{input[:instance].name} port #{input[:port].name}"
-        graph.add_edges(input[:instance].name, wire_name, :tailport => input[:port].name, :xlabel => wire_name, :color => color)
+        #puts "HOOKING UP OUTPUT from #{branchnode_name} to #{input[:instance].name} port #{input[:port].name}"
+        graph.add_edges(input[:instance].name, branchnode_name, :tailport => input[:port].name, :xlabel => wire_name, :color => color)
       else
-        #puts "HOOKING UP OUTPUT from #{wire_name} to #{input[:instance].name} [no port]"
-        graph.add_edges(input[:instance].name, wire_name, :xlabel => wire_name, :color => color)
+        #puts "HOOKING UP OUTPUT from #{branchnode_name} to #{input[:instance].name} [no port]"
+        graph.add_edges(input[:instance].name, branchnode_name, :xlabel => wire_name, :color => color)
       end
     end
     wire.outs.each do |output|
       if(output[:port]) then
-        #puts "HOOKING UP OUTPUT from #{wire_name} to #{output[:instance].name} port #{output[:port].name}"
-        graph.add_edges(wire_name, output[:instance].name, :headport => output[:port].name, :xlabel => wire_name, :color => color)
+        #puts "HOOKING UP OUTPUT from #{branchnode_name} to #{output[:instance].name} port #{output[:port].name}"
+        graph.add_edges(branchnode_name, output[:instance].name, :headport => output[:port].name, :xlabel => wire_name, :color => color)
       else
-        #puts "HOOKING UP OUTPUT from #{wire_name} to #{output[:instance].name} [no port]"
-        graph.add_edges(wire_name, output[:instance].name, :xlabel => wire_name, :color => color)        
+        #puts "HOOKING UP OUTPUT from #{branchnode_name} to #{output[:instance].name} [no port]"
+        graph.add_edges(branchnode_name, output[:instance].name, :xlabel => wire_name, :color => color)        
       end
     end
   end
 end
 
-graph.output(:dot => "eclair-sim.dot" )
-graph.output(:pdf => "eclair-sim.pdf" )
-
-
+graph.output(:dot => "eclair-sim.dot")
+graph.output(:pdf => "eclair-sim.pdf")
+graph.output(:png => "eclair-sim.png")
+File.write('eclair-sim.raw.dot', graph.to_s)
