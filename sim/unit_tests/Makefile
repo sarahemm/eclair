@@ -6,6 +6,13 @@ all: $(ASMTEST_FILES)
 clean:
 	rm -f $(ASMTEST_FILES) $(ASMTEST_ROMFILES) 
 
+disassembler-test:
+	set -o errexit; \
+	for ASMFILE in `ls *.s`; do \
+		echo "Testing disassembly of $$ASMFILE..." ; \
+		../../utils/disasmtest.rb $$ASMFILE ; \
+	done
+
 %.test: %.test.s
 	../../utils/buildtest.rb $< $@
 
