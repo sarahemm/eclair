@@ -1,17 +1,23 @@
+// set up a and b with a value that won't overflow if added
 ldi   a, 0xFFF0
 ldi   b, 0x0004
 add   a, b
-jmpo  0x0007
+// jump back to the add if no overflow, which will loop forever
+// (and therefore fail the test)
+jmpo 0x0007
 // expect: pc=0x00000a
+// load a new value that will overflow if we add them
 ldi   a, 0xFFFF
 add   a, b
-jmpo   0x001D
+// make sure we jump over the next few instructions now that no overflow
+jmpo 0x001D
 
 .org 0x013
 halt    // should jump over this
 halt    // should jump over this
 
 .org 0x01D
+// should get here and halt if all is well
 halt
 // expect: pc=0x00001d
 
