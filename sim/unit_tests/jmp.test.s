@@ -1,3 +1,4 @@
+cir // used as a noop so relative/absolute jump isn't the same result
 jmp 0x000F
 halt // should jump over here
 .org 0x00F
