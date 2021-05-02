@@ -1,9 +1,9 @@
 ldi al, 0x00
-jmpnz   0x0007
+jmpnz   2
 ldi al, 0x0F
 .org 0x007
 // expect: bus_z=00000000_00001111
-jmpnz   0x000D
+jmpnz   3
 .org 0x00A
 halt    // should jump over this
 halt    // should jump over this

@@ -1,9 +1,9 @@
 // reset vector
-jmp 16
+jmp 13
 
 // IRQ1 vector
 .org 4
-jmp 200
+jmp 193
 
 // set up paging
 .org 16
@@ -33,15 +33,15 @@ ldi        d,  0xACDC
 // this is a flag that lets the loop know we've been in the ISR
 st         a,  0x0440
 cir
-jmp        100
+jmp        31
 
 // loop forever (until we get an interrupt)
 // this could be "halt" except that the test framework uses halting
 // as an indication that the test is complete.
 .org 100
 ld      c, 0x0440
-jmpz    300
-jmp     100
+jmpz    194
+jmp     -9
 
 // IRQ1 ISR
 .org 200

@@ -28,7 +28,7 @@ add bl, cl
 // see if we need to continue looping
 sub ah, bh // subtract 1 from ah
 cmp ah, ch
-jmpne 10
+jmpne -21
 halt
 
 // expect: reg_c=XXXXXXXX_11101001

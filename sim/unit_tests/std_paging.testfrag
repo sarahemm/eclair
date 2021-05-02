@@ -13,5 +13,5 @@ ldi d,     0x0800
 ldi a,     0xfc00
 wrpte
 ldi flags, 0x06  // enables paging, code continues running normally since 0x0000 is still ROM
-jmp        0x0040
+jmp 34
 // gap so we can add more pages later if needed, code resumes at 0x0040 in the test

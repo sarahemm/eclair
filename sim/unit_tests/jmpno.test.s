@@ -4,13 +4,13 @@ ldi   b, 0x0004
 add   a, b
 // jump back to the add if no overflow, which will loop forever
 // (and therefore fail the test)
-jmpno 0x0007
+jmpno -2
 // expect: pc=0x00000a
 // load a new value that won't overflow if we add them
 ldi   a, 0xFFF0
 add   a, b
 // make sure we jump over the next few instructions now that no overflow
-jmpno 0x001D
+jmpno 10
 
 .org 0x013
 halt    // should jump over this
