@@ -152,10 +152,13 @@ def run_test(filename)
   end
   
   # make sure the processor halted at the end, or that's a failure
-  if(stdout.split(/\n/)[-1] == "PROCESSOR HALTED") then
+  # iverilog v12+ adds junk at the end ($finish called at XYZ) so scan the last few lines
+  # for the final useful output
+  last_lines = stdout.split(/\n/)[-3..-1]
+  if(last_lines.include? "PROCESSOR HALTED") then
     pass += 1
     puts "PASS:    Processor halted successfully.".light_green
-  elsif(stdout.split(/\n/)[-1] =~ /ILLEGAL MICROINSTRUCTION EXECUTED.*/) then
+  elsif(last_lines.include? "ILLEGAL MICROINSTRUCTION EXECUTED") then
     fails.push Failure.new(nil, "Illegal microinstruction executed.")
     puts "FAIL:    Illegal microinstruction executed.".light_red
   else
