@@ -3,6 +3,10 @@
 # temporary assembler that's being used until the instruction set is a bit
 # more finalized and we port a real one (probably vasm)
 
+# NOTE #
+# NOTE - as of 2022 this is now deprecated as LLVM is now in use as the primary assembler!
+# NOTE #
+
 # read the instruction list out of microcode.txt
 instructions = Hash.new
 File.open(ARGV[0], "r") do |mcfile|
