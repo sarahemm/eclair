@@ -31,6 +31,7 @@ def run_test(filename)
   # find all the expects and put them into an array of arrays
   # expects[pc after which tests are run][register]
   expects = Array.new
+  harness_name = "eclair-test"
   File.open(filename, "r") do |infile|
     addr = nil
     addr_set_last = false
@@ -38,6 +39,8 @@ def run_test(filename)
       if(matches = line.match(/expect:\s*([^=]+)=(.*)/)) then
         # expect line, record it in the array
         expects[addr][matches[1]] = matches[2]
+      elsif(matches = line.match(/harnesstype:\s*(.*)/)) then
+        harness_name = "eclair-test-#{matches[1]}"
       elsif(matches = line.match(/^@([0-9A-Fa-f]+)\s*\/\/\s*pc:\s*([0-9A-Fa-f]+)$/)) then
         # new address where ppc and pc are specified separately
         addr = matches[2].to_i(16)
@@ -67,7 +70,7 @@ def run_test(filename)
   
   # run the test, capturing the output
   stdout = ""
-  sim_io = IO.popen("../sim/eclair.vvp")
+  sim_io = IO.popen("../sim/#{harness_name}.vvp")
   while(!sim_io.eof?) do
     stdout += sim_io.readlines.join
   end

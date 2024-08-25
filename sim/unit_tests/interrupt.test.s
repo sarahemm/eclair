@@ -1,3 +1,7 @@
+// tell the test suite we need the interrupt harness, which triggers an
+// interrupt after a little while
+// harnesstype: int
+
 // reset vector
 jmp 13
 
