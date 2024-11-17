@@ -44,10 +44,10 @@ instruction ld16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_
 # add the supplied address and DP and put that into MAR
 instruction ld16.?  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
 # load the value from RAM into the register
-instruction ld16.?  mem_read  src_mdr(data) mdr_byte(low)  load_mdr xy_imm_lsb(1) src_xy(imm) load_y
+instruction ld16.?  mem_read  src_mdr(data) mdr_byte(high)  load_mdr xy_imm_lsb(1) src_xy(imm) load_y
 instruction ld16.?  src_xy(mar) load_x
 instruction ld16.?  alu_op(add) src_mar(z) load_mar
-instruction ld16.?  mem_read  src_mdr(data) mdr_byte(high) load_mdr op_16bit src_xy(mdr) load_x load_reg(via_ir) next_addr(fetch)
+instruction ld16.?  mem_read  src_mdr(data) mdr_byte(low) load_mdr op_16bit src_xy(mdr) load_x load_reg(via_ir) next_addr(fetch)
 
 # load 8-bit value from memory to low byte of register
 instruction ld8.al  next_addr(ld8.?l)
