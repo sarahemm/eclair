@@ -76,22 +76,26 @@ instruction ld8.?h  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16b
 instruction ld8.?h  mem_read  src_mdr(data) mdr_byte(high) reg_byte(high)  src_xy(mdr) load_x load_reg(via_ir) load_mdr next_addr(fetch)
 
 # store 16-bit value from register to memory
-instruction st16.a  next_addr(st16.?)
-instruction st16.b  next_addr(st16.?)
-instruction st16.c  next_addr(st16.?)
-instruction st16.d  next_addr(st16.?)
-# TODO: optimize this, 9 clocks to do a store is way too high on a load/store architecture
-# get the supplied memory address into MDR
-instruction st16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high)  load_mdr
-instruction st16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low) load_mdr op_16bit load_x
+# TODO: optimize this, 9 clocks to do a store is way too high on a load/store architecture and it's really a mess now
+instruction st16.a  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high)  load_mdr next_addr(st16.?)
+instruction st16.b  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high)  load_mdr next_addr(st16.?)
+instruction st16.c  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high)  load_mdr next_addr(st16.?)
+instruction st16.d  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(high)  load_mdr next_addr(st16.?)
+# finish getting the supplied memory address into MDR (started in the a/b/c/d specific locations above)
+instruction st16.?  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_mar mdr_byte(low)   load_mdr op_16bit load_x
 # add the supplied address and DP and put that into MAR
 instruction st16.?  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
-# store the value from the register into RAM
-instruction st16.?  mdr_byte(low) src_mdr(z)  src_xy(from_ir) op_16bit load_x  load_mdr
-instruction st16.?  mem_write xy_imm_lsb(1) src_xy(imm) load_y
-instruction st16.?  src_xy(mar)   load_x
+# store the high byte of the register into MDRh
+instruction st16.?  mdr_byte(high) src_mdr(z)  src_xy(from_ir) op_16bit load_x  load_mdr
+# write MDRh into RAM and put 0x01 into Y
+instruction st16.?  mdr_byte(high) mem_write xy_imm_lsb(1) src_xy(imm) load_y
+# put the MAR into X
+instruction st16.?  src_xy(mar) load_x
+# add 1 (Y) to MAR (X), put back into MAR
 instruction st16.?  alu_op(add) src_mar(z) load_mar
-instruction st16.?  mem_write next_addr(fetch)
+# write MDRl into RAM
+instruction st16.?  mdr_byte(low) src_mdr(z) src_xy(from_ir) op_16bit load_x load_mdr
+instruction st16.?  mdr_byte(low) mem_write next_addr(fetch)
 
 # load 8-bit value from high byte of register to memory
 instruction st8.al  next_addr(st8.?l)
