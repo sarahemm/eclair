@@ -1,0 +1,11 @@
+# locations - start addresses of instructions
+
+# it makes the circuitry simpler to have these as separate cases, but we handle them the same
+location    dma_req         2
+location    dma_and_int_req 3
+
+# instructions - actual implementation microcode
+
+# we go back to fetch2, then fetch2 will send control back here if dma_req is still high
+instruction dma_req             dma_req_ack  next_addr(fetch2)
+instruction dma_and_int_req     dma_req_ack  next_addr(fetch2)

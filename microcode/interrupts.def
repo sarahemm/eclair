@@ -1,13 +1,6 @@
 # locations - start addresses of instructions
 location    irq         1
 location    irq-cont    412
-#location    irq2        2
-#location    irq3        3
-#location    irq4        4
-#location    irq5        5
-#location    irq6        6
-#location    irq7        7
-#location    irq8        8
 
 location    reti        39
 location    reti-cont   448

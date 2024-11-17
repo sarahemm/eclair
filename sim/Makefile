@@ -2,8 +2,9 @@ OBJS=mc_eprom.v main_eprom.v mc_ram.v main_ram.v counter.v flipflop_jk.v flipflo
 
 OBJS_NORMAL_HARNESS=$(OBJS) test_harness.v
 OBJS_INT_HARNESS=$(OBJS) test_harness-int.v
+OBJS_DMA_HARNESS=$(OBJS) test_harness-dma.v
 
-VVPS=eclair-test.vvp eclair-test-int.vvp
+VVPS=eclair-test.vvp eclair-test-int.vvp eclair-test-dma.vvp
 
 all: $(VVPS) microcode
 
@@ -31,6 +32,9 @@ eclair-test.vvp: $(OBJS_NORMAL_HARNESS)
 
 eclair-test-int.vvp: $(OBJS_INT_HARNESS)
 	iverilog -o $@ -Wall $(OBJS_INT_HARNESS)
+
+eclair-test-dma.vvp: $(OBJS_DMA_HARNESS)
+	iverilog -o $@ -Wall $(OBJS_DMA_HARNESS)
 
 microcode: microcode.bin
 

@@ -56,6 +56,7 @@ field inc_pc          59    1
 field load_pc         60    1
 field mdr_byte        61    1
 field branch_negate   62    1
+field dma_req_ack     63    1
 
 # enums - names for values that go into bit positions
 enum  src_mar     z       0
@@ -125,3 +126,4 @@ include math.def
 include paging.def
 include shift.def
 include interrupts.def
+include dma.def

@@ -5,7 +5,7 @@
 module ECLairTestHarness();
     reg [7:0]  int;
     
-    ECLair  eclair_dut(.int(int));
+    ECLair  eclair_dut(.int(int), .dma_req(1'b0));
     
     initial begin
         int = 8'b11111111;

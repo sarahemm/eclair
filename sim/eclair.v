@@ -1,7 +1,12 @@
 `timescale 1ns/1ps
 
-module ECLair(int);
+module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   input [7:0]   int;          // interrupt "pins"
+  input         dma_req;      // dma request
+  output        dma_ack;      // dma request acknowledge
+  input [23:0]  fp_bus_addr;  // front panel address bus (connected to main address bus when DMA active)
+  input [7:0]   fp_bus_data;  // front panel data bus (connected to main address bus when DMA active)
+  input         fp_write;     // write data entered on front panel
 
   reg           clk_main;     // main system clock
   wire          clk_half;     // halved system clock
@@ -15,9 +20,23 @@ module ECLair(int);
   reg           _por_reset;   // power-on reset, goes high briefly when powered on
   wire          _reset;       // master reset, when this is high we're good to run
   
+  // bus_xyz_nondma is fed from the normal paths, this gets routed to bus_xyz_from_nondma
+  // fp_bus_xyz is fed from the DMA path, this gets routed to bus_xyz_from_dma
+  // the two are ORed together after each going through a latch that can zero each one out,
+  // only one at a time will be non-zero
+  // TODO: the naming of these is not ideal but choosing names for these is hard
   wire  [7:0]   bus_data;
   wire  [23:0]  bus_addr;
-  
+
+  wire  [7:0]   bus_data_nondma;
+  wire  [23:0]  bus_addr_nondma;
+
+  wire  [7:0]   bus_data_from_nondma;
+  wire  [23:0]  bus_addr_from_nondma;
+
+  wire  [7:0]   bus_data_from_dma;
+  wire  [23:0]  bus_addr_from_dma;
+
   wire          addr_rom;         // decoded address lines used as chip selects
   wire          addr_device;
   wire          addr_ram;
@@ -35,7 +54,7 @@ module ECLair(int);
   wire  [63:0]  cs_rom_data;      // output of the control store ROM data
   wire          cs_ram__w;        // RAM control store write signal
   wire  [8:0]   cs_next_addr;         // control store next microcode address bits
-  wire  [8:0]   cs_next_addr_alt;     // control store next microcode address bits from alternate source
+  wire  [8:0]   cs_next_addr_alt;     // control store next microcode address bits from alternate source (IR or interrupt handler)
   wire  [8:0]   cs_next_addr_normal;  // control store next microcode address bits from non-alternate source
   wire  [8:0]   cs_next_addr_rptz;    // control store next microcode address bits from rptz jump bits
   wire  [3:0]   rptz_next_nibble;       // 4 low bits to use for next CS addr if RPT=z
@@ -170,6 +189,9 @@ module ECLair(int);
   wire  [7:0]   intflg;         // interrupt flags
   wire  [7:0]   intclr;         // clear interrupt flag
   wire          int_jmp;        // jump to IRQ area of microcode on next fetch/execute
+  wire          int_or_dma_jmp; // jump to either IRQ or DMA area of microcode on next fetch/execute
+  wire  [8:0]   int_or_dma_csaddr;  // address of interrupt and/or dma handler, whichever is needed next
+                                    // 1 = interrupt handler, 2 = dma handler, 3 = both, so also DMA (since that's higher priority)
   wire          int_pending;    // at least one interrupt is waiting to be serviced
   wire          page_fault_pnp; // a page-not-present fault is in progress
   wire          page_fault_pnw; // a page-not-writable fault is in progress
@@ -181,6 +203,8 @@ module ECLair(int);
   wire          cs_addr_from_dp;        // drive cs_addr from DP instead of the microcode sequencer
   wire          cs_write_seq_reset;     // reset the write sequencer to the idle state
   wire          cs_write;               // write a control store word
+  wire          dma_req_ack;            // microcode is requesting dma_ack be brought high
+
   
   initial begin
     clk_main = 1'b0;
@@ -204,7 +228,7 @@ module ECLair(int);
   mux_2x          #(.WIDTH(9))                  mux_cs_addr_write(.sel(cs_addr_from_dp), .a(cs_addr_normal), .b(reg_dp[8:0]), .y(cs_addr));
   mux_2x          #(.WIDTH(9))                  mux_cs_next_addr_rptz(.sel(rptz_next_nibble != 4'b0000 && rpt_zero), .a(cs_next_addr), .b(cs_next_addr_rptz), .y(cs_next_addr_normal));
   mux_2x          #(.WIDTH(9))                  mux_cs_next_addr(.sel(cs_next_addr == 9'b000000000), .a(cs_next_addr_normal), .b(cs_next_addr_alt), .y(next_addr));
-  mux_2x          #(.WIDTH(9))                  mux_cs_next_addr_alt(.sel(int_jmp), .a(reg_ir_padded), .b(9'b000000001), .y(cs_next_addr_alt)); // IRQ handler is at microcode location 1
+  mux_2x          #(.WIDTH(9))                  mux_cs_next_addr_alt(.sel(int_or_dma_jmp), .a(reg_ir_padded), .b(int_or_dma_csaddr), .y(cs_next_addr_alt)); // IRQ handler is at microcode location 1
   counter         #(.WIDTH(9))                  ctr_cs_seq(.clk(clk_cs), .ce(~cs_ready), .reset(~_por_reset), .out(cs_addr_init), .load(1'b0), .preset(9'b000000000));
   flipflop_d      #(.WIDTH(9))                  flp_cs_addr(.clk(clk_cs), .reset(~cs_ready), .in(next_addr), .out(cs_addr_run));
   microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(._cs(1'b0), ._oe(1'b0), .addr(cs_addr_init), .data(cs_rom_data));
@@ -216,8 +240,8 @@ module ECLair(int);
   shiftreg      #(.WIDTH(8))                    shr_cswrite(.clk(clk_main), .in(write_cse & ~cs_write_in_progress), .out(cs_write_seq));
 
   // Subsystem: Memory
-  main_ram        #(.TYPE("Main"))              ram_main(._cs(1'b0), ._oe(~(~ram_write & ~addr_ram)), ._w(~(ram_write & ~addr_ram)), .addr(bus_addr[19:0]), .data_in(reg_mdr_8bit), .data_out(bus_data));
-  main_eprom      #(.ROM_FILE("sysrom.bin"))    rom_boot(._cs(1'b0), ._oe(addr_rom), .addr(bus_addr[19:0]), .data(bus_data));
+  main_ram        #(.TYPE("Main"))              ram_main(._cs(1'b0), ._oe(~(~ram_write & ~addr_ram)), ._w(~((ram_write & ~addr_ram) | (dma_ack & fp_write & addr_ram))), .addr(bus_addr[19:0]), .data_in(reg_mdr_8bit), .data_out(bus_data_nondma));
+  main_eprom      #(.ROM_FILE("sysrom.bin"))    rom_boot(._cs(1'b0), ._oe(addr_rom), .addr(bus_addr[19:0]), .data(bus_data_nondma));
   counter         #(.WIDTH(16))                 ctr_pc(.clk(clk_cs_dly2), .ce(inc_pc), .reset(~_reset), .out(pc), .load(really_load_pc), .preset(bus_z));
   mux_2x                                        mux_mar_l(.sel(mux_mar_src), .a(bus_z[7:0]),  .b(pc[7:0]),  .y(lat_mar[7:0]));
   mux_2x                                        mux_mar_h(.sel(mux_mar_src), .a(bus_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
@@ -225,8 +249,8 @@ module ECLair(int);
   mux_2x                                        mux_mdr_h(.sel(mux_mdr_src), .a(bus_z[15:8]), .b(bus_data[7:0]), .y(lat_mdr[15:8]));
   mux_2x                                        mux_mdr_byte(.sel(mdr_byte), .a(reg_mdr[7:0]), .b(reg_mdr[15:8]), .y(reg_mdr_8bit));
   main_ram      #(.WIDTH(16), .ADDR_WIDTH(12), .TYPE("Page Table"))  ram_paging(._cs(1'b0), ._oe(1'b0), ._w(~write_pte), .addr(pagetable_addr), .data_in(bus_z), .data_out(pagetable_out));
-  mux_2x                                        mux_paging_l(.sel(flag_pe), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr[17:10]));
-  mux_2x        #(.WIDTH(6))                    mux_paging_h(.sel(flag_pe), .a(6'b0),           .b(pagetable_out[13:8]), .y(bus_addr[23:18]));
+  mux_2x                                        mux_paging_l(.sel(flag_pe), .a(reg_mar[15:10]), .b(pagetable_out[7:0]),  .y(bus_addr_nondma[17:10]));
+  mux_2x        #(.WIDTH(6))                    mux_paging_h(.sel(flag_pe), .a(6'b0),           .b(pagetable_out[13:8]), .y(bus_addr_nondma[23:18]));
   
   // Subsystem: Registers
   latch           #(.WIDTH(8))                  lat_reg_a_h(.clk(reg_a_load | ~op_16bit & ~reg_byte), .reset(1'b0), .in(bus_z[15:8]), .out(reg_a[15:8]));
@@ -290,6 +314,13 @@ module ECLair(int);
   latch         #(.WIDTH(1))                    lat_int_6(.clk(int[6]), .reset(intclr[6]), .in(1'b1), .out(intflg[6]));
   latch         #(.WIDTH(1))                    lat_int_7(.clk(int[7]), .reset(intclr[7]), .in(1'b1), .out(intflg[7]));
   
+  // Subsystem: DMA
+  latch         #(.WIDTH(1))                    lat_dma_ack(.clk(~dma_req_ack), .reset(~dma_req), .in(1'b1), .out(dma_ack));
+  latch         #(.WIDTH(24))                   lat_dma_addr(.clk(1'b0), .reset(~dma_ack), .in(fp_bus_addr), .out(bus_addr_from_dma));
+  latch         #(.WIDTH(8))                    lat_dma_data(.clk(1'b0), .reset(~dma_ack), .in(fp_bus_data), .out(bus_data_from_dma));
+  latch         #(.WIDTH(24))                   lat_nondma_addr(.clk(1'b0), .reset(dma_ack), .in(bus_addr_nondma), .out(bus_addr_from_nondma));
+  latch         #(.WIDTH(8))                    lat_nondma_data(.clk(1'b0), .reset(dma_ack), .in(bus_data_nondma), .out(bus_data_from_nondma));
+
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready
   assign reg_mdr_load = cs_data[1];
@@ -329,6 +360,7 @@ module ECLair(int);
   assign load_pc = cs_data[60];
   assign mdr_byte = cs_data[61];
   assign branch_negate = cs_data[62];
+  assign dma_req_ack = cs_data[63];
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
@@ -356,7 +388,7 @@ module ECLair(int);
   assign addr_rom = ~(bus_addr[23:20] == 4'b0000);
   assign addr_device = ~(bus_addr[23:20] == 4'b0111);
   assign addr_ram = ~(addr_rom & addr_device);
-  assign bus_addr[9:0] = reg_mar[9:0];  // the rest of the bus goes through the paging mechanism
+  assign bus_addr_nondma[9:0] = reg_mar[9:0];  // the rest of the bus goes through the paging mechanism
   assign reg_x_load_ir_src[0] = reg_x_load_ir;
   assign reg_x_load_ir_src[1] = reg_x_load_ir & reg_ir[6];
   assign reg_x_load_ir_src[2] = reg_x_load_ir & reg_ir[7];
@@ -385,6 +417,10 @@ module ECLair(int);
   assign page_fault_pnw = ram_write & flag_pe & ~page_status_writable;
   assign page_fault = page_fault_pnp | page_fault_pnw;
   assign int_jmp = int_pending & flag_ie;
+  assign int_or_dma_jmp = int_jmp | dma_req;
+  assign int_or_dma_csaddr[0] = int_jmp;
+  assign int_or_dma_csaddr[1] = dma_req;
+  assign int_or_dma_csaddr[8:2] = 7'b0000000;
   assign cs_next_addr_rptz[8:4] = cs_next_addr[8:4];
   assign cs_next_addr_rptz[3:0] = rptz_next_nibble;
   assign rpt_mdr_source[11:8] = op_16bit ? reg_mdr[11:8] : 4'b0000;
@@ -438,6 +474,10 @@ module ECLair(int);
   // this is a wired-OR in the actual hardware
   assign lat_xy = reg_imm_xy | reg_a_xy | reg_b_xy | reg_c_xy | reg_d_xy | reg_sp_xy | reg_mar_xy | reg_mdr_xy | reg_intvect_xy | reg_mar_shr_xy | reg_mar_sex_xy | reg_mar_swab_xy | reg_dp_xy;
   
+  // this is also a wired-OR in the actual hardware
+  assign bus_addr = bus_addr_from_dma | bus_addr_from_nondma;
+  assign bus_data = bus_data_from_dma | bus_data_from_nondma;
+
   // control store write sequencer, this takes over the CPU briefly when doing a control store write
   assign cs_write_in_progress = (cs_write_seq[0] | cs_write_seq[1] | cs_write_seq[2] | cs_write_seq[3]);
   assign cs_addr_from_dp = (cs_write_seq[1] || cs_write_seq[2] || cs_write_seq[3]);
