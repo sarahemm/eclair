@@ -15,7 +15,7 @@ module main_ram(_cs, _oe, _w, addr, data_in, data_out);
   wire    [WIDTH-1:0] data_val;
   
   assign #5 data_val = (!_cs) ? ram[addr] : 16'bZ;
-  assign data_out = _oe ? 16'bZ : data_val;
+  assign data_out = _oe ? 16'b0 : data_val; // it's ECL, there's no hi-Z but turning the output off should make it output zeroes
   
   always @ (negedge _w) begin
     #4 ram[addr] <= data_in;

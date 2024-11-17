@@ -12,7 +12,7 @@ module main_eprom(_cs, _oe, addr, data);
   
   // TODO: make this have a realistic propagation delay
   assign data_val = (!_cs) ? rom[addr] : 8'b0;
-  assign data = _oe ? 8'bZ : data_val;
+  assign data = _oe ? 8'b0 : data_val; // it's ECL, there's no hi-Z but turning the output off should make it output zeroes
   
   initial begin
     $readmemb(ROM_FILE, rom);
