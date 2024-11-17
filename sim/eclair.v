@@ -37,6 +37,8 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   wire  [7:0]   bus_data_from_dma;
   wire  [23:0]  bus_addr_from_dma;
 
+  wire          dma_req_latched;  // dma_req, but latched to be synchronous with our main clock
+
   wire          addr_rom;         // decoded address lines used as chip selects
   wire          addr_device;
   wire          addr_ram;
@@ -315,7 +317,8 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   latch         #(.WIDTH(1))                    lat_int_7(.clk(int[7]), .reset(intclr[7]), .in(1'b1), .out(intflg[7]));
   
   // Subsystem: DMA
-  latch         #(.WIDTH(1))                    lat_dma_ack(.clk(~dma_req_ack), .reset(~dma_req), .in(1'b1), .out(dma_ack));
+  latch         #(.WIDTH(1))                    lat_dma_req(.clk(clk_main), .reset(1'b0), .in(dma_req), .out(dma_req_latched));
+  latch         #(.WIDTH(1))                    lat_dma_ack(.clk(~dma_req_ack), .reset(~dma_req_latched), .in(1'b1), .out(dma_ack));
   latch         #(.WIDTH(24))                   lat_dma_addr(.clk(1'b0), .reset(~dma_ack), .in(fp_bus_addr), .out(bus_addr_from_dma));
   latch         #(.WIDTH(8))                    lat_dma_data(.clk(1'b0), .reset(~dma_ack), .in(fp_bus_data), .out(bus_data_from_dma));
   latch         #(.WIDTH(24))                   lat_nondma_addr(.clk(1'b0), .reset(dma_ack), .in(bus_addr_nondma), .out(bus_addr_from_nondma));
@@ -417,9 +420,9 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   assign page_fault_pnw = ram_write & flag_pe & ~page_status_writable;
   assign page_fault = page_fault_pnp | page_fault_pnw;
   assign int_jmp = int_pending & flag_ie;
-  assign int_or_dma_jmp = int_jmp | dma_req;
+  assign int_or_dma_jmp = int_jmp | dma_req_latched;
   assign int_or_dma_csaddr[0] = int_jmp;
-  assign int_or_dma_csaddr[1] = dma_req;
+  assign int_or_dma_csaddr[1] = dma_req_latched;
   assign int_or_dma_csaddr[8:2] = 7'b0000000;
   assign cs_next_addr_rptz[8:4] = cs_next_addr[8:4];
   assign cs_next_addr_rptz[3:0] = rptz_next_nibble;
