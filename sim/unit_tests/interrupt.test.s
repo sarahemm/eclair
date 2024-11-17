@@ -63,6 +63,7 @@ jmp     -9
 // D
 // expect: ram[0x10000a]=0xac
 // expect: ram[0x10000b]=0xdc
+ldi        a, 0x0000
 st         a,  0x0440   // zero out the "we hit the ISR" flag
 // clear everything so we can confirm it's restored by reti later
 xor        a,  a
