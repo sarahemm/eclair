@@ -28,7 +28,9 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   wire  [7:0]   bus_data;
   wire  [23:0]  bus_addr;
 
-  wire  [7:0]   bus_data_nondma;
+  wire  [7:0]   bus_data_nondma_from_ram;
+  wire  [7:0]   bus_data_nondma_from_rom;
+  wire  [7:0]   bus_data_nondma_from_mdr;
   wire  [23:0]  bus_addr_nondma;
 
   wire  [7:0]   bus_data_from_nondma;
@@ -242,8 +244,8 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   shiftreg      #(.WIDTH(8))                    shr_cswrite(.clk(clk_main), .in(write_cse & ~cs_write_in_progress), .out(cs_write_seq));
 
   // Subsystem: Memory
-  main_ram        #(.TYPE("Main"))              ram_main(._cs(1'b0), ._oe(~(~ram_write & ~addr_ram)), ._w(~((ram_write & ~addr_ram) | (dma_ack & fp_write & addr_ram))), .addr(bus_addr[19:0]), .data_in(reg_mdr_8bit), .data_out(bus_data_nondma));
-  main_eprom      #(.ROM_FILE("sysrom.bin"))    rom_boot(._cs(1'b0), ._oe(addr_rom), .addr(bus_addr[19:0]), .data(bus_data_nondma));
+  main_ram        #(.TYPE("Main"))              ram_main(._cs(1'b0), ._oe(~(~ram_write & ~addr_ram)), ._w(~((ram_write & ~addr_ram) | (dma_ack & fp_write & ~addr_ram))), .addr(bus_addr[19:0]), .data_in(bus_data), .data_out(bus_data_nondma_from_ram));
+  main_eprom      #(.ROM_FILE("sysrom.bin"))    rom_boot(._cs(1'b0), ._oe(addr_rom), .addr(bus_addr[19:0]), .data(bus_data_nondma_from_rom));
   counter         #(.WIDTH(16))                 ctr_pc(.clk(clk_cs_dly2), .ce(inc_pc), .reset(~_reset), .out(pc), .load(really_load_pc), .preset(bus_z));
   mux_2x                                        mux_mar_l(.sel(mux_mar_src), .a(bus_z[7:0]),  .b(pc[7:0]),  .y(lat_mar[7:0]));
   mux_2x                                        mux_mar_h(.sel(mux_mar_src), .a(bus_z[15:8]), .b(pc[15:8]), .y(lat_mar[15:8]));
@@ -322,7 +324,9 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   latch         #(.WIDTH(24))                   lat_dma_addr(.clk(1'b0), .reset(~dma_ack), .in(fp_bus_addr), .out(bus_addr_from_dma));
   latch         #(.WIDTH(8))                    lat_dma_data(.clk(1'b0), .reset(~dma_ack), .in(fp_bus_data), .out(bus_data_from_dma));
   latch         #(.WIDTH(24))                   lat_nondma_addr(.clk(1'b0), .reset(dma_ack), .in(bus_addr_nondma), .out(bus_addr_from_nondma));
-  latch         #(.WIDTH(8))                    lat_nondma_data(.clk(1'b0), .reset(dma_ack), .in(bus_data_nondma), .out(bus_data_from_nondma));
+  latch         #(.WIDTH(8))                    lat_nondma_data(.clk(1'b0), .reset(dma_ack), .in(bus_data_nondma_from_ram | bus_data_nondma_from_rom | bus_data_nondma_from_mdr), .out(bus_data_from_nondma));
+  // during a RAM write, MDR has to drive the data bus. Otherwise, output from RAM/ROM/etc. drives the data bus via the non-dma databus.
+  latch         #(.WIDTH(8))                    lat_mdr_data(.clk(1'b0), .reset(~ram_write), .in(reg_mdr_8bit), .out(bus_data_nondma_from_mdr));
 
   // edge-sensitive microcode signals
   assign write_pte = cs_data[0] & cs_ready; // TODO: make the cs latches only latch once cs_ready

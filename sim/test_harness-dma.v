@@ -23,8 +23,16 @@ module ECLairTestHarness();
 
     always @(posedge dma_ack) begin
         #50
-        fp_bus_addr = 'h0440;
-        fp_bus_data = 'hA5;
+        fp_bus_addr = 'h100040;
+        fp_bus_data = 'h00;
+        #10
+        fp_write = 1'b1;
+        #10
+        fp_write = 1'b0;
+
+        #10
+        fp_bus_addr = 'h100041;
+        fp_bus_data = 'h00;
         #10
         fp_write = 1'b1;
         #10

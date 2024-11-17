@@ -26,9 +26,9 @@ ldi flags, 0x06  // enables paging, code continues running normally since 0x0000
 st      a,  0x0000
 
 // loop until the data at 0x0440 (0x0000 relative to DP) is zero
-ld      c, 0x0000
-jmpz    130
-jmp     -9
+ld      c, 0x0000   // 3 bytes
+jmpz    130         // 3 bytes
+jmp     -9          // 3 bytes
 
 .org 130
 halt
