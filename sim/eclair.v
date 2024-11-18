@@ -407,7 +407,7 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   assign flags[1] = flag_m;
   assign flags[2] = flag_pe;
   assign flags[7:3] = 5'b00000;
-  assign status_z_8  = (bus_z[7:0] == 8'd0);
+  assign status_z_8  = reg_byte ? (bus_z[15:8] == 8'd0) : (bus_z[7:0] == 8'd0);
   assign status_z_16 = (bus_z == 16'd0);
   assign status_e_16 = status_e_8 && status_e_8h;
   assign status_8[0]  = status_z_8;
