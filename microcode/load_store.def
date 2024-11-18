@@ -60,7 +60,7 @@ instruction ld8.?l  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_
 # add the supplied address and DP and put that into MAR
 instruction ld8.?l  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
 # load the value from RAM into the register
-instruction ld8.?l  mem_read  src_mdr(data) mdr_byte(low) reg_byte(low)  src_xy(mdr) load_x load_reg(via_ir) load_mdr next_addr(fetch)
+instruction ld8.?l  mem_read  src_mdr(data) mdr_byte(low) reg_byte(low)  src_xy(mdr) load_x load_reg(via_ir) load_mdr load_status next_addr(fetch)
 
 # load 8-bit value from memory to high byte of register
 instruction ld8.ah  next_addr(ld8.?h)
@@ -73,7 +73,7 @@ instruction ld8.?h  inc_pc  src_mar(pc) src_mdr(data) src_xy(mdr) mem_read load_
 # add the supplied address and DP and put that into MAR
 instruction ld8.?h  src_xy(dp)  load_y  alu_op(add)  src_mar(z) load_mar  op_16bit
 # load the value from RAM into the register
-instruction ld8.?h  mem_read  src_mdr(data) mdr_byte(high) reg_byte(high)  src_xy(mdr) load_x load_reg(via_ir) load_mdr next_addr(fetch)
+instruction ld8.?h  mem_read  src_mdr(data) mdr_byte(high) reg_byte(high)  src_xy(mdr) load_x load_reg(via_ir) load_mdr load_status next_addr(fetch)
 
 # store 16-bit value from register to memory
 # TODO: optimize this, 9 clocks to do a store is way too high on a load/store architecture and it's really a mess now
