@@ -234,11 +234,10 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   andgate         #(.WIDTH(1))                  and_clk_cs(.a(clk_cs_mid), .b(~cs_write_in_progress), .y(clk_cs));
   
   // Subsystem: Control Store
-  mux_94					mux_cs_sequenced(.reset(cs_mux_seq_reset), .sel(cs_mux_seq_sel), .a(cs_next_addr), .b(cs_next_addr_rptz), .c(reg_ir_padded), .d(int_or_dma_csaddr), .y(cs_addr_seq));
-  mux_94					mux_cs_immediate(.reset(cs_mux_imm_reset), .sel(cs_mux_imm_sel), .a(cs_addr_init), .b(reg_dp[8:0]), .c(9'b000000000), .d(9'b000000000), .y(cs_addr_imm)); // TODO: use c for exception handling
+  mux_94					mux_cs_sequenced(.reset(~_por_reset | cs_mux_seq_reset), .sel(cs_mux_seq_sel), .lat(clk_cs), .a(cs_next_addr), .b(cs_next_addr_rptz), .c(reg_ir_padded), .d(int_or_dma_csaddr), .y(cs_addr_seq_latched));
+  mux_94					mux_cs_immediate(.reset(cs_mux_imm_reset), .sel(cs_mux_imm_sel), .lat(1'b0), .a(cs_addr_init), .b(reg_dp[8:0]), .c(9'b000000000), .d(9'b000000000), .y(cs_addr_imm)); // TODO: use c for exception handling
   mux_21                                        mux_cs_clk_selector(.sel(cs_ready), .a(clk_quarter), .b(clk_main), .y(clk_cs_mid));
   counter         #(.WIDTH(9))                  ctr_cs_seq(.clk(clk_cs), .ce(~cs_ready), .reset(~_por_reset), .out(cs_addr_init), .load(1'b0), .preset(9'b000000000));
-  flipflop_d      #(.WIDTH(9))                  flp_cs_addr_seq(.clk(clk_cs), .reset(~_por_reset | cs_mux_seq_reset), .in(cs_addr_seq), .out(cs_addr_seq_latched));
   microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(._cs(1'b0), ._oe(1'b0), .addr(cs_addr_init), .data(cs_rom_data));
   microcode_ram                                 ram_cs(._cs(1'b0), ._oe(1'b0), ._w(cs_ram__w), .addr(cs_addr), .data_in(cs_ram_data_in), .data_out(cs_data_prelatch));
   flipflop_d      #(.WIDTH(24))                 flp_ram_cs_e(.clk(clk_cs_dly2), .reset(~(clk_cs && clk_cs_dly2)), .in(cs_data_prelatch[23:0]),  .out(cs_data[23:0]));
@@ -511,10 +510,17 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   assign bus_data = bus_data_from_dma | bus_data_from_nondma;
 
   // control store write sequencer, this takes over the CPU briefly when doing a control store write
-  assign cs_write_in_progress = (cs_write_seq[0] | cs_write_seq[1] | cs_write_seq[2] | cs_write_seq[3]);
+  // 0 = write in progress, stop the rest of the CPU's operation
+  // 1 = source the cs_addr from DP instead of wherever it came from before
+  // 2 = ask the CS RAM to write the new data in
+  // 4 = hold the cs_addr as DP for awhile to make sure things are stable
+  // enough for the RAM write to be valid
+  // 8 = reset the sequence for next time?
+  // TODO: step '8' doesn't do anything, the counter cycles to 0 and stops there
+  assign cs_write_in_progress = (cs_write_seq[0] | cs_write_seq[1] | cs_write_seq[2] | cs_write_seq[3] | cs_write_seq[4]);
   assign cs_addr_from_dp = (cs_write_seq[1] || cs_write_seq[2] || cs_write_seq[3]);
   assign cs_write = cs_write_seq[2];
-  assign cs_write_seq_reset = cs_write_seq[4];
+  assign cs_write_seq_reset = cs_write_seq[5];
   
   always begin
     #40 clk_main = ~clk_main; // 25MHz main clock
