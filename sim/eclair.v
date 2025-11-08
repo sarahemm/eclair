@@ -50,19 +50,27 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   wire          cs_ready;         // RAM control store is ready
   wire  [8:0]   cs_addr;          // output of control store sequencer
   wire  [8:0]   cs_addr_init;     // output of control store counter, used during the initial copy
-  wire  [8:0]   cs_addr_run;      // output of control store sequencer latch, used during runtime
-  wire  [8:0]   cs_addr_normal;   // output of the mux for cs_addr_init/run, fed to the write-or-not mux to generate cs_addr
   wire  [63:0]  cs_data_prelatch; // RAM control store output
   wire  [63:0]  cs_data;          // RAM control store latch output, used to actually run the machine
   wire  [63:0]  cs_ram_data_in;   // input data to the control store RAM
   wire  [63:0]  cs_rom_data;      // output of the control store ROM data
   wire          cs_ram__w;        // RAM control store write signal
   wire  [8:0]   cs_next_addr;         // control store next microcode address bits
-  wire  [8:0]   cs_next_addr_alt;     // control store next microcode address bits from alternate source (IR or interrupt handler)
-  wire  [8:0]   cs_next_addr_normal;  // control store next microcode address bits from non-alternate source
   wire  [8:0]   cs_next_addr_rptz;    // control store next microcode address bits from rptz jump bits
+  wire		cs_mux_seq_reset;     // reset for the sequenced cs_addr mux
+  wire		cs_mux_imm_reset;     // reset for the immediate cs_addr mux
+  wire	[1:0]	cs_mux_seq_sel;       // selector for which cs_addr bits get used via the sequenced mux
+  wire	[1:0]	cs_mux_imm_sel;       // selector for which cs_addr bits get used via the immediate mux
+  wire	[8:0]	cs_addr_seq;
+  wire	[8:0]	cs_addr_seq_latched;
+  wire	[8:0]	cs_addr_imm;
+  wire		cs_mux_sel_ir;		// cs mux should steer IR into cs_addr (to execute a new instruction)
+  wire		cs_mux_sel_rptz;	// cs mux should steer rptz bits into cs_addr (as we're in a microcode loop)
+  wire		cs_mux_sel_nextaddr;	// cs mux should steer CS next_addr bits into cs_addr (as we're mid-instruction)
+  wire		cs_mux_sel_intdma;	// cs mux should steer int/dma bits into cs_addr (due to an IRQ/DRQ)
+  wire	[8:0]	cs_mux_new_test;
+
   wire  [3:0]   rptz_next_nibble;       // 4 low bits to use for next CS addr if RPT=z
-  wire  [8:0]   next_addr;        // next microcode address to visit, either the above bits or IR if above is 8'b0
   wire          inc_pc;           // increment PC
   wire          load_pc;          // load PC from Z
   wire          rpt_mode;         // RPT mode (0=load, 1=decrement)
@@ -226,15 +234,11 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   andgate         #(.WIDTH(1))                  and_clk_cs(.a(clk_cs_mid), .b(~cs_write_in_progress), .y(clk_cs));
   
   // Subsystem: Control Store
+  mux_94					mux_cs_sequenced(.reset(cs_mux_seq_reset), .sel(cs_mux_seq_sel), .a(cs_next_addr), .b(cs_next_addr_rptz), .c(reg_ir_padded), .d(int_or_dma_csaddr), .y(cs_addr_seq));
+  mux_94					mux_cs_immediate(.reset(cs_mux_imm_reset), .sel(cs_mux_imm_sel), .a(cs_addr_init), .b(reg_dp[8:0]), .c(9'b000000000), .d(9'b000000000), .y(cs_addr_imm)); // TODO: use c for exception handling
   mux_21                                        mux_cs_clk_selector(.sel(cs_ready), .a(clk_quarter), .b(clk_main), .y(clk_cs_mid));
-  mux_2x          #(.WIDTH(9))                  mux_cs_addr(.sel(cs_ready), .a(cs_addr_init), .b(cs_addr_run), .y(cs_addr_normal));
-  // TODO: clean up the two chained muxes. we also had to bump the _dly clock delays from 8ns to 10ns to make this work, fix that when this is fixed.
-  mux_2x          #(.WIDTH(9))                  mux_cs_addr_write(.sel(cs_addr_from_dp), .a(cs_addr_normal), .b(reg_dp[8:0]), .y(cs_addr));
-  mux_2x          #(.WIDTH(9))                  mux_cs_next_addr_rptz(.sel(rptz_next_nibble != 4'b0000 && rpt_zero), .a(cs_next_addr), .b(cs_next_addr_rptz), .y(cs_next_addr_normal));
-  mux_2x          #(.WIDTH(9))                  mux_cs_next_addr(.sel(cs_next_addr == 9'b000000000), .a(cs_next_addr_normal), .b(cs_next_addr_alt), .y(next_addr));
-  mux_2x          #(.WIDTH(9))                  mux_cs_next_addr_alt(.sel(int_or_dma_jmp), .a(reg_ir_padded), .b(int_or_dma_csaddr), .y(cs_next_addr_alt)); // IRQ handler is at microcode location 1
   counter         #(.WIDTH(9))                  ctr_cs_seq(.clk(clk_cs), .ce(~cs_ready), .reset(~_por_reset), .out(cs_addr_init), .load(1'b0), .preset(9'b000000000));
-  flipflop_d      #(.WIDTH(9))                  flp_cs_addr(.clk(clk_cs), .reset(~cs_ready), .in(next_addr), .out(cs_addr_run));
+  flipflop_d      #(.WIDTH(9))                  flp_cs_addr_seq(.clk(clk_cs), .reset(~_por_reset | cs_mux_seq_reset), .in(cs_addr_seq), .out(cs_addr_seq_latched));
   microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(._cs(1'b0), ._oe(1'b0), .addr(cs_addr_init), .data(cs_rom_data));
   microcode_ram                                 ram_cs(._cs(1'b0), ._oe(1'b0), ._w(cs_ram__w), .addr(cs_addr), .data_in(cs_ram_data_in), .data_out(cs_data_prelatch));
   flipflop_d      #(.WIDTH(24))                 flp_ram_cs_e(.clk(clk_cs_dly2), .reset(~(clk_cs && clk_cs_dly2)), .in(cs_data_prelatch[23:0]),  .out(cs_data[23:0]));
@@ -371,6 +375,8 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   
   assign clk_half = clk_divided[1];
   assign clk_quarter = clk_divided[2];
+  // TODO: these were bumped from 8 to 10 to accommodate chained CS muxes, try
+  // to figure out if we can lower them again
   assign #10 clk_cs_dly = clk_cs;
   assign #10 clk_cs_dly2 = clk_cs_dly;
   assign top_of_cs = cs_addr == 9'b111111111;
@@ -449,6 +455,25 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   assign intvect_shifted[1:0] = 2'b00;
   assign intvect_shifted[5:2] = intvect;
   assign intvect_shifted[7:6] = 2'b00;
+
+  // reworked CS logic
+  // immediate CS mux (for things that have to jump microcode out-of-sequence)
+  assign cs_mux_imm_sel[0] = cs_addr_from_dp;
+  assign cs_mux_imm_sel[1] = 1'b0;
+  assign cs_mux_imm_reset = cs_ready & ~cs_addr_from_dp; // keep the immediate cs mux in reset unless we're doing the pre-IPL ROM->RAM load or doing a CS write
+  assign cs_mux_seq_reset = ~cs_mux_imm_reset;
+
+  // sequenced CS mux (for things that jump microcode in a planned way during
+  // the fetch part of the instruction cycle)
+  assign cs_mux_sel_ir = ~int_or_dma_jmp & cs_next_addr == 9'b000000000;
+  assign cs_mux_sel_rptz = rptz_next_nibble != 4'b0000 && rpt_zero;
+  assign cs_mux_sel_intdma = int_or_dma_jmp & cs_next_addr == 9'b000000000;	// we only do an int/dma jmp when we're requested to load cs_next "from IR"
+  assign cs_mux_sel_nextaddr = ~cs_mux_sel_ir & ~cs_mux_sel_rptz & ~cs_mux_sel_intdma;
+  assign cs_mux_seq_sel[0] = cs_mux_sel_rptz | cs_mux_sel_intdma;
+  assign cs_mux_seq_sel[1] = cs_mux_sel_ir | cs_mux_sel_intdma;
+
+  assign cs_addr = cs_addr_seq_latched | cs_addr_imm;
+
   
   // FIXME: temporary until proper clear/reset logic is worked out
   assign intclr[0] = ~_por_reset;
