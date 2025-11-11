@@ -15,6 +15,7 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   wire          clk_cs;       // control store clock (driven from clk_main or clk_half_a)
   wire          clk_cs_dly;   // control store clock, delayed a slight amount (used to latch microcode signals)
   wire          clk_cs_dly2;  // control store clock, delayed more (used for edge-sensitive signals)
+  wire          clk_cs_dly3;  // control store clock, delayed even more (used for the last signals, ram_write and such)
   wire          clk_cs_mid;   // control store clock between the quarter/full selector and the writecse logic
   reg           _ext_reset;   // external reset, when this is high we're forced into reset
   reg           _por_reset;   // power-on reset, goes high briefly when powered on
@@ -207,7 +208,11 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   wire          int_pending;    // at least one interrupt is waiting to be serviced
   wire          page_fault_pnp; // a page-not-present fault is in progress
   wire          page_fault_pnw; // a page-not-writable fault is in progress
-  wire          page_fault;     // a page fault is in progress
+  wire  [7:0]   faultflg;       // fault flags
+  wire  [3:0]   faultvect;      // highest-priority fault flag currently active
+  wire          faultclr;       // clear all fault flags
+  wire          fault_pending;  // a fault is waiting to be serviced
+  wire  [8:0]   fault_csaddr;   // faultvect padded to 9 bits with zeroes
   wire          rpt_zero;       // RPT register is zero
   wire          write_cse;      // microcode bit to activate CS write logic
   wire  [7:0]   cs_write_seq;           // steps of the control store write sequencer, controlled by a shift register
@@ -228,18 +233,18 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   
   // Subsystem: Clock
   counter         #(.WIDTH(3))                  ctr_clk_divider(.clk(clk_main), .ce(1'b1), .reset(1'b0), .out(clk_divided), .load(1'b0), .preset(3'b000));
-  flipflop_jk                                   flp_cs_ready(.clk(top_of_cs), .j(1'b1), .k(1'b0), .q(cs_ready));
+  flipflop_jk                                   flp_cs_ready(.clk(clk_cs), .j(top_of_cs), .k(1'b0), .q(cs_ready));
   // controls whether the clock is directed to the control store (normal) or the control store writing counter (only when writing CS)
   // TODO: figure out the logic in real life with real prop delays
   andgate         #(.WIDTH(1))                  and_clk_cs(.a(clk_cs_mid), .b(~cs_write_in_progress), .y(clk_cs));
   
   // Subsystem: Control Store
   mux_94					mux_cs_sequenced(.reset(~_por_reset | cs_mux_seq_reset), .sel(cs_mux_seq_sel), .lat(clk_cs), .a(cs_next_addr), .b(cs_next_addr_rptz), .c(reg_ir_padded), .d(int_or_dma_csaddr), .y(cs_addr_seq_latched));
-  mux_94					mux_cs_immediate(.reset(cs_mux_imm_reset), .sel(cs_mux_imm_sel), .lat(1'b0), .a(cs_addr_init), .b(reg_dp[8:0]), .c(9'b000000000), .d(9'b000000000), .y(cs_addr_imm)); // TODO: use c for exception handling
+  mux_94					mux_cs_immediate(.reset(cs_mux_imm_reset), .sel(cs_mux_imm_sel), .lat(clk_cs), .a(cs_addr_init), .b(reg_dp[8:0]), .c(fault_csaddr), .d(9'b000000000), .y(cs_addr_imm));
   mux_21                                        mux_cs_clk_selector(.sel(cs_ready), .a(clk_quarter), .b(clk_main), .y(clk_cs_mid));
   counter         #(.WIDTH(9))                  ctr_cs_seq(.clk(clk_cs), .ce(~cs_ready), .reset(~_por_reset), .out(cs_addr_init), .load(1'b0), .preset(9'b000000000));
-  microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(._cs(1'b0), ._oe(1'b0), .addr(cs_addr_init), .data(cs_rom_data));
-  microcode_ram                                 ram_cs(._cs(1'b0), ._oe(1'b0), ._w(cs_ram__w), .addr(cs_addr), .data_in(cs_ram_data_in), .data_out(cs_data_prelatch));
+  microcode_eprom #(.ROM_FILE("microcode.bin")) rom_cs(._cs(1'b0), ._oe(cs_ready), .addr(cs_addr), .data(cs_rom_data));
+  microcode_ram                                 ram_cs(._cs(1'b0), ._oe(~cs_ready), ._w(cs_ram__w), .addr(cs_addr), .data_in(cs_ram_data_in), .data_out(cs_data_prelatch));
   flipflop_d      #(.WIDTH(24))                 flp_ram_cs_e(.clk(clk_cs_dly2), .reset(~(clk_cs && clk_cs_dly2)), .in(cs_data_prelatch[23:0]),  .out(cs_data[23:0]));
   flipflop_d      #(.WIDTH(40))                 flp_ram_cs_l(.clk(clk_cs_dly), .reset(1'b0), .in(cs_data_prelatch[63:24]), .out(cs_data[63:24]));
   mux_18                                        mux_branch_cond(.sel(branch_cond), .a(1'b1), .b(status[0]), .c(status[1]), .d(status[2]), .e(1'b0), .f(1'b0), .g(1'b0), .h(1'b0), .y(branch_cond_met));
@@ -320,7 +325,12 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   latch         #(.WIDTH(1))                    lat_int_5(.clk(int[5]), .reset(intclr[5]), .in(1'b1), .out(intflg[5]));
   latch         #(.WIDTH(1))                    lat_int_6(.clk(int[6]), .reset(intclr[6]), .in(1'b1), .out(intflg[6]));
   latch         #(.WIDTH(1))                    lat_int_7(.clk(int[7]), .reset(intclr[7]), .in(1'b1), .out(intflg[7]));
-  
+
+  // Subsystem: Faults
+  prienc_8                                      pri_faultvect(.clk(1'b0), .a(faultflg[7:0]), .y(faultvect));
+  latch         #(.WIDTH(1))                    lat_fault_pnp(.clk(~page_fault_pnp), .reset(faultclr), .in(1'b1), .out(faultflg[0]));
+  latch         #(.WIDTH(1))                    lat_fault_pnw(.clk(~page_fault_pnw), .reset(faultclr), .in(1'b1), .out(faultflg[1]));
+
   // Subsystem: DMA
   latch         #(.WIDTH(1))                    lat_dma_req(.clk(clk_main), .reset(1'b0), .in(dma_req), .out(dma_req_latched));
   latch         #(.WIDTH(1))                    lat_dma_ack(.clk(~dma_req_ack), .reset(~dma_req_latched), .in(1'b1), .out(dma_ack));
@@ -342,10 +352,11 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   assign load_reg = cs_data[9:7];
   assign reg_x_load = ~cs_data[10];
   assign reg_y_load = ~cs_data[11];
+  assign faultclr = cs_data[12] | ~_por_reset;
   assign load_ptb = ~cs_data[13];
   assign rpt_exec = cs_data[14];
   assign load_status = ~cs_data[15];
-  assign ram_write = cs_data[17];
+  assign ram_write = cs_data[17] & clk_cs_dly3 & ~addr_ram;
   assign load_flag_pe = ~cs_data[18];
   assign load_flag_m = ~cs_data[19];
   assign load_flag_ie = ~cs_data[20];
@@ -363,7 +374,7 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   assign xy_imm_lsb = cs_data[50:49];
   assign rpt_mode = cs_data[51];
   assign reg_byte = cs_data[52];
-  assign ram_read = cs_data[53];
+  assign ram_read = cs_data[53] & clk_cs_dly3 & ~addr_ram;
   assign rptz_next_nibble = cs_data[57:54];
   assign write_cse = cs_data[58] & cs_ready;
   assign inc_pc = cs_data[59];
@@ -378,8 +389,9 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   // to figure out if we can lower them again
   assign #10 clk_cs_dly = clk_cs;
   assign #10 clk_cs_dly2 = clk_cs_dly;
+  assign #15 clk_cs_dly3 = clk_cs_dly2;
   assign top_of_cs = cs_addr == 9'b111111111;
-  assign processor_halted = cs_ready & cs_addr == 9'hFE;
+  assign processor_halted = cs_ready & (cs_addr == 9'hFE);
   assign _reset = _ext_reset & _por_reset & cs_ready;
   assign cs_ram__w = (cs_ready ~| clk_cs) | cs_write;
   assign reg_abcd[15:0]  = reg_a;
@@ -397,9 +409,9 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   assign reg_sp_load = reg_load[5];
   assign reg_dp_load = reg_load[6];
   assign reg_x_load_ir = ~reg_load[7];
-  assign addr_rom = ~(bus_addr[23:20] == 4'b0000);
-  assign addr_device = ~(bus_addr[23:20] == 4'b0111);
-  assign addr_ram = ~(addr_rom & addr_device);
+  assign addr_rom = ~(bus_addr[23:20] == 4'b0000);	// active-low!
+  assign addr_device = ~(bus_addr[23:20] == 4'b0111);	// active-low!
+  assign addr_ram = ~(addr_rom & addr_device);		// active-low!
   assign bus_addr_nondma[9:0] = reg_mar[9:0];  // the rest of the bus goes through the paging mechanism
   assign reg_x_load_ir_src[0] = reg_x_load_ir;
   assign reg_x_load_ir_src[1] = reg_x_load_ir & reg_ir[6];
@@ -427,7 +439,6 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   assign int_pending = ~(intvect[3:0] == 4'b0000);
   assign page_fault_pnp = (ram_read | ram_write) & flag_pe & ~page_status_present;
   assign page_fault_pnw = ram_write & flag_pe & ~page_status_writable;
-  assign page_fault = page_fault_pnp | page_fault_pnw;
   assign int_jmp = int_pending & flag_ie;
   assign int_or_dma_jmp = int_jmp | dma_req_latched;
   assign int_or_dma_csaddr[0] = int_jmp;
@@ -454,12 +465,16 @@ module ECLair(int, dma_req, dma_ack, fp_bus_addr, fp_bus_data, fp_write);
   assign intvect_shifted[1:0] = 2'b00;
   assign intvect_shifted[5:2] = intvect;
   assign intvect_shifted[7:6] = 2'b00;
+  assign fault_pending = ~(faultvect[1:0] == 2'b00);
+  assign fault_csaddr[1:0] = 2'b00;
+  assign fault_csaddr[3:2] = faultvect[1:0];
+  assign fault_csaddr[8:4] = 5'b00000;
 
   // reworked CS logic
   // immediate CS mux (for things that have to jump microcode out-of-sequence)
   assign cs_mux_imm_sel[0] = cs_addr_from_dp;
-  assign cs_mux_imm_sel[1] = 1'b0;
-  assign cs_mux_imm_reset = cs_ready & ~cs_addr_from_dp; // keep the immediate cs mux in reset unless we're doing the pre-IPL ROM->RAM load or doing a CS write
+  assign cs_mux_imm_sel[1] = fault_pending;
+  assign cs_mux_imm_reset = cs_ready & ~cs_addr_from_dp & ~fault_pending; // keep the immediate cs mux in reset unless we're doing the pre-IPL ROM->RAM load or doing a CS write
   assign cs_mux_seq_reset = ~cs_mux_imm_reset;
 
   // sequenced CS mux (for things that jump microcode in a planned way during

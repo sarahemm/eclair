@@ -1,0 +1,9 @@
+# locations - start addresses of instructions
+location    fault-pnp  4
+location    fault-pnw  8
+
+# instructions - actual implementation microcode
+
+# handle interrupts
+instruction fault-pnp clr_faults next_addr(fetch)
+instruction fault-pnw clr_faults next_addr(fetch)

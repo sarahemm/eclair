@@ -19,7 +19,7 @@ ldi a,     0x0000
 wrpte
 // page table address 1 = 00000100_00000000 (first block of RAM)
 ldi d,     0x0400
-ldi a,     0x0400
+ldi a,     0xC400
 wrpte
 ldi d,     0x0800
 ldi a,     0x3c00

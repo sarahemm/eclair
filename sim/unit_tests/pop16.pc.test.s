@@ -8,7 +8,7 @@ ldi d,      0x0000
 wrpte
 // page table address 1 = 00000100_00000000 (first block of RAM)
 .org 0x009
-ldi a,      0x0400
+ldi a,      0xC400
 ldi d,      0x0401
 wrpte
 // set up the stack pointer to the bottom of RAM and enable paging
